@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{title}}</title>
+    <!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="/views/css/vendor/font-awesome.css">
+    <link rel="stylesheet" href="/views/css/vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="/views/css/style.css">
+    <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css"> -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.13.2/datatables.min.css">
+    <!-- <link rel="stylesheet" href="/views/css/vendor.css"> -->
+    <link rel="stylesheet" href="/views/css/vendor/alchemy-white.css">
+
+    <style>
+        table.dataTable tbody tr.selected {
+            color: white;
+            background-color: #819FF7;
+        }
+		#drop_zone {
+			border: 2px dashed #bbb;
+			-moz-border-radius: 5px;
+			-webkit-border-radius: 5px;
+			border-radius: 5px;
+			padding: 25px;
+			text-align: center;
+			font: 20pt bold 'Vollkorn';
+			color: #bbb;
+		}
+    </style>
+</head>
+<body>
+    {{> header }}
+    {{{body}}}
+
+
+</body>
+</html>

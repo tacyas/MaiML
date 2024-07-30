@@ -1,0 +1,221 @@
+<?xml version='1.0' encoding='utf-8'?>
+<maiml xmlns="http://www.maiml.org/schemas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" feature="nested-attributes" xsi:type="maimlRootType">
+    <document id="MaimlSampleDoc">
+        <Sigunature/>
+        <uuid>e2639184-39fd-45a5-b7ef-640e56165fe2</uuid>
+        <name>SEM DATA</name>
+        <description>SEM観察　１回実施データ</description>
+        <creator id="creatorSEM_B">
+            <uuid>7de44cb7-f020-3604-aed1-fcec4586525c</uuid>
+            <name>docNS:B</name>
+            <vendorRef id="vendorRef_VCompany" ref="VCompany"/>
+            <instrumentRef id="instrumentRef_SEM" ref="SEM"/>
+        </creator>
+        <vendor id="VCompany">
+            <uuid>6815f1a8-5d87-31a3-b8f2-576c8aa2f787</uuid>
+            <name>docNS:VCompany</name>
+        </vendor>
+        <owner id="CompanyA">
+            <uuid>42bd959b-86c5-3a93-a732-c3f2732701e2</uuid>
+            <name>docNS:CompanyA</name>
+        </owner>          
+        <instrument id="SEM">
+            <uuid>c20c6e96-64f8-3b75-ba4e-c5e36d8bd47d</uuid>
+            <name>docNS:ScanningElectronMicroscopy</name>
+            <description>SEM</description>
+        </instrument>
+        <date>2022-05-19T13:24:12+09:00</date>
+        <parent>
+          <uuid>a2be2526-dc71-4035-aeda-e56efb823cb4</uuid>
+          <hash>VbQyxFq1rEnE5MjlK1m8pTCKKhK76qfPLokAZXW2uig=</hash>
+        </parent>
+        <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2006/12/xml-c14n11"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2006/12/xml-c14n11"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>7CxQVSSRAoW2203OKLL+Lf/QS4L+wlS9qoHtuIip3yQ=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>4uoHe/1PGMHpIJR7yt6RtuwmKT3SXd3/EuBlEJFAwRsITKnTSq9GCkzHThkLS2gF0By5cSrTDOByDI6j8/lfmadgAFiXnjslgo9wKR7EVBn00wI1CbPeFtQ7GbcN4XsponxTjAtOw0Yo94bJDA0Ws/DkTIWi7nfoRi6K9dhyatcqKM96lUb8rd05ZaO3gultDjoGSTvzeHXSx9wjsVTDPQa07wn3EfDwk0Tk8FkFTjtKQc6LSgJ279DlzuleMqtfxRJM8MQ1uSbiSF+doQSyDFTCl+8hZcLDN9d2XrUAAZJ5+zCSvZZ9OCeNCXtM73eCpA05iaPiNgx+U8Efyb0nWQ==</ds:SignatureValue><ds:KeyInfo><ds:KeyValue><ds:RSAKeyValue><ds:Modulus>8jM/QZn1WzjImJ2yAiGSpx/kxU/Ps+/DNJExA6OKOpt93hEZK9nPZJKUdb16I+RY54mvwlPDxrs1skF5ZKm0OM+2qDxx5FQuZ6R4h6sYm7yr7W0v5UmDXpSgN0scMgdhy7f08dsaIMt2uLxDlhSQ0PJeZ03e3hS54p5YlQ8NMBcYX3PUAcB1gKuy2NqUEnb49FEORrHCMUfkR1DxUuHGiKm5Kcx3LXkyJjRUKp1/862iC5PilS+kDy1h9ogC+v3WwJXLvkV0J9RJWFIbR/ISg4IAeJmButj2c2uWRC0ZYWee/Sq7WeOtkD5Lb0GHbJp4PqwTEphEx2a+X7AOuk8bBw==</ds:Modulus><ds:Exponent>AQAB</ds:Exponent></ds:RSAKeyValue></ds:KeyValue></ds:KeyInfo></ds:Signature>
+    </document>
+    <protocol id="MaimlSampleProtocol">
+        <uuid>5ac5ab10-866d-4ea2-b9f0-f9394d66b66c</uuid>
+        <name>SEM_protpcol</name>
+        <method id="methodID">
+            <uuid>ee2121f6-35ec-4e4a-ba9b-43df70f6c9f7</uuid>
+            <pnml id="pnmlID">
+                <uuid>d245588e-86ba-4235-b056-b88073505724</uuid>
+                <place id="MM-1">
+                    <description>帯電防止済試料X'</description>
+                </place>
+                <place id="CC-1">
+                    <description>SEM condition</description>
+                </place> 
+                <place id="RR-2">
+                    <description>SEM Image</description>
+                </place>
+                <place id="MM-2">
+                    <description>帯電防止済試料X'</description>
+                </place>
+                <transition id="TT-1">
+                    <description>SEM</description>
+                </transition>
+                <arc id="a1" source="MM-1" target="TT-1"/>
+                <arc id="a2" source="CC-1" target="TT-1"/>
+                <arc id="a3" source="TT-1" target="RR-2"/>
+                <arc id="a4" source="TT-1" target="MM-2"/>
+                <place id="M1">
+                  <name/>
+                  <description/>
+                </place>
+                <place id="C1">
+                  <name/>
+                  <description/>
+                </place>
+                <place id="R1">
+                  <name/>
+                  <description/>
+                </place>
+                <place id="M2">
+                  <name/>
+                  <description/>
+                </place>
+                <place id="M3">
+                  <name/>
+                  <description/>
+                </place>
+                <place id="C2">
+                  <name/>
+                  <description/>
+                </place>
+            </pnml>
+            <program xmlns:exm="http://www.example.com/maiml/program#" id="programID">
+                <uuid>ee5a5789-456e-42a4-8d37-a61b61f0a5cb</uuid>
+                <instruction id="instruction1"> 
+                    <uuid>4090fab5-a4a7-4639-847c-0266a49f0c25</uuid>
+                    <name>SEM</name>
+                    <property xsi:type="stringType" key="exm:TreatmentType">
+                        <value>SEM</value>
+                    </property>
+                    <transitionRef id="tra1" ref="TT-1"/>
+                </instruction>
+                <materialTemplate id="MM_T"> 
+                    <uuid>33e3c15c-81fb-4275-95f2-16504d0d16ce</uuid>
+                    <name>material_XdashTemplate</name>
+                    <property xsi:type="stringType" key="exm:MaterialLotNo">
+                        <value>Lot No.</value>
+                        <property xsi:type="stringType" key="exm:LotNumber"/>
+                    </property>
+                    <property xsi:type="stringType" key="exm:MaterialType">
+                        <value> Bulk </value>
+                        <property xsi:type="doubleType" key="exm:Thickness" formatString="0.00" scaleFactor="1.00" unit="mm">
+                        <value> 10.00 </value>
+                        </property>
+                    </property>
+                    <property xsi:type="stringType" key="exm:Comment">
+                        <value> "Color is black." </value>
+                    </property>
+                    <placeRef id="pr1" ref="MM-1"/>
+                    <placeRef id="pr2" ref="MM-2"/>
+                </materialTemplate>
+                
+                <conditionTemplate id="CC-1T_ver2">
+                    <uuid>408e9845-027b-41b2-932e-c644a73cceb7</uuid>
+                    <property xsi:type="doubleType" key="AcceleratingVoltage" formatString="1.00" units="kV" sacleFactor="1.0">
+                        <value>6.00</value>
+                    </property>
+                    <placeRef id="pr4" ref="CC-1"/>
+                </conditionTemplate>
+                <resultTemplate id="RR-2T"> 
+                    <uuid>cc77bc35-267b-4d25-a76c-6b726a849028</uuid>
+                    <name>SEMImageTemplate</name>
+                    <property xsi:type="uriType" key="exm:SEMImageUri">
+                        <!-- image&#12398;&#12497;&#12473;&#12289;&#21517;&#21069; image/tiff -->
+                    </property>
+                    <property xsi:type="uriType" key="exm:SEMOutConditionUri">
+                        <!-- conditionData&#12398;&#12497;&#12473;&#12289;&#21517;&#21069; text/plain -->
+                    </property>
+                    <placeRef id="pr6" ref="RR-2"/>
+                </resultTemplate>          
+            </program>
+        </method>
+    </protocol>
+    <data id="MaimlSampleData">
+        <uuid>cd026315-cba8-49d5-aa76-e23a3bd90c9a</uuid>
+        <results id="resultsID"><!-- SEM&#12398;&#23455;&#26045;&#12487;&#12540;&#12479; -->
+            <uuid>4fa5ff65-d92c-4f96-bd98-553730585653</uuid>
+            <material xmlns:exm="http://www.example.com/maiml/material#" id="material_TTT" ref="MM_T">
+                <!-- MM-1&#12289;MM-2&#12289;MM-3 -->
+                <uuid>5dce691a-add4-4796-879e-83ee649da489</uuid>
+                <name>exm:TTT</name>
+                <description>TTT Sample</description>
+                <annotation>Sample Material for TTT.</annotation>
+                <property xsi:type="stringType" key="exm:MaterialLotNo">
+                    <value>Lot No.</value>
+                    <property xsi:type="stringType" key="exm:LotNumber">
+                        <value>w1098c</value>
+                    </property>
+                </property>
+                <property xsi:type="stringType" key="exm:MaterialType">
+                    <value> Bulk </value>
+                    <property xsi:type="doubleType" key="Thickness" formatString="0.00" scaleFactor="1.00" units="mm">
+                        <value>11.12</value>
+                        <uncertainty xsi:type="doubleType" key="Bias"> 
+                            <value>+1.12</value>
+                        </uncertainty>
+                        <uncertainty xsi:type="doubleType" key="StandardDeviation" formatString="0.00" scaleFactor="1.00" units="mm"> 
+                            <value>0.13</value>
+                        </uncertainty>
+                    </property>
+                </property>
+                <property xsi:type="stringType" key="exm:Comment">
+                    <value> "Color is black." </value>
+                </property>
+            </material>
+            <condition id="condition_TTT" ref="CC-1T_ver2">
+                <uuid>4fab3d7f-2e6d-4bc2-9af7-ea044d00d7ac</uuid>
+                <name>exm:SEMCondtion_AA</name>
+                <description>SEM Condition</description>
+                <property xsi:type="doubleType" key="AcceleratingVoltage" formatString="1.00" units="kV" sacleFactor="1.0">
+                    <value>6.00</value>
+                </property>
+                <property xsi:type="doubleType" key="ScanningTime" formatString="1.00" units="s" sacleFactor="1.0">
+                    <value>2.00</value>
+                </property>
+                <property xsi:type="stringType" key="DetectionSignal">
+                    <value>Secondary Electron</value>
+                </property>
+                <property xsi:type="stringType" key="Note">
+                    <value>Low dose condition for redusing electron damage</value>
+                </property>
+            </condition>
+            <result id="result_TTT" ref="RR-2T">
+                <uuid>c1d6c085-e13c-4a67-aa24-b460051af46b</uuid>
+                <description>SEM Output Data</description>
+                <property xsi:type="uriType" key="exm:SEMImageUri">
+                    <value>./SEMOUTPUT/IMAGES/LotNo_w1098c.tif</value>
+                </property>
+                <property xsi:type="uriType" key="exm:SEMOutConditionUri">
+                    <value>./SEMOUTPUT/LOGS/LotNo_w1098c.txt</value>
+                </property>
+            </result>
+        </results>
+    </data>
+    <eventLog id="MaimlSampleEventLog">
+        <uuid>f2f31ce3-b877-4df8-bbe1-2e066af7f77b</uuid>
+        <log id="logID" ref="methodID">
+            <uuid>8718f6df-f4c7-4bf8-a910-8ca9cad72824</uuid>
+            <trace id="traceID1" ref="programID">
+                <uuid>6ebae319-3a5c-4021-8356-083a07cc78a7</uuid>
+                <event id="eventID1" ref="instruction1">
+                    <uuid>9b8bd365-ac72-4d0e-850c-cd27881abbe0</uuid>
+                    <property xsi:type="uuidType" key="concept:instance">
+                        <value>c1d6c085-e13c-4a67-aa24-b460051af46b</value>
+                    </property>
+                    <property xsi:type="stringType" key="lifecycle:transition">
+                        <value>complete</value> 
+                    </property>
+                    <property xsi:type="dateType" key="time:timestamp">
+                        <value>2022-05-15T01:12:24+09:00</value>
+                    </property>                        
+                    <resultsRef id="resultsRefID" ref="resultsID"/>
+                </event>
+            </trace>
+            <creatorRef id="creatorRefID1" ref="creatorSEM_B"/>
+            <ownerRef id="ownerRefID1" ref="CompanyA"/>
+        </log>
+    </eventLog>
+</maiml>

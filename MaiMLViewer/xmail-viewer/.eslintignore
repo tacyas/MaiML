@@ -1,0 +1,7 @@
+# /node_modules/* and /bower_components/* in the project root are ignored by default
+
+./package.json
+/node_modules/*
+/views/js/vendor-util*
+/views/js/alchemy.js
+/views/js/vendor.js

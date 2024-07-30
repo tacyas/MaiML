@@ -1,0 +1,473 @@
+<!DOCTYPE html><html><head>
+      <title>README</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:////Users/koyasako/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.6.7/node_modules/@shd101wyy/mume/dependencies/katex/katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <style>
+      /**
+ * prism.js Github theme based on GitHub's theme.
+ * @author Sam Clarke
+ */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #333;
+  background: none;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.4;
+
+  -moz-tab-size: 8;
+  -o-tab-size: 8;
+  tab-size: 8;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: .8em;
+  overflow: auto;
+  /* border: 1px solid #ddd; */
+  border-radius: 3px;
+  /* background: #fff; */
+  background: #f5f5f5;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+  white-space: normal;
+  background: #f5f5f5;
+}
+
+.token.comment,
+.token.blockquote {
+  color: #969896;
+}
+
+.token.cdata {
+  color: #183691;
+}
+
+.token.doctype,
+.token.punctuation,
+.token.variable,
+.token.macro.property {
+  color: #333;
+}
+
+.token.operator,
+.token.important,
+.token.keyword,
+.token.rule,
+.token.builtin {
+  color: #a71d5d;
+}
+
+.token.string,
+.token.url,
+.token.regex,
+.token.attr-value {
+  color: #183691;
+}
+
+.token.property,
+.token.number,
+.token.boolean,
+.token.entity,
+.token.atrule,
+.token.constant,
+.token.symbol,
+.token.command,
+.token.code {
+  color: #0086b3;
+}
+
+.token.tag,
+.token.selector,
+.token.prolog {
+  color: #63a35c;
+}
+
+.token.function,
+.token.namespace,
+.token.pseudo-element,
+.token.class,
+.token.class-name,
+.token.pseudo-class,
+.token.id,
+.token.url-reference .token.variable,
+.token.attr-name {
+  color: #795da3;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+.token.title,
+.token.title .token.punctuation {
+  font-weight: bold;
+  color: #1d3e81;
+}
+
+.token.list {
+  color: #ed6a43;
+}
+
+.token.inserted {
+  background-color: #eaffea;
+  color: #55a532;
+}
+
+.token.deleted {
+  background-color: #ffecec;
+  color: #bd2c00;
+}
+
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+
+/* JSON */
+.language-json .token.property {
+  color: #183691;
+}
+
+.language-markup .token.tag .token.punctuation {
+  color: #333;
+}
+
+/* CSS */
+code.language-css,
+.language-css .token.function {
+  color: #0086b3;
+}
+
+/* YAML */
+.language-yaml .token.atrule {
+  color: #63a35c;
+}
+
+code.language-yaml {
+  color: #183691;
+}
+
+/* Ruby */
+.language-ruby .token.function {
+  color: #333;
+}
+
+/* Markdown */
+.language-markdown .token.url {
+  color: #795da3;
+}
+
+/* Makefile */
+.language-makefile .token.symbol {
+  color: #795da3;
+}
+
+.language-makefile .token.variable {
+  color: #183691;
+}
+
+.language-makefile .token.builtin {
+  color: #0086b3;
+}
+
+/* Bash */
+.language-bash .token.keyword {
+  color: #0086b3;
+}
+
+/* highlight */
+pre[data-line] {
+  position: relative;
+  padding: 1em 0 1em 3em;
+}
+pre[data-line] .line-highlight-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: transparent;
+  display: block;
+  width: 100%;
+}
+
+pre[data-line] .line-highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: inherit 0;
+  margin-top: 1em;
+  background: hsla(24, 20%, 50%,.08);
+  background: linear-gradient(to right, hsla(24, 20%, 50%,.1) 70%, hsla(24, 20%, 50%,0));
+  pointer-events: none;
+  line-height: inherit;
+  white-space: pre;
+}
+
+pre[data-line] .line-highlight:before, 
+pre[data-line] .line-highlight[data-end]:after {
+  content: attr(data-start);
+  position: absolute;
+  top: .4em;
+  left: .6em;
+  min-width: 1em;
+  padding: 0 .5em;
+  background-color: hsla(24, 20%, 50%,.4);
+  color: hsl(24, 20%, 95%);
+  font: bold 65%/1.5 sans-serif;
+  text-align: center;
+  vertical-align: .3em;
+  border-radius: 999px;
+  text-shadow: none;
+  box-shadow: 0 1px white;
+}
+
+pre[data-line] .line-highlight[data-end]:after {
+  content: attr(data-end);
+  top: auto;
+  bottom: .4em;
+}html body{font-family:"Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ul,html body>ol{margin-bottom:16px}html body ul,html body ol{padding-left:2em}html body ul.no-list,html body ol.no-list{padding:0;list-style-type:none}html body ul ul,html body ul ol,html body ol ol,html body ol ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:bold;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:bold}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em !important;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::before,html body code::after{letter-spacing:-0.2em;content:"\00a0"}html body pre>code{padding:0;margin:0;font-size:.85em !important;word-break:normal;white-space:pre;background:transparent;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;font-size:.85em !important;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:before,html body pre tt:before,html body pre code:after,html body pre tt:after{content:normal}html body p,html body blockquote,html body ul,html body ol,html body dl,html body pre{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body pre,html body code{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview .pagebreak,.markdown-preview .newpage{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center !important}.markdown-preview:not([for="preview"]) .code-chunk .btn-group{display:none}.markdown-preview:not([for="preview"]) .code-chunk .status{display:none}.markdown-preview:not([for="preview"]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0}@media screen and (min-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{font-size:14px !important;padding:1em}}@media print{html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,0.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p,html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% -  300px);padding:2em calc(50% - 457px -  300px/2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+    </head>
+    <body for="html-export">
+      <div class="mume markdown-preview  ">
+      <h2 class="mume-header" id="-maiml%E5%9E%8B%E3%83%87%E3%83%BC%E3%82%BF%E5%86%85%E3%81%AE%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88%E5%8F%8A%E3%81%B3%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8Bbr%E5%8F%82%E7%85%A7%E9%96%A2%E4%BF%82%E3%81%AE%E5%8F%AF%E8%A6%96%E5%8C%96%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3--omit-in-toc--">MaiML&#x578B;&#x30C7;&#x30FC;&#x30BF;&#x5185;&#x306E;&#x30C6;&#x30F3;&#x30D7;&#x30EC;&#x30FC;&#x30C8;&#x53CA;&#x3073;&#x30A4;&#x30F3;&#x30B9;&#x30BF;&#x30F3;&#x30B9;&#x306B;&#x304A;&#x3051;&#x308B;<br>&#x53C2;&#x7167;&#x95A2;&#x4FC2;&#x306E;&#x53EF;&#x8996;&#x5316;&#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;<!-- omit in toc --></h2>
+
+<div align="right">&#x56FD;&#x7ACB;&#x4E5D;&#x5DDE;&#x5DE5;&#x696D;&#x5927;&#x5B66;&#x30D7;&#x30ED;&#x30B8;&#x30A7;&#x30AF;&#x30C8;</div>
+<h3 class="mume-header" id="-1-%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E6%A6%82%E8%A6%81">1. &#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x6982;&#x8981;</h3>
+
+<p>XMAIL&#x30C7;&#x30FC;&#x30BF;&#x3092;GraphDB&#x306B;&#x767B;&#x9332;&#x3057;&#x3001;&#x305D;&#x306E;&#x30C7;&#x30FC;&#x30BF;&#x3092;nodeJS WEB&#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x4E0A;&#x3067;&#x30C7;&#x30FC;&#x30BF;&#x4E00;&#x89A7;&#x3001;&#x30DA;&#x30C8;&#x30EA;&#x30CD;&#x30C3;&#x30C8;&#x56F3;&#x3092;&#x7167;&#x4F1A;&#x30FB;&#x7DE8;&#x96C6;&#x3059;&#x308B;&#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x3067;&#x3042;&#x308B;&#x3002;&#x30DA;&#x30C8;&#x30EA;&#x30CD;&#x30C3;&#x30C8;&#x56F3;&#x306E;&#x7DE8;&#x96C6;&#x7D50;&#x679C;&#x306F;&#x518D;&#x3073;XMAIL&#x30C7;&#x30FC;&#x30BF;&#x3068;&#x3057;&#x3066;&#x30D5;&#x30A1;&#x30A4;&#x30EB;&#x3078;&#x51FA;&#x529B;&#x4FDD;&#x5B58;&#x3059;&#x308B;&#x3053;&#x3068;&#x304C;&#x3067;&#x304D;&#x308B;&#x3002;</p>
+<h3 class="mume-header" id="-2-%E6%94%B9%E8%A8%82%E5%B1%A5%E6%AD%B4">2. &#x6539;&#x8A02;&#x5C65;&#x6B74;</h3>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Author</th>
+<th style="text-align:center">Version</th>
+<th style="text-align:center">Last updated</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Usk Tetsubayashi</td>
+<td style="text-align:center">1.0</td>
+<td style="text-align:center">2019/1/24</td>
+<td style="text-align:left">&#x30C9;&#x30E9;&#x30D5;&#x30C8;</td>
+</tr>
+<tr>
+<td style="text-align:center">Usk Tetsubayashi</td>
+<td style="text-align:center">1.1</td>
+<td style="text-align:center">2021/2/8</td>
+<td style="text-align:left">&#x30DA;&#x30C8;&#x30EA;&#x30CD;&#x30C3;&#x30C8;&#x7DE8;&#x96C6;, XMAIL&#x30C7;&#x30FC;&#x30BF;&#x51FA;&#x529B;</td>
+</tr>
+<tr>
+<td style="text-align:center">Koyasako</td>
+<td style="text-align:center">1.2</td>
+<td style="text-align:center">2022/2/10</td>
+<td style="text-align:left">MaiML&#x5BFE;&#x5FDC;,&#x8981;&#x7D20;&#x540C;&#x58EB;&#x306E;&#x95A2;&#x9023;&#x8868;&#x793A;&#x6A5F;&#x80FD;</td>
+</tr>
+<tr>
+<td style="text-align:center">Koyasako</td>
+<td style="text-align:center">1.3</td>
+<td style="text-align:center">2023/2/13</td>
+<td style="text-align:left">Class&#x5C64;,Instance&#x5C64;&#x30CE;&#x30FC;&#x30C9;&#x5BFE;&#x5FDC;</td>
+</tr>
+</tbody>
+</table>
+<h3 class="mume-header" id="-3-%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E6%A7%8B%E6%88%90">3. &#x30EA;&#x30DD;&#x30B8;&#x30C8;&#x30EA;&#x69CB;&#x6210;</h3>
+
+<p>&#x5404;&#x30B3;&#x30F3;&#x30DD;&#x30FC;&#x30CD;&#x30F3;&#x30C8;&#x306E;&#x5229;&#x7528;&#x65B9;&#x6CD5;&#x306F;&#x500B;&#x5225;&#x306E;README.md&#x3092;&#x53C2;&#x7167;&#x306E;&#x3053;&#x3068;&#x3002;</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Repository</th>
+<th style="text-align:left">Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">graph-db/</td>
+<td style="text-align:left">Neo4j, Cypher Query Language</td>
+</tr>
+<tr>
+<td style="text-align:left">xmail-viewer/</td>
+<td style="text-align:left">NodeJS</td>
+</tr>
+<tr>
+<td style="text-align:left">Documents/</td>
+<td style="text-align:left">Markdown</td>
+</tr>
+<tr>
+<td style="text-align:left">MaiML/</td>
+<td style="text-align:left">XML</td>
+</tr>
+<tr>
+<td style="text-align:left">docker-compose.yml</td>
+<td style="text-align:left">Docker</td>
+</tr>
+<tr>
+<td style="text-align:left">README.*</td>
+<td style="text-align:left">-</td>
+</tr>
+</tbody>
+</table>
+<h3 class="mume-header" id="-4-%E3%82%B5%E3%83%BC%E3%83%90%E8%B5%B7%E5%8B%95%E6%89%8B%E9%A0%86">4. &#x30B5;&#x30FC;&#x30D0;&#x8D77;&#x52D5;&#x624B;&#x9806;</h3>
+
+<p>&#x672C;&#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x306F;&#x8907;&#x6570;&#x306E;Docker&#x30B3;&#x30F3;&#x30C6;&#x30CA;&#x3067;&#x69CB;&#x6210;&#x3055;&#x308C;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Repository</th>
+<th style="text-align:left">&#x30B3;&#x30F3;&#x30C6;&#x30CA;</th>
+<th style="text-align:left">&#x6A5F;&#x80FD;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">xmail-viewer</td>
+<td style="text-align:left">xmail_viewer</td>
+<td style="text-align:left">Web&#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x672C;&#x4F53;</td>
+</tr>
+<tr>
+<td style="text-align:left">graph-db</td>
+<td style="text-align:left">graph_db</td>
+<td style="text-align:left">Neo4j&#x306B;&#x3088;&#x308B;&#x30B0;&#x30E9;&#x30D5;DB</td>
+</tr>
+<tr>
+<td style="text-align:left">nginx</td>
+<td style="text-align:left">nginx</td>
+<td style="text-align:left">Nginx&#x306B;&#x3088;&#x308B;Web&#x30B5;&#x30FC;&#x30D0;</td>
+</tr>
+</tbody>
+</table>
+<p>&#x3053;&#x308C;&#x3089;&#x5168;&#x3066;&#x306E;&#x30B3;&#x30F3;&#x30C6;&#x30CA;&#x306F; docker-compose &#x306B;&#x3088;&#x3063;&#x3066;&#x4E00;&#x62EC;&#x7BA1;&#x7406;&#x3055;&#x308C;&#x3066;&#x304A;&#x308A;&#x3001;&#x4E0B;&#x8A18;&#x306E;&#x3088;&#x3046;&#x306A;&#x30B3;&#x30DE;&#x30F3;&#x30C9;&#x3092;&#x7528;&#x3044;&#x3066;&#x4E00;&#x62EC;&#x3057;&#x3066;&#x958B;&#x59CB;/&#x7D42;&#x4E86;&#x306E;&#x64CD;&#x4F5C;&#x304C;&#x53EF;&#x80FD;&#x3067;&#x3059;&#x3002;</p>
+<ul>
+<li>&#x30B3;&#x30F3;&#x30C6;&#x30CA;&#x4F5C;&#x6210;&#xFF06;&#x8D77;&#x52D5;<br>
+<code>docker-compose up -d</code></li>
+<li>&#x30B3;&#x30F3;&#x30C6;&#x30CA;&#x505C;&#x6B62;<br>
+<code>docker-compose stop</code></li>
+<li>&#x505C;&#x6B62;&#x4E2D;&#x30B3;&#x30F3;&#x30C6;&#x30CA;&#x306E;&#x8D77;&#x52D5;<br>
+<code>docker-compose start</code></li>
+<li>&#x30B3;&#x30F3;&#x30C6;&#x30CA;&#x518D;&#x8D77;&#x52D5;<br>
+<code>docker-compose restart</code></li>
+<li>&#x30B3;&#x30F3;&#x30C6;&#x30CA;&#x7D42;&#x4E86;&#xFF06;&#x30A4;&#x30E1;&#x30FC;&#x30B8;&#x524A;&#x9664;<br>
+<code>docker-compose down --rmi all</code></li>
+<li>&#x30C7;&#x30FC;&#x30BF;&#x3082;&#x5168;&#x3066;&#x524A;&#x9664;<br>
+<code>docker-compose down --rmi all --volumes</code></li>
+</ul>
+<h3 class="mume-header" id="-5-%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95">5. &#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x4F7F;&#x7528;&#x65B9;&#x6CD5;</h3>
+
+<h4 class="mume-header" id="-51-%E8%B5%B7%E5%8B%95">5.1. &#x8D77;&#x52D5;</h4>
+
+<p>&#x4E0B;&#x8A18;URL&#x3078;&#x30D6;&#x30E9;&#x30A6;&#x30B6;&#x3067;&#x30A2;&#x30AF;&#x30BB;&#x30B9;&#x3059;&#x308B;&#x4E8B;&#x306B;&#x3088;&#x308A;&#x30A2;&#x30D7;&#x30EA;&#x30B1;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x306E;&#x30C8;&#x30C3;&#x30D7;&#x753B;&#x9762;&#x304C;&#x8868;&#x793A;&#x3055;&#x308C;&#x307E;&#x3059;&#x3002;</p>
+<p><code>http://&#xFF1C;&#x30DB;&#x30B9;&#x30C8;&#x540D; or IP&#x30A2;&#x30C9;&#x30EC;&#x30B9;&#xFF1E;:3101</code></p>
+<p>&#x203B;&#x30ED;&#x30FC;&#x30AB;&#x30EB;&#x74B0;&#x5883;&#x3067;&#x306E;Docker machine&#x306E;&#x5834;&#x5408;</p>
+<p><a href="http://localhost:3101">http://localhost:3101</a></p>
+<h4 class="mume-header" id="-52-maiml%E4%B8%80%E8%A6%A7%E8%A1%A8%E7%A4%BA%E7%94%BB%E9%9D%A2">5.2. MaiML&#x4E00;&#x89A7;&#x8868;&#x793A;&#x753B;&#x9762;</h4>
+
+<p>&#x8D77;&#x52D5;&#x5F8C;&#x306E;&#x521D;&#x671F;&#x753B;&#x9762;&#x3002;&#x4EE5;&#x4E0B;&#x306E;&#x64CD;&#x4F5C;&#x304C;&#x53EF;&#x80FD;&#x3002;</p>
+<ul>
+<li>MaiML&#x30D5;&#x30A1;&#x30A4;&#x30EB;&#x304B;&#x3089;&#x4E00;&#x89A7;&#x306B;&#x8FFD;&#x52A0;<br>
+&#x30D7;&#x30EB;&#x30C0;&#x30A6;&#x30F3;&#x30E1;&#x30CB;&#x30E5;&#x30FC;&#x3088;&#x308A; <code>Import</code> &#x2192; <code>Upload File</code> &#x2192; MaiML&#x30D5;&#x30A1;&#x30A4;&#x30EB;&#x3092;drop &#x2192; <code>&#x5B9F;&#x884C;</code></li>
+<li>MaiML&#x3092;&#x9078;&#x629E;&#x3057;&#x3066;Petri-Net&#x8868;&#x793A;<br>
+&#x8868;&#x793A;&#x3057;&#x305F;&#x3044;MaiML&#x306E;<code>NID</code>&#x30DC;&#x30BF;&#x30F3;&#x62BC;&#x4E0B; &#x2192; Petri-Net&#x8981;&#x7D20;&#x60C5;&#x5831;&#x753B;&#x9762;&#x3078;&#x9077;&#x79FB;</li>
+<li>MaiML&#x3092;&#x9078;&#x629E;&#x3057;&#x3066;&#x4E00;&#x89A7;&#x304B;&#x3089;&#x524A;&#x9664;<br>
+&#x8868;&#x793A;&#x3057;&#x305F;&#x3044;MaiML&#x306E;<code>DEL</code>&#x30DC;&#x30BF;&#x30F3;&#x62BC;&#x4E0B;</li>
+</ul>
+<h4 class="mume-header" id="-53-petri-net%E8%A6%81%E7%B4%A0%E6%83%85%E5%A0%B1%E7%94%BB%E9%9D%A2">5.3. Petri-Net&#x8981;&#x7D20;&#x60C5;&#x5831;&#x753B;&#x9762;</h4>
+
+<p>MaiML&#x306B;&#x683C;&#x7D0D;&#x3055;&#x308C;&#x3066;&#x3044;&#x308B;Petri-Net&#x3068;&#x5404;&#x8981;&#x7D20;&#x306E;&#x8A73;&#x7D30;&#x60C5;&#x5831;&#x306E;&#x8868;&#x793A;&#x753B;&#x9762;&#x3002;</p>
+<h5 class="mume-header" id="-531-petri-net%E5%9B%B3%E5%B7%A6%E3%82%AB%E3%83%A9%E3%83%A0">5.3.1. Petri-Net&#x56F3;(&#x5DE6;&#x30AB;&#x30E9;&#x30E0;)</h5>
+
+<p>&#x9078;&#x629E;&#x3057;&#x305F;MaiML&#x306B;&#x5C5E;&#x3059;&#x308B;Petri-Net&#x306E;&#x5168;&#x8981;&#x7D20;&#x3068;&#x3001;&#x305D;&#x308C;&#x3089;&#x306E;&#x8981;&#x7D20;&#x3068;&#x95A2;&#x9023;&#x4ED8;&#x3051;&#x306E;&#x3042;&#x308B;&#x4ED6;MaiML&#x306B;&#x5C5E;&#x3059;&#x308B;&#x8981;&#x7D20;&#x3092;&#x542B;&#x3093;&#x3060;Petri-Net&#x3092;&#x540C;&#x6642;&#x306B;&#x8868;&#x793A;&#x3059;&#x308B;&#x3002;</p>
+<ul>
+<li>&#x5404;&#x8981;&#x7D20;&#x304C;&#x5C5E;&#x3059;&#x308B;MaiML&#x306B;&#x3088;&#x308A;&#x30B0;&#x30EB;&#x30FC;&#x30D7;&#x5206;&#x985E;&#x8868;&#x793A;</li>
+<li>MaiML&#x30B0;&#x30EB;&#x30FC;&#x30D7;&#x306E;&#x30E9;&#x30D9;&#x30EB;&#x306F;&#x5BFE;&#x5FDC;&#x3059;&#x308B;MaiML NID&#x3092;&#x793A;&#x3059;</li>
+<li>Petri-Net &#x306E;&#x5404;&#x8981;&#x7D20;&#x3092;&#x9078;&#x629E;&#x3057;&#x3001;&#x6B21;&#x9805;&#x306B;&#x793A;&#x3059;&#x7DE8;&#x96C6;&#x64CD;&#x4F5C;&#x304C;&#x53EF;&#x80FD;</li>
+<li>MaiML&#x30B0;&#x30EB;&#x30FC;&#x30D7;&#x3092;&#x30C0;&#x30D6;&#x30EB;&#x30AF;&#x30EA;&#x30C3;&#x30AF;&#x3059;&#x308B;&#x3068;&#x3001;&#x305D;&#x306E;MaiML&#x306E;Petri-Net&#x8981;&#x7D20;&#x60C5;&#x5831;&#x753B;&#x9762;&#x3078;&#x9077;&#x79FB;<br>
+&#xFF08;&#x7DE8;&#x96C6;&#x5BFE;&#x8C61;&#x306E;MaiML&#x3092;&#x5207;&#x308A;&#x66FF;&#x3048;&#x308B;&#x3053;&#x3068;&#x304C;&#x3067;&#x304D;&#x308B;&#xFF09;</li>
+</ul>
+<h5 class="mume-header" id="-532-%E7%B7%A8%E9%9B%86--%E8%A6%81%E7%B4%A0%E6%83%85%E5%A0%B1%E8%A1%A8%E7%A4%BA%E4%B8%AD%E3%82%AB%E3%83%A9%E3%83%A0">5.3.2. &#x7DE8;&#x96C6; + &#x8981;&#x7D20;&#x60C5;&#x5831;&#x8868;&#x793A;(&#x4E2D;&#x30AB;&#x30E9;&#x30E0;)</h5>
+
+<ul>
+<li>&#x30CE;&#x30FC;&#x30C9;&#x9593;&#x306E;&#x63A5;&#x7D9A;&#x306E;&#x524A;&#x9664;&#xFF1A;<br>
+&#x5DE6;&#x30AB;&#x30E9;&#x30E0;&#x3067;&#x63A5;&#x7D9A;&#x3092;&#x9078;&#x629E;&#x3057;&#x3066; <code>Delete connection</code> &#x62BC;&#x4E0B;</li>
+<li>&#x30CE;&#x30FC;&#x30C9;&#x9593;&#x306B;&#x63A5;&#x7D9A;&#x3092;&#x8FFD;&#x52A0;&#xFF1A;<br>
+&#x5DE6;&#x30AB;&#x30E9;&#x30E0;&#x3067; place/transition &#x3092;&#x9806;&#x306B;&#x9078;&#x629E;&#x3057;&#x3066; <code>Create connection</code> &#x62BC;&#x4E0B;</li>
+<li>place/transition &#x8FFD;&#x52A0;&#xFF1A;<br>
+<code>Add node</code> &#x2192; <code>ID</code>&#x6587;&#x5B57;&#x5217;&#x3092;&#x5165;&#x529B;, <code>Node type</code>&#x9078;&#x629E; &#x2192; <code>&#x5B9F;&#x884C;</code></li>
+<li>&#x7DE8;&#x96C6;&#x7D50;&#x679C;&#x306E;MaiML&#x30D5;&#x30A1;&#x30A4;&#x30EB;&#x51FA;&#x529B;&#xFF1A;<br>
+<code>Export MaiML</code> &#x2192; <code>Filename</code> &#x3092;&#x5165;&#x529B; &#x2192; <code>&#x5B9F;&#x884C;</code></li>
+<li>Node Details&#xFF1A;<br>
+&#x9078;&#x629E;&#x3057;&#x305F;&#x30CE;&#x30FC;&#x30C9;&#x306B;&#x542B;&#x307E;&#x308C;&#x308B;&#x60C5;&#x5831;&#x3092;&#x8868;&#x793A;</li>
+</ul>
+<h5 class="mume-header" id="-533-properties%E5%8F%B3%E3%82%AB%E3%83%A9%E3%83%A0">5.3.3. Properties(&#x53F3;&#x30AB;&#x30E9;&#x30E0;)</h5>
+
+<p>&#x5DE6;&#x30AB;&#x30E9;&#x30E0;&#x3067;&#x9078;&#x629E;&#x3057;&#x305F;&#x30CE;&#x30FC;&#x30C9;&#x306B;&#x5B58;&#x5728;&#x3059;&#x308B;&#x5C5E;&#x6027;&#x60C5;&#x5831;&#x3092;&#x8868;&#x793A;&#x3059;&#x308B;&#x3002;<br>
+&#x5404;&#x5C5E;&#x6027;&#x5C5E;&#x6027;&#x306E;&#x4E0B;&#x306B;&#x306F;&#x5225;&#x306E;&#x8907;&#x6570;&#x306E;&#x5C5E;&#x6027;&#x3092;&#x6301;&#x3064;&#x3053;&#x3068;&#x304C;&#x3067;&#x304D;&#x308B;&#x968E;&#x5C64;&#x69CB;&#x9020;&#x3092;&#x69CB;&#x6210;&#x3059;&#x308B;&#x3002;</p>
+<ul>
+<li><code>NID</code> : &#x5404;&#x5C5E;&#x6027;&#x60C5;&#x5831;&#x306B;&#x4ED8;&#x4E0E;&#x3055;&#x308C;&#x305F;&#x500B;&#x5225;&#x756A;&#x53F7;</li>
+<li><code>Parent NID</code> : &#x305D;&#x306E;&#x60C5;&#x5831;&#x3092;&#x6301;&#x3064;&#x89AA;&#x3092;&#x793A;&#x3059; <code>NID</code></li>
+</ul>
+<h3 class="mume-header" id="-6-%E3%81%9D%E3%81%AE%E4%BB%96%E3%83%84%E3%83%BC%E3%83%AB%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E7%AD%89">6. &#x305D;&#x306E;&#x4ED6;&#x30C4;&#x30FC;&#x30EB;&#x30FB;&#x30B9;&#x30AF;&#x30EA;&#x30D7;&#x30C8;&#x7B49;</h3>
+
+<ul>
+<li><s>MaiML&#x30C7;&#x30FC;&#x30BF;&#x30ED;&#x30FC;&#x30C9;</s><br>
+<code>sh graph-db-loader.sh</code></li>
+<li><s>MaiML&#x30C7;&#x30FC;&#x30BF;&#x5168;&#x524A;&#x9664;</s><br>
+<code>sh graph-db-delete.sh</code></li>
+<li><a href="graph-db/app/Script/README.html">MaiML&#x7DE8;&#x96C6;&#x30A2;&#x30D7;&#x30EA;&#x30B5;&#x30DD;&#x30FC;&#x30C8;&#x7528;&#x30B9;&#x30AF;&#x30EA;&#x30D7;&#x30C8;</a> (XML&#x7F72;&#x540D;&#x306B;&#x3064;&#x3044;&#x3066;&#x306F;&#x3053;&#x3061;&#x3089;&#x306B;&#x8A18;&#x8F09;)</li>
+</ul>
+<h3 class="mume-header" id="-7-%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88">7. &#x30C9;&#x30AD;&#x30E5;&#x30E1;&#x30F3;&#x30C8;</h3>
+
+<ul>
+<li><a href="Documents/MaiML-App.html">&#x30BD;&#x30D5;&#x30C8;&#x30A6;&#x30A7;&#x30A2;&#x8A2D;&#x8A08;&#x66F8;</a></li>
+</ul>
+<blockquote>
+<p>Written with <a href="https://stackedit.io/">StackEdit</a>.</p>
+</blockquote>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    </body></html>
