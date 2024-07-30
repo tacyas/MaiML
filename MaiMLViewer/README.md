@@ -1,7 +1,5 @@
 ## MaiML型データ内のテンプレート及びインスタンスにおける<br>参照関係の可視化アプリケーション<!-- omit in toc -->
 
-<div align="right">国立九州工業大学プロジェクト</div>
-
 ### 1. アプリケーション概要
 XMAILデータをGraphDBに登録し、そのデータをnodeJS WEBアプリケーション上でデータ一覧、ペトリネット図を照会・編集するアプリケーションである。ペトリネット図の編集結果は再びXMAILデータとしてファイルへ出力保存することができる。
 
@@ -108,17 +106,4 @@ MaiMLに格納されているPetri-Netと各要素の詳細情報の表示画面
 * `Parent NID` : その情報を持つ親を示す `NID`
 
 
-### 6. その他ツール・スクリプト等
 
-- ~~MaiMLデータロード~~
-`sh graph-db-loader.sh`
-- ~~MaiMLデータ全削除~~
-`sh graph-db-delete.sh`
-- [MaiML編集アプリサポート用スクリプト](graph-db/app/Script/README.html) (XML署名についてはこちらに記載)
-
-### 7. ドキュメント
-
-- [ソフトウェア設計書](Documents/MaiML-App.html)
-
-
-> Written with [StackEdit](https://stackedit.io/).
