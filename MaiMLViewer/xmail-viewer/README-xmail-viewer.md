@@ -174,7 +174,7 @@ docker hubからnode image を取得（10.5.0で開発だが、とりあえずla
 |1|XMAILデータ一覧照会|Graph DBに格納されているデータを一覧表示します。|
 |2|XMAILペトリネット図生成|Alchemy.jsを使用し、XMAILデータからペトリネット図を生成します。|
 |3|XMAIL構成ノード情報照会|ペトリネット図を構成するノートの情報を照会します。|
-|4|XMAILファイルアップロード(1件)|ローカルPC上のXMAILファイルを一覧表示とペトリネット図データとしてGraph DBへ登録します。NIDは自動で採番され、同じファイルを複数回登録することができる。|
+|4|XMAILファイルアップロード(1件)|ローカルPC上のXMAILファイルを一覧表示とペトロネット図データとしてGraph DBへ登録します。NIDは自動で採番され、同じファイルを複数回登録することができる。|
 |5|XMAILデータ削除(1件)|一覧上で選択された行（キー：NID）を対象にGraphDBに登録されているXMAILデータを削除する。|
 ||||
 
@@ -195,7 +195,7 @@ docker hubからnode image を取得（10.5.0で開発だが、とりあえずla
 	where id(a)=30862
 	detach delete p;
 
-ペトリネット図を直接表示
+ペトロネット図を直接表示
 
 	http://localhost:3000/petronet/view?id=0
 	http://localhost:3000/petronet/view?id=30862

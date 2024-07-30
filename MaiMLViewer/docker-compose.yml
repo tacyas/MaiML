@@ -2,7 +2,7 @@ version: '2'
 services:
   # Neo4j server
   graph_db:
-    container_name: 'graph-db-test'
+    container_name: 'graph-db'
     image: neo4j:4.4.16
     ports:
       - "7474:7474"
@@ -13,7 +13,7 @@ services:
 
   # XMAIL viewer
   xmail_viewer:
-    container_name: 'xmail-viewer-test'
+    container_name: 'xmail-viewer'
     build:
       context: ./
       dockerfile: ./xmail-viewer/Dockerfile
@@ -28,10 +28,10 @@ services:
 
   # file server for exported XMAIL
   nginx:
-    container_name: 'nginx-test'
+    container_name: 'nginx'
     image: nginx:latest
     ports:
-      - "3101:81"
+      - "3101:80"
     volumes:
       - ./xmail-viewer/exports:/usr/share/nginx/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
