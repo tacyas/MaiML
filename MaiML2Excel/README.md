@@ -1,4 +1,4 @@
-# [How to build 'MaiML to Excel']
+# [How to RUN 'MaiML to Excel']
 
 ## (Ⅰ) RUN python file
 1. RUN-pythonディレクトリ下、READMEファイルを参照
