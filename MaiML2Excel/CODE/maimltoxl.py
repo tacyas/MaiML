@@ -1,95 +1,32 @@
-import sys, os
-import argparse
+import sys, os, re, json
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import PatternFill
-import xmltodict, json
+import lxml.etree as ET
+from staticClass import maimlelement, filepath, commandargs, headerlist, headerlistET, fill, encheaderlist
 
-from staticClass import maimlelement
-from namespace import defaultNS
-
-## FILE DIR PATH #################################################
-# local dir for test
-#rootdir = '../'
-# dir for docker
-rootdir = '/WORK/'
-codedir = rootdir + 'CODE/'
-input_dir = rootdir + 'DATA/INPUT/'
-output_dir = rootdir + 'DATA/OUTPUT/'
-tmp_dir = rootdir + 'DATA/TMP/'
 
 ### Log #################################################
-from logging import getLogger, config
-with open(codedir+'LOG/log_config.json', 'r') as f:
+from logging import getLogger, config, handlers  ## handlersはconfig内で使用しているので必要
+with open(filepath.codedir+'LOG/log_config.json', 'r') as f:
     log_conf = json.load(f)
+    ## filehandlerのfilepathの追加
+    infologfilename=filepath.codedir+'LOG/INFO.log'
+    debuglogfilename=filepath.codedir+'LOG/DEBUG.log'
+    data_as_dict = dict(log_conf)
+    data_as_dict['handlers']['fileHandler'].update({ "filename": infologfilename})
+    data_as_dict['handlers']['fileHandler2'].update({ "filename": debuglogfilename})
     # logging設定
     config.dictConfig(log_conf)
+# ロガーに追加
 loggerI = getLogger('maimltoxlI')
 loggerD = getLogger('maimltoxlD')
 
-## open&read excel file #################################################
-## not called
-def readxl(path):
-    if path == '':
-        path = input_dir+'newmaimldata.xlsx'
-    wb = load_workbook(path)
-    return wb
 
-## open&read maiml file #################################################
+### lxmlを使用しXML解析 #################################################
 def readmaiml(filepath):
-    with open(filepath, 'r') as inF:
-        maiml_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces, encoding='UTF-8')
-        return maiml_dic
-
-### A1~XFDまでのcellのidを取得する #################################################
-## not called
-def getcellid(x,y):
-    #A:x=0
-    x=x-1
-    code = ord('A')
-    # columnの２桁以上
-    tf = 1
-    xhcode = ord('A')
-    ch = ''
-    while True:
-        loggerD.debug('tf=='+tf)
-        loggerD.debug('x=='+x)
-        if (tf-1)<(x+1) and (x+1)/26<=tf:
-            if tf-2 >= 0:
-                xhnum = xhcode + tf-2
-                ch = chr(xhnum)
-                loggerD.debug(ch)
-            #if ch == 'Z':
-            break
-        tf += 1
-
-    thiscode = ch + chr(code + x%26) + str(y)
-    loggerD.debug(thiscode)
-    #print(thiscode)
-    return thiscode
-
-### header定義 ###############################################################
-headerlist={
-    'A':'hierarchy',
-    'B':'element',
-    'C':'@xsi:type',
-    'D':'@key',
-    'E':'@formatString',
-    'F':'@units',
-    'G':'@scaleFactor',
-    'H':'@axis',
-    'I':'@size',
-    'J':'@id',
-    'K':'@ref',
-    'L':'childUri',
-    'M':'childHash',
-    'N':'childUuid',
-    'O':'EncryptedData',
-    'P':'description',
-    'Q':'value',
-    }
-
-### headerのstyle定義 ########################################################
-fill = PatternFill(patternType='solid', fgColor='EAE7F3')
+    with open(filepath, 'r') as f:
+        xml = f.read().encode('utf-8')
+    root = ET.fromstring(re.sub(rb'xmlns=".*?"', b'', xml, count=1))
+    return root
 
 ### headerをエクセルシートに書き出す #################################################
 def addHeader(ws):
@@ -98,58 +35,147 @@ def addHeader(ws):
         ws[cellid+'1'].fill = fill
     return ws
 
+### insertion要素をエクセルシートに書き出す ##################################################
+def addinsertioncontent(insertionlist, ws, y, thishie=''):
+    if not isinstance(insertionlist,list):
+        insertionlist = [insertionlist]
+    for insertiontag in insertionlist:
+        hashvalue = insertiontag.find(maimlelement.hash).text
+
+        thisline = insertiontag.sourceline
+        linecell = ws.cell(row=y, column=1)
+        linecell.value = str(thisline)
+        hie=1
+        # insertion要素は階層と要素名のみ
+        hiecell = ws.cell(row=y, column=2)
+        hiecell.value = str(thishie)
+        elecell = ws.cell(row=y, column=3)
+        elecell.value =maimlelement.insertion
+        y+=1
+        # insertion要素が持つuri要素
+        uricell = ws.cell(row=y, column=2)
+        uricell.value = str(thishie)+'-'+str(hie)
+        uricell = ws.cell(row=y, column=3)
+        uricell.value = maimlelement.uri
+        urivaluecell = ws.cell(row=y, column=5)
+        urivaluecell.value = insertiontag.find(maimlelement.uri).text
+        y+=1
+        hie+=1
+        # insertion要素が持つhash要素
+        hashcell = ws.cell(row=y, column=2)
+        hashcell.value = str(thishie)+'-'+str(hie)
+        hashcell = ws.cell(row=y, column=3)
+        hashcell.value = maimlelement.hash
+        hashvaluecell = ws.cell(row=y, column=5)
+        hashvaluecell.value = hashvalue
+        
+        y+=1
+        # insertion要素が持つuuid要素が存在したら
+        if insertiontag.find(maimlelement.uuid) is not None:
+            hie+=1
+            uuidcell = ws.cell(row=y, column=2)
+            uuidcell.value = str(thishie)+'-'+ str(hie)
+            uuidcell = ws.cell(row=y, column=3)
+            uuidcell.value = maimlelement.uuid
+            uuidvaluecell = ws.cell(row=y, column=5)
+            uuidvaluecell.value = insertiontag.find(maimlelement.uuid).text
+            y+=1
+        # insertion要素が持つformat要素が存在したら
+        if insertiontag.find(maimlelement.format) is not None:
+            hie+=1
+            formathiecell = ws.cell(row=y, column=2)
+            formathiecell.value = str(thishie)+'-'+str(hie)
+            formatcell = ws.cell(row=y, column=3)
+            formatcell.value = maimlelement.format
+            formatvaluecell = ws.cell(row=y, column=5)
+            formatvaluecell.value = insertiontag.find(maimlelement.format).text
+            y+=1
+        thishie+=1
+    return ws, y , thishie
+
 ### 汎用データコンテナのデータをエクセルシートに書き出す ###################################
 def addcellgeneralcontainer(generallist, selectkey, g, ws, y, oyahie='', thishie=''):
-    #hie = 1  # 階層を表す ex)1,1-1,2-1-3,9-5
-    #y=2  # エクセルのy(1~),行数
-    if isinstance(generallist,list):
-        pass
-    else:
-        generallist = [generallist]
-    for generaldict in generallist:
+    generallist =  generallist if isinstance(generallist,list) else [generallist]
+    for generaltag in generallist:
         #hierarchy,element
         if oyahie == '':
             hievalue = str(thishie)
         else:
             hievalue = str(oyahie) + '-' + str(thishie)
-        if selectkey==[] or generaldict[maimlelement.keyd] in selectkey:
-            x=1 # エクセルのx(A~/1~),列数
-            hiecell = ws.cell(row=y, column=x)
+        tagdict = generaltag.attrib
+        if selectkey==[] or tagdict[maimlelement.key] in selectkey:
+            ## add maimlfile lineNo
+            lineNo = generaltag.sourceline
+            linecell = ws.cell(row=y, column=1)
+            linecell.value = lineNo
+
+            x=2 # エクセルのx(A~/1~),列数
+            hiecell = ws.cell(row=y, column=2)
             hiecell.value = hievalue
-            elecell = ws.cell(row=y, column=2)
+            elecell = ws.cell(row=y, column=3)
             if g == 'p':
                 elecell.value =maimlelement.property
             if g == 'c':
                 elecell.value =maimlelement.content
             if g == 'u':
                 elecell.value =maimlelement.uncertainty
+
             #headerの値に合わせてmaimlデータを取得セルデータに格納
-            for cellid, header in headerlist.items():
-                if header in generaldict.keys():
-                    thiscellid = cellid+str(y)
-                    ws[thiscellid] = generaldict[header]
-            y+=1         # エクセルの行を一つ進める
+            for cellxid, header in headerlistET.items():
+                thiscellid = cellxid+str(y)
+                if generaltag.get(header) is not None:  ## attribute
+                    ws[thiscellid] = generaltag.get(header)
+                if generaltag.find(header) is not None:  ## child element
+                    ## value > 1
+                    if header == maimlelement.value:
+                        if isinstance(generaltag.findall(maimlelement.value),list):
+                            num = 1
+                            for valuedata in generaltag.findall(maimlelement.value):
+                                ws[thiscellid] = valuedata.text
+                                if num < len(generaltag.findall(maimlelement.value)):
+                                    y+=1
+                                    thiscellid = cellxid+str(y)
+                                num += 1
+                        else:
+                            ws[thiscellid] = generaltag.find(maimlelement.value).text
+                    else:
+                        ws[thiscellid] = generaltag.find(header).text
+        y+=1         # エクセルの行を一つ進める
+
+        # 汎用データコンテナ内で秘匿化されたコンテンツをもつ場合
+        hie2 = 1
+        for encheader in encheaderlist: ## case: encrypted data exists
+            if generaltag.find(encheader) is not None:
+                #'B':'hierarchy',
+                thiscellid = 'B' + str(y)
+                ws[thiscellid] = hievalue + '-' + str(hie2)
+                # 'C':'element',
+                thiscellid = 'C' + str(y)
+                ws[thiscellid] = encheader
+                # 'E':'element data',
+                thiscellid = 'E' + str(y)
+                ws[thiscellid] = generaltag.find(encheader).text
+                hie2+=1
+                y+=1
         
         #多階層の場合
-        hie2 = 1
-        if maimlelement.property in generaldict.keys():
-            propertylist2 = generaldict[maimlelement.property]
-            #print('propertylist2:::',propertylist2)
+        #hie2 = 1
+        if  generaltag.find(maimlelement.property) is not None:
+            propertylist2 = generaltag.findall(maimlelement.property)
             propertylist2, ws, y, hie2 = addcellgeneralcontainer(propertylist2, selectkey, 'p', ws, y, oyahie=hievalue, thishie=hie2)
-        if maimlelement.content in generaldict.keys():
-            contentlist2 = generaldict[maimlelement.content]
-            #print('contentlist:::',contentlist2)
+        if generaltag.find(maimlelement.content) is not None:
+            contentlist2 = generaltag.findall(maimlelement.content)
             contentlist2, ws, y, hie2 = addcellgeneralcontainer(contentlist2, selectkey, 'c', ws, y, oyahie=hievalue, thishie=hie2)
-        if maimlelement.uncertainty in generaldict.keys():
-            uncertaintylist2 = generaldict[maimlelement.uncertainty]
-            #print('uncertaintylist2:::',uncertaintylist2)
+        if generaltag.find(maimlelement.uncertainty) is not None:
+            uncertaintylist2 = generaltag.findall(maimlelement.uncertainty)
             uncertaintylist2, ws, y, hie2 = addcellgeneralcontainer(uncertaintylist2, selectkey, 'u', ws, y, oyahie=hievalue, thishie=hie2)
         thishie += 1
     return generallist,ws,y,thishie
 
+
 ### MaiMLファイルから抽出したresult要素が持つ汎用データコンテナの値をエクセルに書き出す ##########
-def createcsv( resultId=[], selectkey=[], maiml_file_path = '', xl_file_path=output_dir+'output.xlsx'):
-    loggerD.debug('createcsv')
+def createcsv( resultId=[], selectkey=[], maiml_file_path = '', xl_file_path=filepath.output_dir+'output.xlsx'):
+    loggerD.debug('createcsv method start.')
     # maiml file --> resultlist
     maimldict = {}
     if maiml_file_path == '':
@@ -159,57 +185,86 @@ def createcsv( resultId=[], selectkey=[], maiml_file_path = '', xl_file_path=out
         loggerI.error('input maiml filepath is not exist.')
         sys.exit()
     else:
-        maimldict = readmaiml(maiml_file_path)
+        maimldata = readmaiml(maiml_file_path)
+    loggerD.info('parsed maiml.:::{0}'.format(maimldata))
     resultlist = []
-    if maimlelement.data in maimldict[maimlelement.maiml].keys() and maimlelement.results in maimldict[maimlelement.maiml][maimlelement.data].keys() and maimlelement.result in maimldict[maimlelement.maiml][maimlelement.data][maimlelement.results].keys():
-        resultlist = maimldict[maimlelement.maiml][maimlelement.data][maimlelement.results][maimlelement.result]
-    loggerD.debug(resultlist)
+    ## results >=1
+    if maimldata.find(maimlelement.data) is not None and maimldata.find(maimlelement.data).find(maimlelement.results) is not None:
+        #line_numbers = {}
+        resultslist = maimldata.find(maimlelement.data).findall(maimlelement.results)
+        loggerD.debug('user select resultId:{0}'.format(resultId))
+        # create & save workbook
+        wb = Workbook()
+        wb.save(xl_file_path)
+        if not isinstance(resultslist, list):
+            resultslist = [resultslist]
+        for resultstag in resultslist:
+            resultstaglist = resultstag.findall(maimlelement.result) if isinstance(resultstag.findall(maimlelement.result),list) else [resultstag.findall(maimlelement.result)]
 
-    # create & save workbook
-    wb = Workbook()
-    wb.save(xl_file_path)
-    #wb = load_workbook(xl_file_path)
-    if isinstance(resultlist,list):
-        pass
-    else:
-        resultlist = [resultlist]
-    for resultdict in resultlist:
-        loggerD.debug('resultId:{0}'.format(resultId))
-        if resultId == [] or resultdict[maimlelement.idd] in resultId:
-            if any(key in resultdict for key in (maimlelement.property, maimlelement.content, maimlelement.uncertainty)):
-                # ws = result-id
-                ws_name = resultdict[maimlelement.idd]
-                loggerD.debug('create ws. ws-name is {0}'.format(ws_name))
-                # create worksheet
-                ws = wb.create_sheet(ws_name)
-                # add header
-                ws = addHeader(ws)
-                hie = 1  # 階層を表す ex)1,1-1,2-1-3,9-5
-                y=2  # エクセルのy(1~),行数
-                #property
-                if maimlelement.property in resultdict.keys():
-                    propertylist = resultdict[maimlelement.property]
-                    #loggerD.debug('propertylist:::{0}'.format(propertylist))
-                    propertylist, ws, y, hie = addcellgeneralcontainer(propertylist, selectkey, 'p', ws, y, thishie=hie)
-                #content
-                if maimlelement.content in resultdict.keys():
-                    contentlist = resultdict[maimlelement.content]
-                    #loggerD.debug('contentlist:::{0}'.format(contentlist))
-                    contentlist, ws, y, hie = addcellgeneralcontainer(contentlist, selectkey, 'c', ws, y, thishie=hie)
-                #uncertainty
-                if maimlelement.uncertainty in resultdict.keys():
-                    uncertaintylist = resultdict[maimlelement.uncertainty]
-                    #loggerD.debug('uncertaintylist:::{0}'.format(uncertaintylist))
-                    uncertaintylist, ws, y, hie = addcellgeneralcontainer(uncertaintylist, selectkey, 'u', ws, y, thishie=hie)
-                wb.save(xl_file_path)
-    return
+            for resulttag in resultstaglist:
+                if resultId == [] or resulttag.get(maimlelement.id) in resultId:
+                    ## maiml file lineNo
+                    ws_name = resulttag.get(maimlelement.id)
+                    ## create worksheet
+                    resultlineno = resulttag.sourceline
+                    ws = wb.create_sheet(str(resultlineno) + '-' + ws_name[:20])
+                    loggerD.debug('create ws. ws-name is {0}'.format(ws.title))
+                    ## add header
+                    ws = addHeader(ws)
+
+                    hie = 1  # 階層を表す ex)1,1-1,2-1-3,9-5
+                    y=2  # エクセルのy(1~),行数
+
+                    ## insertion tag >=0
+                    if resulttag.find(maimlelement.insertion) is not None:
+                        insertionlist = resulttag.findall(maimlelement.insertion) if isinstance(resulttag.findall(maimlelement.insertion),list) else [resulttag.findall(maimlelement.insertion)]
+                        ws, y, hie = addinsertioncontent(insertionlist, ws, y, thishie=hie)
+                    
+                    hie2 = 1
+                    for encheader in encheaderlist: ## case: encrypted data exists
+                        if resulttag.find(encheader) is not None:
+                            #'B':'hierarchy',
+                            thiscellid = 'B' + str(y)
+                            ws[thiscellid] = str(hie) + '-' + str(hie2)
+                            # 'C':'element',
+                            thiscellid = 'C' + str(y)
+                            ws[thiscellid] = encheader
+                            # 'E':'element data',
+                            thiscellid = 'E' + str(y)
+                            ws[thiscellid] = resulttag.find(encheader).text
+                            hie2+=1
+                            y+=1   
+                    
+                    ## 汎用データコンテナ
+                    if resulttag.find(maimlelement.property) is not None:
+                        propertytaglist = resulttag.findall(maimlelement.property)
+                        propertytaglist, ws, y, hie = addcellgeneralcontainer(propertytaglist, selectkey, 'p', ws, y, thishie=hie)
+                    if resulttag.find(maimlelement.content) is not None:
+                        contenttaglist = resulttag.findall(maimlelement.content)
+                        contenttaglist, ws, y, hie = addcellgeneralcontainer(contenttaglist, selectkey, 'c', ws, y, thishie=hie)
+                    if resulttag.find(maimlelement.uncertainty) is not None:
+                        uncertaintytaglist = resulttag.findall(maimlelement.uncertainty)
+                        uncertaintytaglist, ws, y, hie =  addcellgeneralcontainer(uncertaintytaglist, selectkey, 'u', ws, y, thishie=hie)
+                    
+                    wb.save(xl_file_path)
+
+        ## デフォルトで作成されたシートを削除
+        for ws in wb.worksheets:
+            if ws.title == 'Sheet':
+                wb.remove(ws)
+                wb.save(xl_file_path)  
+    return  
 
 ### open&read input.json #############################################################################
 ## 'maiml_file_name' : Required
 ## 'xl_file_name' and 'resultId' and 'selectkey' : not Required
 ############################
 def openinputjson():
-    jsonfile = open(input_dir+'input.json', 'r')
+    try:
+        jsonfile = open(filepath.input_dir+'input.json', 'r')
+    except Exception as e:
+        loggerI.error('"{0}" file not found.'.format(filepath.input_dir+'input.json'))
+        sys.exit()
     inputlist = json.load(jsonfile)
     loggerD.debug('input data: {0}'.format(inputlist))
     if 'maiml_file_name' not in inputlist or inputlist['maiml_file_name'] == '':
@@ -217,13 +272,13 @@ def openinputjson():
         loggerI.error('"maiml_file_name" is required.')
         sys.exit()
     else:
-        inputlist['maiml_file_name'] = input_dir + inputlist['maiml_file_name']
+        inputlist['maiml_file_name'] = filepath.input_dir + inputlist['maiml_file_name']
     if 'xl_file_name' not in inputlist or inputlist['xl_file_name'] == "":
-        output_filepath = output_dir+'output.xlsx'
+        output_filepath = filepath.output_dir+'output.xlsx'
         loggerI.info('use default outout filepath : "{0}".'.format(output_filepath))
         inputlist['xl_file_name'] = output_filepath
     else:
-        inputlist['xl_file_name'] = output_dir + inputlist['xl_file_name']
+        inputlist['xl_file_name'] = filepath.output_dir + inputlist['xl_file_name']
     if 'resultId' not in inputlist:
         inputlist['resultId'] = []
     if 'selectkey' not in inputlist:
@@ -236,12 +291,12 @@ def openinputjson():
 def testmethod(args):
     input_filepath = ''
     if args.json :
-        loggerI.info('use json file. Input json-filepath="{0}"'.format(input_dir+'input.json'))
+        loggerI.info('use json file. Input json-filepath="{0}"'.format(filepath.input_dir+'input.json'))
         input_filepath,output_filepath,resultId,selectkey = openinputjson()
     else:
         input_filepath = args.maiml
         if args.xl == '':
-            output_filepath = output_dir+'output.xlsx'
+            output_filepath = filepath.output_dir+'output.xlsx'
             loggerI.info('use default outout filepath : "/DATA/TMP/output.xlsx".')
         else:
             output_filepath = args.xl
@@ -249,107 +304,47 @@ def testmethod(args):
             resultID = args.selectid
         if args.selectkey != '':
             selectkey = args.selectkey
-    input_filepath = input_dir+'test.maiml'
-    output_filepath = output_dir+'newmaimldata.xlsx'
-    ###引数チェック
-    ## OK
-    input_filepath = input_dir+'test1.maiml'
-    output_filepath = output_dir+'newmaimldata1.xlsx'
-    createcsv(maiml_file_path=input_filepath, xl_file_path=output_filepath)
-    ## OK
-    input_filepath = input_dir+'test1.maiml'
-    #os.makedirs(os.path.dirname('./tmp/'), exist_ok=True)
-    createcsv(maiml_file_path=input_filepath)
-    ## OK
-    input_filepath = input_dir+'test1.maiml'
-    output_filepath = output_dir+'newmaimldata2.xlsx'
-    createcsv(resultId=['juyosample_RT_ver1-1_instance','2juyosample_RT_ver1-1_instance'],maiml_file_path=input_filepath,xl_file_path=output_filepath)
-    ## OK
-    input_filepath = input_dir+'test1.maiml'
-    output_filepath = output_dir+'newmaimldata3.xlsx'
-    createcsv(selectkey='tiff:StripOffsets',maiml_file_path=input_filepath,xl_file_path=output_filepath)
-    ## OK
-    input_filepath = input_dir+'test1.maiml'
-    output_filepath= output_dir+'newmaimldata4.xlsx'
-    createcsv(selectkey=['tiff:StripOffsets', 'tiff:SMinSampleValue','tiff:Compression'],maiml_file_path=input_filepath,xl_file_path=output_filepath)
+    input_filepath = filepath.input_dir+'test.maiml'
+    output_filepath = filepath.output_dir+'newmaimldata.xlsx'
     
-    ## NG:message:input maiml filepath is not exist.
-    #input_filepath = input_dir+'testng.maiml'
-    #createcsv(maiml_file_path=input_filepath,xl_file_path=output_filepath)
-    ## NG:message:input maiml filepath is null.
-    #createcsv(xl_file_path=output_filepath)
-
-    ###MaiMLデータチェック###########################################
-    # OK : 汎用データが存在しないファイル1:dataコンテンツがない-->空のエクセルファイルを出力
-    input_filepath = input_dir+'test5.maiml'
-    output_filepath= output_dir+'newmaimldata5.xlsx'
-    createcsv(maiml_file_path=input_filepath, xl_file_path=output_filepath)
-    # OK : 汎用データが存在しないファイル2:resultコンテンツがない-->空のエクセルファイルを出力
-    input_filepath = input_dir+'test6.maiml'
-    output_filepath = output_dir+'newmaimldata6.xlsx'
-    createcsv(maiml_file_path=input_filepath, xl_file_path=output_filepath)
-    # OK : 汎用データが存在しないファイル3:resultはあるが汎用データコンテンツがない-->空のエクセルファイルを出力
-    input_filepath = input_dir+'test7.maiml'
-    output_filepath = output_dir+'newmaimldata7.xlsx'
-    createcsv(maiml_file_path=input_filepath, xl_file_path=output_filepath)
-    # OK : 様々なテストデータ1
-    input_filepath = input_dir+'test8.maiml'
-    output_filepath= output_dir+'newmaimldata8.xlsx'
-    createcsv(maiml_file_path=input_filepath, xl_file_path=output_filepath)
-    # OK : 様々なテストデータ2
-    input_filepath = input_dir+'test9.maiml'
-    output_filepath = output_dir+'newmaimldata9.xlsx'
-    createcsv(maiml_file_path=input_filepath, xl_file_path=output_filepath)
-
-
 
 ### RUN ################################################################################################
 ###### パラメータ
-#######  1 : input file name of maiml data
-#######  2 : output file name of excel ( if no-data, use default path "/DATA/OUTPUT/output.xlsx" )
-#######  3 : result ID
-#######  4 : key data
+#######  -j : use json file 
+#######  -m : input file name of maiml data
+#######  -o : output file name of excel ( if no-data, use default path "/DATA/OUTPUT/output.xlsx" )
+#######  -si : result ID
+#######  -sk : key data
 ####### '-t' : テストコード実行
-#######  nothing : /DATA/INPUT/input.jsonに記載のデータを取得
 ################
 if __name__ == '__main__':
-    args = sys.argv
-
-    ## 引数読み込み
-    parser = argparse.ArgumentParser()
-    # '-t' > '-j' > '-m'
-    parser.add_argument('-j', '--json', action='store_true') # use json file Flag
-    parser.add_argument('-m', '--maiml',default='') # input maiml file name
-    parser.add_argument('-o', '--xl', default='') # output file name
-    parser.add_argument('-si', '--selectid',  nargs="*", default='') # result ID
-    parser.add_argument('-sk', '--selectkey',  nargs="*", default='') # general container key
-    parser.add_argument('-t', '--test', action='store_true') # tests run Flag
-
-    args = parser.parse_args()
+    args = commandargs.parser.parse_args()
     loggerI.info('run argument:{0}'.format(args))
 
-    # test
-    if args.test:
+    if args.test: # tests run
         loggerD.info('test run!')
         testmethod(args)
     else:
         input_filepath = ''
         resultID = []
         selectkey = []
-        if args.json:  #if(len(sys.argv) <= 1):
-            loggerI.info('Use json file. Input json-filepath="{0}"'.format(input_dir+'input.json'))
+        if args.json: # use json
+            loggerI.info('use json file. Input json-filepath="{0}"'.format(filepath.input_dir+'input.json'))
             input_filepath,output_filepath,resultID,selectkey = openinputjson()
-        elif args.maiml != '':  #elif(len(args) >= 2):
-            input_filepath = input_dir+args.maiml
+        elif args.maiml != '': # use command args
+            input_filepath = filepath.input_dir+args.maiml
             if args.xl == '':
-                output_filepath = output_dir+'output.xlsx'
+                output_filepath = filepath.output_dir+'output.xlsx'
                 loggerI.info('use default outout filepath : "{0}".'.format(output_filepath))
             else:
-                output_filepath = output_dir+args.xl
+                output_filepath = filepath.output_dir+args.xl
+                loggerI.info('use outout filepath : "{0}".'.format(output_filepath))
             if args.selectid != '':
                 resultID = args.selectid 
             if args.selectkey != '':
                 selectkey = args.selectkey
+            if args.doc: ## document要素の情報をエクセルへ書き出す
+                pass
         else:
             loggerI.error('Arguments is incorrect.')
             sys.exit()
