@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BuildDocker.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="how-to-build-maiml-to-excel">[How to build 'MaiML to Excel']</h1>
+<h2 id="%E2%85%B0-docker-install">(Ⅰ) Docker install</h2>
+<ul>
+<li>前提：Docker Desktop等のDockerDeamonが起動している</li>
+</ul>
+<h2 id="%E2%85%B1-build-docker">(Ⅱ) Build Docker</h2>
+<ol>
+<li>dockerjupyterlabディレクトリに移動</li>
+<li>Docker compose build command<br>
+　<code>&gt;docker compose build</code></li>
+<li>Docker compose run command<br>
+　<code>&gt;docker-compose up -d</code></li>
+</ol>
+<h2 id="%E2%85%B2-use-jupyter-notebook">(Ⅲ) Use Jupyter Notebook</h2>
+<ul>
+<li>ブラウザで下記URLにアクセスする
+<ul>
+<li>URL：<a href="http://localhost:8888/">http://localhost:8888/</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="%E2%85%B3-python-run-maiml-to-excel">(Ⅳ) python run 'MaiML to Excel'</h2>
+<ol>
+<li>&quot;Notebook&quot; の　&quot;Python 3(ipykernel)&quot;アイコンをクリック</li>
+<li>下記コマンドを入力し、実行してみる<br>
+　<code>run /WORK/CODE/maimltoxl.py</code></li>
+</ol>
+<p><br><br></p>
+<h1 id="how-to-run-maiml-to-excel">[How to run 'MaiML to Excel']</h1>
+<h2 id="%E2%85%B0-%E5%AE%9F%E8%A1%8C%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB">(Ⅰ) 実行ファイル</h2>
+<p><code>/WORK/CODE/maimltoxl.py</code></p>
+<h2 id="%E2%85%B1-%E5%85%A5%E5%87%BA%E5%8A%9B%E3%83%87%E3%83%BC%E3%82%BF">(Ⅱ) 入出力データ</h2>
+<pre><code>　入力データは、MaiMLファイル、&lt;result&gt;要素のid属性（必須）の値、&lt;result&gt;要素が持つ汎用データコンテナのkey属性の値である。result要素のid属性、&lt;result&gt;要素が持つ汎用データのkey属性の指定がない場合は、MaiMLファイル内のそのコンテンツ全てが対象となる。
+　出力データは、エクセルファイルである。&lt;result&gt;要素のid属性の値をシート名とした、その要素の汎用データコンテナのコンテンツ一覧が出力される。実行時にkey属性の値を指定した場合は、そのkey属性の値を持つ汎用データコンテナのコンテンツのみが出力される。
+　プログラム実行時に入力データを指定する方法は２通りあり、jsonファイルを使用する方法とコマンド引数を使用する方法である。入力データは、「/WORK/CODE/INPUT/」フォルダにアップデートする。出力データは、「/WORK/DATA/OUTPUT/」フォルダからダウンロード可能である。
+</code></pre>
+<h2 id="%E2%85%B2-%E5%AE%9F%E8%A1%8C%E6%96%B9%E6%B3%95%E3%81%A8%E5%85%A5%E5%8A%9B%E3%83%87%E3%83%BC%E3%82%BF">(Ⅲ) 実行方法と入力データ</h2>
+<pre><code>　入力データの指定は、コマンドオプションを使用し区別される。
+　コマンドオプションについては[3-1]、JSONファイルを使用する方法については[3-2]、コマンド引数を使用する方法については[3-3]を参照。
+</code></pre>
+<h3 id="%E2%85%B2-%E2%85%B0-%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E8%AA%AC%E6%98%8E">(Ⅲ-ⅰ) コマンドオプションの説明</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">option</th>
+<th style="text-align:left">Specified data</th>
+<th style="text-align:left">description</th>
+<th style="text-align:left">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-j</td>
+<td style="text-align:left">json</td>
+<td style="text-align:left">Specify when using a json file for input.</td>
+<td style="text-align:left">&quot;-j&quot; or &quot;-m&quot; is required.</td>
+</tr>
+<tr>
+<td style="text-align:left">-m</td>
+<td style="text-align:left">maiml</td>
+<td style="text-align:left">input File Path of MaiML data file</td>
+<td style="text-align:left">&quot;-j&quot; or &quot;-m&quot; is required.</td>
+</tr>
+<tr>
+<td style="text-align:left">-o</td>
+<td style="text-align:left">xl</td>
+<td style="text-align:left">output File Path of excel</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">-si</td>
+<td style="text-align:left">resultid</td>
+<td style="text-align:left">select 'result' element ID</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">-sk</td>
+<td style="text-align:left">selectkey</td>
+<td style="text-align:left">select 'key' data of property/content/uncertainty data content</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">another:</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">-t</td>
+<td style="text-align:left">test</td>
+<td style="text-align:left">tests run</td>
+<td style="text-align:left">Specify when running tests.</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E2%85%B2-%E2%85%B1-json%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95">(Ⅲ-ⅱ) JSONファイルを使用する方法</h3>
+<ul>
+<li>
+<p>コマンド例<br>
+　<code>run /WORK/CODE/maimltoxl.py -j</code></p>
+</li>
+<li>
+<p>使用するJSONファイル <br>
+　<code>/WORK/DATA/INPUT/input.json</code> <br></p>
+</li>
+<li>
+<p>JSONファイルの記述内容 <br>
+input.jsonの記述定義は表の通り。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Param name</th>
+<th style="text-align:left">description</th>
+<th style="text-align:left">type</th>
+<th style="text-align:center">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">maiml_file_name</td>
+<td style="text-align:left">File Name of input MaiML data</td>
+<td style="text-align:left">URI</td>
+<td style="text-align:center">⭕️</td>
+</tr>
+<tr>
+<td style="text-align:left">xl_file_name</td>
+<td style="text-align:left">File Name of output excel data</td>
+<td style="text-align:left">URI</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:left">resultId</td>
+<td style="text-align:left">select 'result' element ID</td>
+<td style="text-align:left">List of string</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:left">selectkey</td>
+<td style="text-align:left">select 'key' of property/content/uncertainty data content</td>
+<td style="text-align:left">List of string</td>
+<td style="text-align:center">-</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>input.jsonの記述例 <br>
+ex-1)</p>
+<pre class="hljs"><code><div>{
+    &quot;maiml_file_name&quot; : &quot;test.maiml&quot;,
+    &quot;xl_file_name&quot; : &quot;test.xlsx&quot;,
+    &quot;resultId&quot; : [&quot;resultID-1&quot;,&quot;resultID-2&quot;],
+    &quot;selectkey&quot; : [&quot;exm:SampleValue&quot;]
+}
+</div></code></pre>
+<p>ex-2)</p>
+<pre class="hljs"><code><div>{
+    &quot;maiml_file_name&quot; : &quot;test.maiml&quot;,
+    &quot;xl_file_name&quot; : &quot;test.xlsx&quot;,
+    &quot;selectkey&quot; : [&quot;exm:SampleValue&quot;]
+}
+</div></code></pre>
+</li>
+</ul>
+<h3 id="%E2%85%B2-%E2%85%B2-%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E5%BC%95%E6%95%B0%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95">(Ⅲ-ⅲ) コマンド引数を使用する方法</h3>
+<ul>
+<li>
+<p>コマンド例<br>
+　<code>run /WORK/CODE/maimltoxl.py -m maimlfilename.maiml -sk exm:SampleValu1 exm:SampleValue2</code></p>
+</li>
+<li>
+<p>Description of each arguments: <br></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">option to use</th>
+<th style="text-align:left">description</th>
+<th style="text-align:left">type</th>
+<th style="text-align:center">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-m &quot;filename&quot;</td>
+<td style="text-align:left">&quot;filename&quot; is File Name of input MaiML data</td>
+<td style="text-align:left">URI</td>
+<td style="text-align:center">⭕️</td>
+</tr>
+<tr>
+<td style="text-align:left">-o &quot;filename&quot;</td>
+<td style="text-align:left">&quot;filename&quot; is File Name of output excel data</td>
+<td style="text-align:left">URI</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:left">-si &quot;list of ID&quot;</td>
+<td style="text-align:left">&lt;result&gt; element ID</td>
+<td style="text-align:left">List of string</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:left">-sk &quot;list of key&quot;</td>
+<td style="text-align:left">key data of &lt;property&gt;/&lt;content&gt;/&lt;uncertainty&gt; data content</td>
+<td style="text-align:left">List of string</td>
+<td style="text-align:center">-</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<p><br><br></p>
+<h1 id="%E3%81%9D%E3%81%AE%E4%BB%96">[その他]</h1>
+<ul>
+<li>ディレクトリ構成<pre class="hljs"><code><div>dockerjupyterlab/
+    -docker-compose.yml
+    -Dockerfile
+    -CODE/
+        -maimltoxl.py
+        -namespace.py
+        -staticClass.py
+        -LOG/
+            -log_config.json
+            -INFO.log
+            -DEBUG.log
+    -DATA/
+        -INPUT/
+            -input.json
+            -**inputmaimlfile.maiml
+        -OUTPUT/
+            -**outputexcelfile.xlsx
+        -TMP/
+</div></code></pre>
+</li>
+</ul>
+
+</body>
+</html>
