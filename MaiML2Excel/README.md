@@ -1,8 +1,7 @@
 # [How to build 'MaiML to Excel']
 
 ## (Ⅰ) RUN python file
-1. RUN-pythonディレクトリに移動
-1. maimltoxl.pyを実行
+1. RUN-pythonディレクトリ下、READMEファイルを参照
 
 
 ## (Ⅱ) Run on Docker
