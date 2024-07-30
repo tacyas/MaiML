@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<maiml version="1.0" feature="nested-attributes" xmlns="http://www.maiml.org/schemas" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="maimlRootType">
+    <document></document>
+    <pprotocol></pprotocol>
+    <data id="dataID">
+        <uuid></uuid>
+        <results id="resultsID">
+            <uuid></uuid>
+            <material id="materialID" ref="">
+                <uuid></uuid>
+                <name>sample</name>
+                <description>SEM Material Data</description>
+                <annotation>sample</annotation>
+                <property xsi:type="" key="">
+                    <value></value>
+                    <property xsi:type="" key="">
+                        <value>sample</value>
+                    </property>
+                </property>
+            </material>
+            <condition id="conditionID" ref="">
+                <uuid></uuid>
+                <name>sample</name>
+                <description>SEM Condition Data</description>
+                <annotation>sample</annotation>
+                <property xsi:type="" key="">
+                    <value></value>
+                    <property xsi:type="" key="">
+                        <value>sample</value>
+                    </property>
+                </property>
+            </condition>
+            <result id="resultID" ref="">
+                <uuid></uuid>
+                <!-- SEM output files -->
+                <insertion>
+                    <uri>./out/outfile.tif</uri>
+                    <hash></hash>
+                    <format>image/tiff</format>
+                </insertion>
+                <name>sample</name>
+                <description>SEM Output Data</description>
+                <annotation>sample</annotation>
+                <property xsi:type="" key="">
+                    <value>sample</value>
+                    <property xsi:type="" key="">
+                        <value>sample</value>
+                    </property>
+                </property>
+            </result>
+        </results>
+    </data>
+    <eventLog id="eventLogID">
+        <uuid></uuid>
+        <name>sample</name>
+        <description>eventLog for SEM</description>
+        <annotation>sample</annotation>
+        <log id="logID" ref="">
+            <uuid></uuid>
+            <name>sample</name>
+            <description>log for SEM</description>
+            <annotation>sample</annotation>
+            <trace id="traceID" ref="">
+                <uuid></uuid>
+                <name>sample</name>
+                <description>trace for SEM</description>
+                <annotation>sample</annotation>
+                <event id="eventID" ref="">
+                    <uuid></uuid>
+                    <property xsi:type="uuidType" key="concept:instance">
+                       <value></value>
+                    </property>
+                    <property xsi:type="stringType" key="lifecycle:transition">
+                        <value>complete</value> 
+                    </property>
+                    <property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+                        <value></value>
+                    </property>
+                    <!--
+                    <resultsRef id="resultsRef" ref="resultsID"></resultsRef>
+                    <creatorRef id="creatorRef" ref=""></creatorRef>
+                    <ownerRef id="ownerRef" ref=""></ownerRef>
+                    -->
+                </event>
+            </trace>
+        </log>
+    </eventLog>
+</maiml>

@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: Morphosnginx
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
+      - ./src/static:/static
+      - ./src/media:/media
+    ports:
+      - '80:80'
+    depends_on:
+      - django
+  django:
+    build: ./dockersettings
+    container_name: django
+    expose:
+      - '8001'
+    volumes:
+      - ./src:/code
+    command: uwsgi --socket :8001 --module Morphos.wsgi

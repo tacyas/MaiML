@@ -1,0 +1,92 @@
+@charset "utf-8";
+/* maiml_data div class  fuwafuwa*/
+.divclass{
+    padding-left:5px;
+    /*background-color: #faf6de;*/  /* hirahira */
+    /*background-color: #f7f7ef;*/ /* PATTERN 1 */
+    background-color: #f2f2b0; /* PATTERN 2 */
+    font-size: large;
+}
+
+.div1class{
+    margin: 1px;
+    padding-left:15px;
+    /*background-color: #edef9f;*/  /* hirahira */
+    /*background-color: #f4f2de;*/ /* PATTERN 1 */
+    background-color: #BAD4EE; /* PATTERN 2 */
+    font-size: medium;
+}
+
+.div2class{
+    margin: 1px;
+    padding-left:15px;
+    /*background-color: #cbe2a7;*/  /* hirahira */
+    /*background-color: #f6e2e7;*/ /* PATTERN 1 */
+    background-color: #EAF6FD; /* PATTERN 2 */
+}
+
+.div3class{
+    margin: 1px;
+    padding-left:15px;
+    /*background-color: #ebf4e2;*/  /* hirahira */
+    /*background-color: #e6cada;*/ /* PATTERN 1 */
+    background-color: #C5E2C2; /* PATTERN 2 */
+    /*border: 1px solid;
+    border-color: white #e6cada;*/
+}
+
+.div4class{
+    margin: 1px;
+    padding-left:15px;
+    /*background-color: #fbcec5;*/  /* hirahira */
+    /*background-color: #e4f2f4;*/ /* PATTERN 1 */
+    background-color: #F7C6BD; /* PATTERN 2 */
+}
+
+.div5class{
+    margin: 1px;
+    padding-left:15px;
+    /*background-color: #f5d9de;*/  /* hirahira */
+    /*background-color: #b4dee2;*/ /* PATTERN 1 */
+    background-color: #E2EBA3; /* PATTERN 2 */
+}
+
+/*
+.pclass{
+
+}
+*/
+
+.spanclass{
+    padding-left:5px;
+}
+
+input[type='text']{
+    width: 300px;
+    font-size: medium;
+}
+
+/* for petrinet by cytoscape */
+#cy {
+    width: 100%;  /* MUST */
+    height: 400px;  /* MUST */
+    /*position: absolute; */
+    border-style: solid;
+    border-width: 1px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+    /*background-color: #EBF3D9; */ /*serisunawatisakau*/
+    /*background-color: #E5EAEA; */ /*sekireinaku*/
+    background-color: #eaf4fc  /* geppaku */
+}
+.flex-button-box {
+    display: flex;              /* フレックスボックスにする */
+    align-items:stretch;
+    justify-content:flex-start;
+}
+.flex-button-item{
+    padding: 10px;
+    margin:  10px;
+}

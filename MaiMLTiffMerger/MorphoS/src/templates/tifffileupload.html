@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static './css/maiml_style.css' %}" type="text/css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+
+<div class="container">
+    <div class="row">
+        <nav class="navbar navbar-light" style="background-color: #d1e4e6;">
+            <span class="navbar-brand mb-0 h1">Please select TIFF files, then click the 'Go to edit' button.</span>
+        </nav>
+    </div>
+    <br/>
+    <form id='fromidupload' enctype="multipart/form-data" action="{% url 'createapp:fromidupload' %}" method="POST">
+        {% csrf_token %}
+        <div>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Document UUID :</label>
+                <div class="col-sm-10">
+                    {{ form.upload_maiml_id }}
+                </div>
+            </div>
+            {% load static%}
+            <!--
+            <div class="col-md-5">
+                <img class="img-fluid" src="{% static 'img/measurement.jpg' %}" alt="measurement petri net img" />
+            </div>
+            -->
+            <div class="cy" id="cy" alt="measurement petri net graph"></div>
+        </div>
+        <br /><br />
+        <div class="form-group">
+            <div>
+                {{ form.upload_maiml_id.as_hidden }}
+                {{ form.petri_data.as_hidden }}
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">TIFF File : </label>
+                <div class="col-sm-10">
+                    {{ form.upload_tiff }}
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div>
+                <input type="button" id="tiff_update_btn" value="Go to edit" class="btn btn-dark"></input>
+            </div>
+        </div>
+    </form>
+ 
+</div>
+
+<script src="{% static './js/cytoscape.js/dist/cytoscape.min.js' %}"></script>
+<script src="{% static './js/drawpnd.js' %}"></script>
+
+<script src="{% static './js/cola.js' %}"></script>
+<script src="{% static './js/cytoscape-cola.min.js' %}"></script>
+{% endblock %} 

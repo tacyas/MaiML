@@ -1,0 +1,8 @@
+Django>=3.0,<4.0
+uwsgi>=2.0.20
+django-bootstrap5
+django-cleanup
+xmltodict
+django-bootstrap-icons
+django-betterforms
+Pillow

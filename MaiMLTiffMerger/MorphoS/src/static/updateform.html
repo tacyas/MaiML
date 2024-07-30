@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static './css/maiml_style.css' %}" type="text/css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="{% static './js/maiml_dict.js' %}"></script>
+<div class="container">
+    <div class="row">
+        <nav class="navbar navbar-light" style="background-color: #d1e4e6;">
+            <span class="navbar-brand mb-0 h1">Edit/Add the necessary data.</span>
+        </nav>
+    </div>
+
+    <form id="updateForm" class="" action="{% url 'createapp:updateform' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.upload_maiml_id.as_hidden }}
+        
+        <div class="row">
+            <div>
+                <p hidden>{{form.maiml_dict}}</p>
+            </div>
+            <div>
+                <div hidden class="divclass" >
+                    <div id="documentvalue" class="div1class" ></div>
+                </div>
+                <div hidden class="divclass" >
+                    <div id="protocolvalue" class="div1class" ></div>
+                </div>
+                <br />
+                <details class="divclass">
+                    <summary>Content of 'data' element</summary>
+                    <div class="divclass" >
+                        <div id="datavalue" class="div1class" ></div>
+                    </div>
+                </details>
+                <br />
+                <details class="divclass">
+                    <summary>Content of 'eventLog' element</summary>
+                    <div class="divclass" >
+                        <div id="eventLogvalue" class="div1class" ></div>
+                    </div>
+                </details>
+                
+            </div>
+        </div>
+        
+        <br/>
+        <br/>
+        <div>
+            <input type="button" id="maiml_update_btn" value="Update" class="btn btn-dark"></input>
+        </div>
+
+    </form>
+    <br/><br /><br /><br />
+</div>
+{% endblock %} 

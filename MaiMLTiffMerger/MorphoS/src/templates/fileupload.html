@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <nav class="navbar navbar-light" style="background-color: #d1e4e6;">
+            <span class="navbar-brand mb-0 h1">Please select MaiML and TIFF files, then click the 'Go to edit' button.</span>
+        </nav>
+    </div>
+    <br/>
+    <form enctype="multipart/form-data" action="{% url 'createapp:fileupload' %}" method="POST">
+        {% csrf_token %}
+        <!-- 後々table表示に変える!!!! -->
+        <div>
+            <h4>Protocol Model Type::: measurement</h4>
+            {% load static%}
+            <div class="col-md-5">
+                <img class="img-fluid" src="{% static 'img/measurement.jpg' %}"  alt="measurement petri net" />
+            </div>
+        </div>
+        <div><br /><br /></div>
+        <div class="form-group">
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Description</label>
+                <div class="col-sm-10">
+                    {{ form.description }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">MaiML File</label>
+                <div class="col-sm-10">
+                    {{ form.upload_maiml }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">TIFF File</label>
+                <div class="col-sm-10">
+                    {{ form.upload_tiff }}
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div>
+                <button type="submit" class="btn btn-dark" name="toupdate">Go to edit</button>
+                <!--
+                <button type="submit" class="btn btn-dark" name="topnml">Go to draw pnml</button>
+                -->
+            </div>
+        </div>
+        </div>
+    </form>
+    </div>
+</div>
+{% endblock %} 
