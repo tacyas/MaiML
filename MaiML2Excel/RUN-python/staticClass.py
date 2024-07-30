@@ -120,10 +120,10 @@ class filepath:
     print(os.path.dirname(cur_file))
 
     codedir = os.path.dirname(cur_file) + '/'
-    rootdir = os.path.abspath(os.path.join(codedir, os.pardir)) + '/'
-    input_dir = rootdir + 'DATA/INPUT/'
-    output_dir = rootdir + 'DATA/OUTPUT/'
-    tmp_dir = rootdir + 'DATA/TMP/'
+    #rootdir = os.path.abspath(os.path.join(codedir, os.pardir)) + '/'
+    input_dir = codedir + 'DATA/INPUT/'
+    output_dir = codedir + 'DATA/OUTPUT/'
+    tmp_dir = codedir + 'DATA/TMP/'
 
 ## コマンド引数定義  #################################################################
 import argparse
