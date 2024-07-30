@@ -101,7 +101,7 @@
 # [その他]
 - ディレクトリ構成
     ```
-    dockerjupyterlab/
+    MaiML2Excel/
         -docker-compose.yml
         -Dockerfile
         -CODE/
