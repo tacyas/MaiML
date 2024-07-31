@@ -1,6 +1,10 @@
 # MaiMLTiffMerger
+## (0) システムの概要
+TIFF画像を出力する計測分析工程の情報をもつMaiMLファイルと、結果の情報をマージするシステムである。
+
+
 ## (Ⅰ) システムの使用方法
-1. MorphoSmanual.pdfを参照すること
+1. MorphoSmanual.pdf、MaiMLTiffMerger説明.pdfを参照
 
 ## (Ⅱ)　入力データ
 1. document層、protocol層が存在するMaiMLファイル
