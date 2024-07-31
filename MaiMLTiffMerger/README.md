@@ -4,7 +4,7 @@ TIFF画像を出力する計測分析工程の情報をもつMaiMLファイル�
 
 
 ## (Ⅰ) システムの使用方法
-1. MorphoSmanual.pdfを参照
+1. MorphoSmanual.pdf、MaiMLTiffMerger説明.pdfを参照
 
 ## (Ⅱ)　入力データ
 1. document層、protocol層が存在するMaiMLファイル
