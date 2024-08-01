@@ -1,6 +1,6 @@
 # [How to RUN 'MaiML to Excel' program]
 
-## (Ⅰ) RUN python
+## (Ⅰ) Run python
 1. RUN-pythonディレクトリ下、READMEファイルを参照
 
 
