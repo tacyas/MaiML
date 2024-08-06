@@ -1,11 +1,10 @@
 '''
  Tiff画像の読み込み
+'''
+
+
+'''
  ①Pillowライブラリ(PIL)でマルチページTIFFを読み込む
-'''
-
-
-'''
- ①
 '''
 from PIL import Image
 from PIL import TiffTags
@@ -20,60 +19,36 @@ def readTIFF1(filename):
         image.seek(i)
         sImg = image.copy()
 
-        '''
-        # 処理
-        print(sImg.width, sImg.height)
-        print(sImg.info)
-        print(image.tag.iterkyrs())
-
-        for key, value in sImg.info.items():  #tag???
-            taginfo = TiffTags.lookup(key)
-            print(key, " , " , value)
-            print(taginfo)
-            
-            #switching key and value
-            tagdict = {(y,) : x for x, y in taginfo.enum.items()}  # tagdict: dict
-            
-            print(taginfo.name, ':', tagdict.get(value, value))
-        '''
 
 
 '''
- ②
+ ② Tiffのメタデータを取得
 '''
 from PIL import TiffTags as TAGS
-
 def readTIFF2(filename):
-    print(filename)
-    with Image.open(filename) as img:   # img: PIL.TiffImagePlugin.TiffImageFile type
-        metadata = img.tag
-        print(metadata)  #metadata: dict type
-
-        print('===================================================')
+    tiffdict = {}
+    with Image.open(f'{filename}') as img:   # img: PIL.TiffImagePlugin.TiffImageFile type
+        metadata = img.tag  #metadata: dict type
         # tiftagのキー（３桁数字）と値（tiffのタグ名）
         # tiftagのキーとimg.tagのキーを照らし合わせることで、タグ名を取得できる
         for key in metadata.keys():
             keyname = TAGS.lookup(key).name
-            #print(keyname, ':', metadata[key])
-            #print(item)
-        #meta_dict = {TAGS[key] : img.tag[key] for key in img.tag.iterkeys()}
-        #print(meta_dict)
+            tiffdict[keyname] = {'keynum':key, 'value':str(metadata[key])}
+    print(tiffdict)
 
 
 #コードを実行
 import sys
-
+#### param  1 : 実行関数指定    2 : filepath
 if __name__ == "__main__":
-    args = sys.argv  # 1:実行関数指定　2:読み込むファイル名
-
+    args = sys.argv
     #パス、ファイル名
-    read_dir = './IN_DATA/'
     if len(args) >= 3:
         read_file1 = args[2]
     else:
-        read_file1 = "image1.tif"  # デフォルトのファイル名
+        exit
 
     if args[1] == '1':
-        readTIFF1(read_dir + read_file1)
+        readTIFF1(read_file1)
     elif args[1] == '2':
-        readTIFF2(read_dir + read_file1) 
+        readTIFF2(read_file1) 

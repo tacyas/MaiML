@@ -2,41 +2,39 @@
  yamlファイルからdocumentのコンテンツを取得
  
 '''
-
 import sys
 import yaml
 import pprint
 import json
-import codecs
-
-data_dir = './DATA/'
 
 '''
 # rootがmaiml要素の場合の処理
-try:
-    with open( data_dir + 'input.yaml') as file:
-        obj = yaml.safe_load(file)  # type(obj)) : dict
+def getDocment2():
+    try:
+        with open( data_dir + 'input.yaml') as file:
+            obj = yaml.safe_load(file)  # type(obj)) : dict
 
-        maiml_obj = obj['maiml']  # type(maiml_obj)) : list
-        for i in maiml_obj:
-            key = i.keys()
-            # print(key)
-            if list(key)[0] == 'document':
-                print('document::', i['document'])
-            elif list(key)[0] == 'protocol':
-                print('protocol::', i['protocol'])
+            maiml_obj = obj['maiml']  # type(maiml_obj)) : list
+            for i in maiml_obj:
+                key = i.keys()
+                # print(key)
+                if list(key)[0] == 'document':
+                    print('document::', i['document'])
+                elif list(key)[0] == 'protocol':
+                    print('protocol::', i['protocol'])
 
-except Exception as e:
-    print('Exception occurred while loading YAML...', file=sys.stderr)
-    print(e, file=sys.stderr)
-    sys.exit(1)
+    except Exception as e:
+        print('Exception occurred while loading YAML...', file=sys.stderr)
+        print(e, file=sys.stderr)
+        sys.exit(1)
 '''
 
 # rootがdocumentの場合の処理（データ取得のみ）
-def getDocment():
+#### param  1 : filepath
+def getDocment1(filepath):
     print('getDocument')
     try:
-        with open( data_dir + 'input_document.yaml') as file:
+        with open(filepath) as file:
             # yaml to dict
             obj = yaml.safe_load(file)  # type(obj)) : dict
             # dict to JSON
@@ -56,14 +54,11 @@ def getDocment():
         print(e, file=sys.stderr)
         sys.exit(1)
 
-def getData():
-    print('getData')
-
 
 if __name__ == '__main__':
-    # 実行時引数（1: document , 2: protocol）
+    # 実行時引数（1: document）
     args = sys.argv
+    data_dir = './DATA/'
+    filename= 'input_document.yaml'
     if args[1] == '1':
-        getDocment()
-    elif args[1] == '2':
-        getData()
+        getDocment1(data_dir+filename)
