@@ -11,17 +11,17 @@ TIFF画像を出力する計測工程の情報をもつMaiMLファイルと、�
 ## (b) 動作確認済みの入出力データ条件
 ### [入力データ]
 1. document層、protocol層をもつMaiMLファイル
-    1. \<instruction>を１つもつ
-    2. instructionの出力である\<resultTemplate>を１つもつ
+    1. \<instruction>要素を１つもつ
+    2. instructionの出力である\<resultTemplate>要素を１つもつ
 2. メタデータを持つTIFFファイル
     1. TIFF画像を出力したdatetimeをもつ
 3. 入力するMaiMLに追加する結果のデータ
-    1. 計測で利用した\<material>、\<condition>のコンテンツに追加するデータ
-    2. TIFFファイルのメタデータから抽出可能なデータ以外の、\<result>コンテンツに追加するデータ
+    1. 計測で利用した\<material>要素、\<condition>要素のコンテンツに追加するデータ
+    2. TIFFファイルのメタデータから抽出可能なデータ以外の、\<result>要素のコンテンツに追加するデータ
 
 ### [出力データ]
 1. 入力MaiMLデータ（計測工程のデータ）に、data層、eventLog層のコンテンツ（計測結果のデータ）を生成追加したMaiMLデータ
-    1. template(\<materialTemplate>、\<conditionTemplate>、\<resultTemplate>)のコンテンツをinstance(\<material>、\<condition>、\<result>)に引き継いだ\<data>要素のコンテンツをもつ
+    1. template(\<materialTemplate>要素、\<conditionTemplate>要素、\<resultTemplate>要素)のコンテンツをinstance(\<material>要素、\<condition>要素、\<result>要素)に引き継いだ\<data>要素のコンテンツをもつ
     2. protocol層でもっている参照関係が、自動でdata層に引き継がれることはない
     3. １つの\<instruction>要素に対して１つの\<event>要素をもつ
     4. TIFFのメタデータのキー'DateTime'の値を\<eventLog>要素の完了時刻としてもつ
