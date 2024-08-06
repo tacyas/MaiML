@@ -1,10 +1,8 @@
 from pathlib import Path
 import os
-from django.contrib import messages
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-# MorphoSディレクトリがBASE_DIR
+# MorphosディレクトリがBASE_DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 
@@ -153,11 +151,4 @@ LOGGING = {
             'propagate': True,
         },
     },
-}
-
-MESSAGE_TAGS = {
-    messages.INFO: 'alert alert-info',
-    messages.SUCCESS: 'alert alert-success',
-    messages.WARNING: 'alert alert-warning',
-    messages.ERROR: 'alert alert-danger',
 }

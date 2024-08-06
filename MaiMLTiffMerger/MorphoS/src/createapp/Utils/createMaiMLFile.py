@@ -1,12 +1,9 @@
 import os,copy,re
-
 import xml.etree.ElementTree as ET
 import glob, xmltodict
-
 import uuid as UUID
 from datetime import datetime as DT
 from zoneinfo import ZoneInfo
-
 from PIL import Image
 from PIL import TiffTags as TAGS
 import hashlib
@@ -48,7 +45,7 @@ class MaimlUtil():
             pass
         path = os.path.join(dir, os.path.basename(filepath))
         return path
-    
+
     ### create dir of tiff output
     def create_outputtifmetapath(tifname, newfileid):
         # create directory of tiff metadata
@@ -66,7 +63,6 @@ class MaimlUtil():
     
     ### Read TIFF
     def readTIFF(self, old_maimluuid, new_maimluuid, tif_obj):
-        #print("read TIFF file 2")
         input_tifname = MaimlUtil.path_branch(old_maimluuid, tif_obj.name)
         output_tifdatapath = MaimlUtil.create_outputtifmetapath(input_tifname, new_maimluuid)
 
@@ -75,7 +71,6 @@ class MaimlUtil():
             metadata = img.tag  #metadata: dict type
             with open(f'{settings.MEDIA_ROOT}/{output_tifdatapath}', 'w', encoding='utf-8', newline='\n') as f:
                 # tiftagのキー（３桁数字）と値（tiffのタグ名）
-                # tiftagのキーとimg.tagのキーを照らし合わせることで、タグ名を取得できる
                 for key in metadata.keys():
                     keyname = TAGS.lookup(key).name
                     writeObj = {keyname : str(metadata[key])}     # type= str, tuple
@@ -100,7 +95,6 @@ class UpdateMaiML():
 
     ##propertyのvalue要素がなければ作成する
     def create_property_value(self,property_list):
-        #self = UpdateMaiML.create_property_value()
         if isinstance(property_list, list):
             pass
         else:
@@ -111,13 +105,14 @@ class UpdateMaiML():
                 property_dict[maimlelement.property] = self.create_property_value(property_dict[maimlelement.property])
         return property_list
 
-
     ## templateからdata用インスタンスを作る
     def copytemplate(self, templatelist):
         datalist = []
         for template_dict in templatelist:
             #  要素の順番はこの時点では保証しない
             datadict = template_dict.copy()
+            # templateRefが存在した場合、インスタンス層の対応なし（削除）
+            datadict.pop(maimlelement.templateRef, None)
             del datadict[maimlelement.placeRef]
             material_id = template_dict[maimlelement.idd]+'_instance'
             material_attribute = {
@@ -136,10 +131,8 @@ class UpdateMaiML():
                 m_property_list = datadict[maimlelement.property]
                 self = UpdateMaiML()
                 datadict[maimlelement.property] = self.create_property_value(m_property_list)
-                
             datalist.append(datadict)
         return datalist
-
 
     ### dict(document + protocol --> + data + eventLog)
     def createFullMaimlDict(self,maiml_dict):
@@ -268,16 +261,14 @@ class UpdateMaiML():
         ptcrlist = updateMaiml.copytemplate(ptc_resultTemplate_list)
         result_list += ptcrlist
         new_data_dict[maimlelement.results].update({maimlelement.result:result_list})
-        
+
         ## eventLog要素を作成
-        #print('create eventLog contents=====================================================')
         full_dict[maimlelement.maiml][maimlelement.eventlog] = data_dic[maimlelement.maiml][maimlelement.eventlog]
         full_dict[maimlelement.maiml][maimlelement.eventlog][maimlelement.uuid] = UUID.uuid4()
 
         ## 要素と属性値の追加と編集
         def_log_dict = full_dict[maimlelement.maiml][maimlelement.eventlog][maimlelement.log]
         def_trace_dict = full_dict[maimlelement.maiml][maimlelement.eventlog][maimlelement.log][maimlelement.trace]
-        #def_event_dict = full_dict[maimlelement.maiml][maimlelement.eventlog][maimlelement.log][maimlelement.trace][maimlelement.event]
         def_property_list = full_dict[maimlelement.maiml][maimlelement.eventlog][maimlelement.log][maimlelement.trace][maimlelement.event][maimlelement.property]
 
         log_list = []
@@ -330,21 +321,16 @@ class UpdateMaiML():
                     event_list.append(event_dict)
                     
                 new_trace_dict.update({maimlelement.event:event_list})
-
                 trace_list.append(new_trace_dict)
                 
             new_log_dict.update({maimlelement.trace:trace_list})
             log_list.append(new_log_dict)
         full_dict[maimlelement.maiml][maimlelement.eventlog].update({maimlelement.log:log_list})
-
         return full_dict
-
 
     ### dict( MaiML データと TIFF データをマージする )
     def margeFullMaimlDict(self,maiml_dict, tiff_dict):
-        #print("Marege Tiff data ======================================================")
         full_dict = copy.deepcopy(maiml_dict)
-        #full_dict = maiml_dict.copy()
         tiffkey_list = tiff_dict.keys()
         
         ## TiffのメタデータからDateTimeを取得しeventLogに追加
@@ -394,7 +380,7 @@ class UpdateMaiML():
             # results==1を前提
             result_list = full_dict[maimlelement.maiml][maimlelement.data][maimlelement.results][maimlelement.result]
         except Exception as e:
-            print('<results> content is not one.')
+            print('<results> contents is not one.')
             raise e
         if isinstance(result_list, list):
             pass
@@ -416,7 +402,8 @@ class UpdateMaiML():
                             pkey = nspkey[0]
                         if pkey in tiffkey_list:
                             tiff_value_dict = tiff_dict.pop(pkey)
-                            tiff_value = tiff_value_dict['value'].replace('((','',1).replace('(','',1).replace(',(',',').replace(')','')
+                            tiff_value = tiff_value_dict[maimlelement.value].replace('((','',1).replace('(','',1).replace(',(',',').replace(')','')
+                            
                             ####### 実データに合わせて型変換処理が必要? ##########################################
                             s_tiff_value = tiff_value.split(',')
                             if len(s_tiff_value)==1:
@@ -428,7 +415,8 @@ class UpdateMaiML():
                             pass
             tiffkey_list = tiff_dict.keys()
             if maimlelement.content in result_dict.keys():
-                for rescontent_list in result_dict[maimlelement.content]:
+                rescontent = [ [result_dict[maimlelement.content]] if not isinstance(result_dict[maimlelement.content],list) else result_dict[maimlelement.content]]
+                for rescontent_list in rescontent:
                     if isinstance(rescontent_list, list):
                         pass
                     else:
@@ -440,11 +428,9 @@ class UpdateMaiML():
                             ckey = nsckey[1]
                         else:
                             ckey = nsckey[0]
-                        if isinstance(nsckey, list):
-                            ckey = nsckey[1]
                         if ckey in tiffkey_list:
                             tiff_value_dict = tiff_dict.pop(str(rescontent_dict[maimlelement.keyd]))
-                            tiff_value = tiff_value_dict['value'].replace('((','',1).replace('(','',1).replace(',(',',').replace(')','')
+                            tiff_value = tiff_value_dict[maimlelement.value].replace('((','',1).replace('(','',1).replace(',(',',').replace(')','')
                             ####### 実データに合わせて型変換処理が必要? ##########################################
                             s_tiff_value = tiff_value.split(',')
                             if len(s_tiff_value)==1:
@@ -454,7 +440,6 @@ class UpdateMaiML():
                                 rescontent_dict[maimlelement.value]  = r_tiff_value
                         else:
                             pass
-            
             ## テンプレートとして存在しなかったTIFFメタデータは新たに汎用データコンテナを作成
             n_property_list = []
             if maimlelement.property in result_dict.keys():
@@ -476,7 +461,6 @@ class UpdateMaiML():
                         protype = staticVal.tiffmetatype[str(tiffval_type)]
                     else:
                         protype = 'stringType'
-                    ####### 型による変換処理が必要? ##########################################
                     n_tiff_value = n_tiff_value.split(',')
                     new_dict = { maimlelement.typed : protype, 
                                 maimlelement.keyd : 'tiff:' + key,
@@ -484,7 +468,6 @@ class UpdateMaiML():
                                 maimlelement.formatStringd : '',
                                 maimlelement.unitsd : '',
                                 maimlelement.scaleFactord : ''}
-                    #print(new_dict)
                     n_property_list.append(new_dict)
                 else:
                     if tiffval_type in staticVal.tiffmetatype.keys():
@@ -503,7 +486,6 @@ class UpdateMaiML():
                                 maimlelement.idd : '',
                                 maimlelement.refd : ''}
                     n_content_list.append(new_dict)
-                #print(n_property_list)
             ## xmlnsを追加
             result_dict.update({maimlelement.nsd+'tiff': 'https://www.iso.org/standard/29377.html'})
             result_dict.update({maimlelement.property : n_property_list})
@@ -526,29 +508,11 @@ class UpdateMaiML():
                         maimlelement.format:'image/tiff'}
         # 今回はresult[0]のコンテンツとして追加
         if maimlelement.insertion in result_dict[0].keys():
-            insertion_list = [result_dict[maimlelement.insertion]]
-            insertion_list.append({insertion_dict})
+            insertion_list = [result_dict[0][maimlelement.insertion]]
+            insertion_list.append(insertion_dict)
         else:
             result_dict[0].update({maimlelement.insertion:insertion_dict})
         return full_data_dict
-    
-    ### not use
-    def deepupdate(dict_updated, dict_updating, add_keys=True):
-        dict_updated = dict_updated.copy()
-        #add_keysをTrueにしなかった場合、dict_updatingの中のdict_updatedにない要素は排除される
-        if not add_keys:
-            dict_updating = {
-                k: dict_updating[k]
-                for k in set(dict_updated).intersection(set(dict_updating))
-            }
-        #階層を潜っていく部分。その階層が辞書形式で構成される場合、さらに深い階層に移動する。
-        for k in dict_updating.keys():
-            if (k in dict_updated and isinstance(dict_updated[k], dict)
-                    and isinstance(dict_updating[k], dict)):
-                dict_updated[k] = MaimlUtil.deepupdate(dict_updated[k], dict_updating[k], add_keys=add_keys)
-            else:
-                dict_updated[k] = dict_updating[k]
-        return dict_updated
         
 ################################################
 ##   Read & Write MaiML file class
@@ -556,7 +520,6 @@ class UpdateMaiML():
 class ReadWriteMaiML:
     ''' Global contents    nomal=(True:グローバル要素/False:特定グローバル要素) '''
     def writeGlobalContents(self, mydic, parentET, nomal=True):
-        #print('writeGlobalContents')
         uuid = 'uuid'
         global_uuid = ET.SubElement(parentET, uuid)    # =1
         global_uuid.text = mydic[uuid]
@@ -645,10 +608,8 @@ class ReadWriteMaiML:
                     self.writeGenericdataContainer(property_nest, parentET, generalTag)
         ################################################################################### 
         
-
     ''' 汎用データコンテナのネスト構造に対応 '''
     def writeGenericdataContainer(self, mydic, parentET, mytag):
-        #print('writeGenericdataContainer')
         # set attrib
         my_Elem = ET.SubElement(parentET, mytag, attrib={'xsi:type':mydic['@xsi:type'], 'key':mydic['@key']})    # =1
         # set values  
@@ -698,7 +659,6 @@ class ReadWriteMaiML:
                 childUuid_Elem.text = childUuid_dic
 
         ##  EncryptedData  ## 0/1
-        #print('Templates内のEncryptedDataの実装を忘れない')
         description = 'description'
         if description in mydic.keys():    # 0/1
             my_Elem.set(description,mydic[description])
@@ -880,7 +840,6 @@ class ReadWriteMaiML:
 
     ''' TEMPLATESの作成 '''
     def writeTemplates(self, mydic, parentET):
-        #print('writeTemplates')
         ## global contents
         self.writeGlobalContents(mydic, parentET)
 
@@ -919,7 +878,6 @@ class ReadWriteMaiML:
 
     ''' INSTANCEの作成 '''
     def writeInstanceData(self, results_dic, results_Elem, mytag):
-        #print('writeInstanceData')
         if mytag in results_dic.keys():
             if isinstance(results_dic[mytag], list):
                 mytag_list = results_dic[mytag]
@@ -960,10 +918,9 @@ class ReadWriteMaiML:
                             mytag_instanceRef_description_Elem = ET.SubElement(mytag_instanceRef_Elem, isinstanceRef_description)
                             mytag_instanceRef_description_Elem.text = mytag_instanceRef_dic[isinstanceRef_description]
 
-
     ''' chain要素のネスト構造に対応 '''  ## 未テスト
     def writeChainContents(self, mydic, parentET):
-        ## global contents 特定グローバル要素
+        ## global contents グローバル要素
         self.writeGlobalContents(mydic, parentET)
         chain_hash = 'hash'   ## =1
         chain_hash_Elem = ET.SubElement(parentET, chain_hash)
@@ -975,7 +932,9 @@ class ReadWriteMaiML:
             else:
                 chain_chain_list = [mydic[chain]]
             for chain_chain_dic in chain_chain_list:
-                child_chain_Elem = ET.SubElement(parentET, chain, attrib={'id':chain_chain_dic['@id']})
+                child_chain_Elem = ET.SubElement(parentET, chain)
+                if '@id' in chain_chain_dic.keys():
+                    child_chain_Elem.set('id',chain_chain_dic['@id'])
                 ###########################################
                 # namespace
                 rens = re.compile("@xmlns:.*")
@@ -985,9 +944,9 @@ class ReadWriteMaiML:
                 ###########################################
                 self.writeChainContents(chain_chain_dic, child_chain_Elem)
 
-    ''' parent要素のネスト構造に対応 '''  ## 未テスト
+    ''' parent要素のネスト構造に対応 ''' 
     def writeParentContents(self, mydic, parentET):
-        ## global contents 特定グローバル要素
+        ## global contents グローバル要素
         self.writeGlobalContents(mydic, parentET)
         parentT_hash = 'hash'   ## =1
         parentT_hash_Elem = ET.SubElement(parentET, parentT_hash)
@@ -999,7 +958,9 @@ class ReadWriteMaiML:
             else:
                 parent_parent_list = [mydic[parentT]]
             for parent_parent_dic in parent_parent_list:
-                child_parent_Elem = ET.SubElement(parentET, parentT, attrib={'id':parent_parent_dic['@id']})
+                child_parent_Elem = ET.SubElement(parentET, parentT)
+                if '@id' in parent_parent_dic.keys():
+                    child_parent_Elem.set('id',parent_parent_dic['@id'])
                 ###########################################
                 # namespace
                 rens = re.compile("@xmlns:.*")
@@ -1012,7 +973,6 @@ class ReadWriteMaiML:
 
     ''' 参照要素型 '''
     def writeReferenceContents(self, mydic, parentET, mytag):
-        #print('writeReferenceContents')
         mytag_Elem = ET.SubElement(parentET, mytag, attrib={'id':mydic['@id'], 'ref':mydic['@ref']})
         mytag_name = 'name'
         if mytag_name in mydic.keys():
@@ -1049,7 +1009,6 @@ class ReadWriteMaiML:
 
     ''' Document Contents の作成 '''
     def createdocumentcontents(self,document_dic, document_Elem):
-        #print('create <document> contents')
         ## Signature    0/1  署名のためのコンテンツ：未実装
         ## global contents 特定グローバル要素
         self.writeGlobalContents(document_dic, document_Elem)
@@ -1163,14 +1122,16 @@ class ReadWriteMaiML:
         create_date = nowtimestamp.strftime('%Y-%m-%dT%H:%M:%S') + nowtimestamp.strftime('%z')[:3] + ':' + nowtimestamp.strftime('%z')[3:]
         date_Elem.text = create_date
 
-        chain = 'chain'   ## >=0    グローバル要素
+        chain = 'chain'   ## >=0    グローバル要素(?)
         if chain in document_dic.keys():
             if isinstance(document_dic[chain], list):
                 chain_list = document_dic[chain]
             else:
                 chain_list =[document_dic[chain]]
             for chain_dic in chain_list:
-                chain_Elem = ET.SubElement(document_Elem, chain, attrib={'id':chain_dic['@id']})
+                chain_Elem = ET.SubElement(document_Elem, chain)
+                if '@id' in chain_dic.keys():
+                    chain_Elem.set('id', chain_dic['@id'])
                 ###########################################
                 # namespace
                 rens = re.compile("@xmlns:.*")
@@ -1178,12 +1139,12 @@ class ReadWriteMaiML:
                     if rens.search(key):
                         chain_Elem.set(key[1:],chain_dic[key])
                 ###########################################
-                if '@key' in chain_dic['@key']:
+                if '@key' in chain_dic.keys():
                     chain_Elem.set('key', chain_dic['@key'])
                 ## nest
                 self.writeChainContents(chain_dic, chain_Elem)
 
-        parent = 'parent'   ## >=0    グローバル要素
+        parent = 'parent'   ## >=0    グローバル要素(?)
         if parent in document_dic.keys():
             if isinstance(document_dic[parent], list):
                 parent_list = document_dic[parent]
@@ -1191,6 +1152,8 @@ class ReadWriteMaiML:
                 parent_list =[document_dic[parent]]
             for parent_dic in parent_list:
                 parent_Elem = ET.SubElement(document_Elem, parent, attrib={'id':parent_dic['@id']})
+                if '@id' in parent_dic.keys():
+                    parent_Elem.set('id', parent_dic['@id'])
                 ###########################################
                 # namespace
                 rens = re.compile("@xmlns:.*")
@@ -1198,15 +1161,13 @@ class ReadWriteMaiML:
                     if rens.search(key):
                         parent_Elem.set(key[1:],parent_dic[key])
                 ###########################################
-                if '@key' in parent_dic['@key']:
+                if '@key' in parent_dic.keys():
                     parent_Elem.set('key', parent_dic['@key'])
                 ## nest
                 self.writeParentContents(parent_dic, parent_Elem)
 
-
     ''' Protocol Contents の作成 '''
     def createprotocolcontents(self, protocol_dic, protocol_Elem):
-        #print('create <protocol> contents')
         ## global contents
         self.writeGlobalContents(protocol_dic, protocol_Elem)
         
@@ -1216,7 +1177,6 @@ class ReadWriteMaiML:
         else:
             method_list = [protocol_dic[maimlelement.method]]
         for method_dic in method_list:
-            #print(dict(method_dic))
             method_Elem = ET.SubElement(protocol_Elem, maimlelement.method, attrib={'id':method_dic['@id']})    # =1
             ###########################################
             # namespace
@@ -1252,6 +1212,7 @@ class ReadWriteMaiML:
                     place_list = [pnml_dic[maimlelement.place]]
                 for place_dic in place_list:    # >=1
                     place_Elem = ET.SubElement(pnml_Elem, maimlelement.place, attrib={'id':place_dic['@id']})
+                    #place_Elem.text = place_dic['#text']
                     #place_name = 'name'
                     if maimlelement.name in place_dic.keys():   # 0/1
                         place_name_dic = place_dic[maimlelement.name]
@@ -1514,11 +1475,8 @@ class ReadWriteMaiML:
                 # templates contents
                 self.writeTemplates(resultTemplate_dic, resultTemplate_Elem)
 
-
     ''' Data Contents の作成 '''
     def createdatacontents(self, data_dic, data_Elem):
-        #print('create <data> contents')
-        # global contents
         self.writeGlobalContents(data_dic, data_Elem)
 
         results = 'results'   ## >=1
@@ -1552,7 +1510,6 @@ class ReadWriteMaiML:
 
     ''' EventLog Contents の作成 '''
     def createeventlogcontents(self, eventlog_dic, eventlog_Elem):
-        #print('create <eventLog> contents')
         # global contents
         self.writeGlobalContents(eventlog_dic, eventlog_Elem)
         log = 'log'   ##  >=1  参照付グローバル
@@ -1661,9 +1618,9 @@ class ReadWriteMaiML:
     ''' dict型オブジェクトから新たなmaimlファイルを作成'''
     def writecontents(self, maiml_dic, filepath):
         ## maiml root contents
+        #maiml = 'maiml'
         ''' maimlの属性値を入れる '''
-        maimlroot = ET.Element(maimlelement.maiml, attrib={'version':'1.0', 'features':'nested-attributes', 
-                                         })
+        maimlroot = ET.Element(maimlelement.maiml, attrib={'version':'1.0', 'features':'nested-attributes', })
         if '@xmlns' in maiml_dic[maimlelement.maiml].keys():
             if isinstance(maiml_dic[maimlelement.maiml]['@xmlns'], list):
                 maiml_ns_dic_list = maiml_dic[maimlelement.maiml]['@xmlns']
@@ -1679,6 +1636,7 @@ class ReadWriteMaiML:
                     maimlroot.set(setkey, maiml_ns_dic[key])
         
         ## document contents
+        #document = 'document'
         document_dic = maiml_dic[maimlelement.maiml][maimlelement.document]
         document_Elem = ET.SubElement(maimlroot, maimlelement.document, attrib={'id':document_dic['@id']})
         ###########################################
@@ -1689,10 +1647,9 @@ class ReadWriteMaiML:
                 document_Elem.set(key[1:],document_dic[key])
         ###########################################
         self.createdocumentcontents(document_dic, document_Elem)
-        #print('writed <document> contents!')
-        ## document_uuid = str(UUID.uuid4())
         
         ## protocol contents
+        #protocol = 'protocol'
         protocol_dic = maiml_dic[maimlelement.maiml][maimlelement.protocol]
         protocol_Elem = ET.SubElement(maimlroot, maimlelement.protocol, attrib={'id':protocol_dic['@id']})
         ###########################################
@@ -1703,9 +1660,10 @@ class ReadWriteMaiML:
                 protocol_Elem.set(key[1:],protocol_dic[key])
         ###########################################
         self.createprotocolcontents(protocol_dic, protocol_Elem)
-        #print('writed <protocol> contents!')
         
         ## data & eventLog contents
+        #data = 'data'
+        #eventLog = 'eventLog'
         if maimlelement.data in maiml_dic[maimlelement.maiml].keys() and maimlelement.eventlog in maiml_dic[maimlelement.maiml].keys():
             ## data contents
             maimlroot.set('xsi:type','maimlRootType')
@@ -1719,9 +1677,11 @@ class ReadWriteMaiML:
                     data_Elem.set(key[1:],data_dic[key])
             ###########################################
             self.createdatacontents(data_dic, data_Elem)
-            #print('writed <data> contents!')
 
             ## eventlog contents
+            #concept = 'concept'
+            #lifecycle = 'lifecycle'
+            #timeAttrib = 'time'
             eventlog_dic = maiml_dic[maimlelement.maiml][maimlelement.eventlog]
             eventlog_Elem = ET.SubElement(maimlroot, maimlelement.eventlog, attrib={'id':eventlog_dic['@id']})
             if '@xmlns' in eventlog_dic.keys():
@@ -1738,7 +1698,6 @@ class ReadWriteMaiML:
                         eventlog_Elem.set('xmlns:'+maimlelement.timeAttrib, eventLog_ns_dic[maimlelement.timeAttrib])
 
             self.createeventlogcontents(eventlog_dic, eventlog_Elem)
-            #print('writed <eventLog> contents!')
         else:
             maimlroot.set('xsi:type','protocolFileRootType')
 
@@ -1748,7 +1707,6 @@ class ReadWriteMaiML:
             #文字列をそのまま扱えるが、改行、インデントがない
             maimltree = ET.ElementTree(maimlroot)
             self.pretty_print(maimltree.getroot())
-            #print(maimltree)
             maimltree.write(filepath, encoding='utf-8', xml_declaration=True)
         
         return filepath, maiml_dic[maimlelement.maiml][maimlelement.document][maimlelement.uuid]

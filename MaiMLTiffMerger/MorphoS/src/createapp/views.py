@@ -17,7 +17,6 @@ from .Utils.createMaiMLFile import MaimlUtil, ReadWriteMaiML, UpdateMaiML
 from .Utils.createPNML import MaimlUtilforPNML
 
 
-
 ###############################################
 ##    class for URI  Top
 ##     URL/top/  -->  top.html(file list)
@@ -27,14 +26,13 @@ class ListDL():
     def displayTop(request):
         #Documentリストを設定
         file_list = Document.objects.all()
+
         return render(request, 'top.html', {'file_list': file_list})
     
     ## ZIP DOWNLOAD
     def download_zip(request, upload_maiml_id):
         docment_obj = get_object_or_404(Document, pk=upload_maiml_id)
 
-        ## zip URI（ディレクトリ構成）を手に入れる
-        ## zipを作ってresponseで返す
         response = HttpResponse(content_type='application/zip')
         file_zip = zipfile.ZipFile(response, 'w')
         maiml_dirname, maiml_filename = os.path.split(docment_obj.upload_maiml.name)
@@ -76,20 +74,15 @@ class DocumentUpload():
                     try:
                         form.save()      # DB, mediaディレクトリにMaiML/Tiffファイルを保存
                     except Exception:
-                        #form.errors.update({'':'Data registration error.'})
                         messages.add_message(request, messages.ERROR, messagesList.registrationError)
                         return render(request, 'fileupload.html', {'form':form})
                     
-                    #print("form data saved!!")
                     # Read MaiML data
                     document_obj = Document.objects.get(upload_maiml_id = staticVal.upload_maiml_id) # デフォルトのUUID値
                     maiml_file_path = document_obj.upload_maiml.path
                     tiff_file_path = document_obj.upload_tiff.path
-                    #print("read maiml:", maiml_file_path)
-                    #print("read tiff:", tiff_file_path)
                     readWriteMaiML_class = ReadWriteMaiML()
                     maimldict = readWriteMaiML_class.readFile(maiml_file_path) 
-                    #print(maimldict)
 
                     ### maimldictのUUIDで新規作成 
                     document_uuid = UpdateMaiML.getUUID(maimldict)
@@ -123,7 +116,6 @@ class DocumentUpload():
                             os.remove(tiff_file_path)
                     except Exception as e:
                         print(time.strftime('%Y/%m/%d %H:%M:%S', time.localtime()),'  ','デフォルトデータ削除時エラー',e)
-                        #form.errors.update({'':'Data registration error.'})
                         messages.add_message(request, messages.ERROR, messagesList.registrationError)
                         return render(request, 'fileupload.html', {'form':form})
 
@@ -139,14 +131,11 @@ class DocumentUpload():
                             tiffdict = utils.readTIFF(document_uuid, new_maimluuid, form.cleaned_data['upload_tiff'])
                         except Exception as e:
                             print(time.strftime('%Y/%m/%d %H:%M:%S', time.localtime()),'  ','Errors occurred in utils.readTIFF.')
-                            #form.errors.update({'':'Errors occurred in utils.readTIFF.'})
                             messages.add_message(request, messages.ERROR, messagesList.readTiffError)
                             return render(request, 'fileupload.html', {'form':form})
-                        print('created maiml dict')
                         try:
                             ## TIFF データとマージ
                             new_maimldict = updatemaiml.margeFullMaimlDict(new_maimldict, tiffdict)
-                            print('marged tiff meta data.')
                         except Exception as e:
                             print(time.strftime('%Y/%m/%d %H:%M:%S', time.localtime()),'  ','Errors occurred in updatemaiml.margeFullMaimlDict.')
                             messages.add_message(request, messages.WARNING, messagesList.invalidFiles)
@@ -194,7 +183,6 @@ class DocumentUpload():
                 
                 # Read MaiML data
                 document_obj = Document.objects.get(upload_maiml_id = upload_maiml_id_data)
-                #Documentのtiffを更新
                 document_obj.upload_tiff = str(tiff_savepath).replace(settings.MEDIA_ROOT+'/', '')
                 document_obj.save()
 
@@ -247,7 +235,6 @@ class DocumentUpload():
             form.errors.clear()
             return render(request, 'tifffileupload.html', {'form': form})
 
-
 #############################################
 ##    class for URI  Data Update
 ##     URL/update/  -->   URL/Top
@@ -258,12 +245,9 @@ class DocumentUpdate():
         if request.method == 'POST':
             # requestのformからMaiMLの編集情報を取得する
             form = MaimlUpdateForm(request.POST)
-            #print('======update_maiml=============')
             
             if not form.is_valid():
-                print('not valid')
                 print(time.strftime('%Y/%m/%d %H:%M:%S', time.localtime()),'  ',"form.errors:::",form.errors)
-                #print(form['maiml_dict'])
                 return render(request, 'updateform.html', {'form': form,})
             ## MaiMLファイルを更新
             else:
@@ -319,7 +303,6 @@ class DocumentUpdate():
                 #doc_objのtiffファイルを削除
                 doc_obj.upload_tiff = ""
                 doc_obj.save()
-
                 return redirect('createapp:top')
         else:
             return render(request, 'top.html')

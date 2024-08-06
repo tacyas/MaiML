@@ -1,29 +1,3 @@
-
-/* テスト用データ */
-var testdata = [
-    // node(place,transition)
-    {"data": {"id": "M1", "maiml_type": "M"},},
-    {"data": {"id": "C1", "maiml_type": "C"},},
-    {"data": {"id": "T1", "maiml_type": "T"},},
-    {"data": {"id": "R1", "maiml_type": "R"},},
-    // edge(arc)
-    {"data": {"id": "E1", "source": "M1", "target": "T1", "nodeType":"transition", "label": "M1 - T1"}},
-    {"data": {"id": "E2", "source": "C1", "target": "T1", "nodeType":"transition", "label": "C1 - T1"}},
-    {"data": {"id": "E3", "source": "T1", "target": "R1", "nodeType":"transition", "label": "C - D"}},
-]
-// 座標を初期指定
-var testdata2 = [
-    // node(place,transition)
-    {"data": {"id": "M1", "maiml_type": "M"}, position: { x: 100, y: 100 }},
-    {"data": {"id": "C1", "maiml_type": "C"}, position: { x: 300, y: 100 }},
-    {"data": {"id": "T1", "maiml_type": "T"}, position: { x: 100, y: 300 }},
-    {"data": {"id": "R1", "maiml_type": "R"}, position: { x: 300, y: 300 }},
-    // edge(arc)
-    {"data": {"id": "E1", "source": "M1", "target": "T1", "nodeType":"transition", "label": "M1 - T1"}},
-    {"data": {"id": "E2", "source": "C1", "target": "T1", "nodeType":"transition", "label": "C1 - T1"}},
-    {"data": {"id": "E3", "source": "T1", "target": "R1", "nodeType":"transition", "label": "C - D"}},
-]
-
 /////////////////////////////////////////////////////////////////////////////////////
 // draw petri-net graph
 ////////////////////////////////////////////////////////////////////////////////////
@@ -108,10 +82,8 @@ var style = [
 
 // 座標記録
 function addpositiontodata(){
-    //console.log(petridata)
     var form = document.getElementById('id_petri_data')
     for (let i = 0; i < petridata.length; i++) {
-        //console.log(petridata[i])
         if (petridata[i].data.hasOwnProperty('maiml_type')){
             petridata[i].position={
                 'x': cy.getElementById(petridata[i].data.id)._private.position.x,
@@ -119,7 +91,6 @@ function addpositiontodata(){
             };
         }
     }
-    //console.log([petridata])
     document.getElementById('id_petri_data').value = JSON.stringify(petridata)
 }
 
@@ -128,7 +99,6 @@ window.onload = function drawpetrinetd() {
     // formからペトリネットの情報を取得する
     var form = document.getElementById('id_petri_data')
     petridata = JSON.parse(form.value)
-    //console.log(petridata)
 
     // cytoscapeオブジェクトの初期化
     cy = cytoscape({
@@ -137,7 +107,6 @@ window.onload = function drawpetrinetd() {
         style: style,
         layout: layoutConfig,
     });
-
     
     // 描画
     cy.ready(function () {
@@ -150,7 +119,6 @@ window.onload = function drawpetrinetd() {
                 }
             }
         }
-        //console.log(layout_out)
         const layout = cy.makeLayout(layout_out);
         layout.run();
     });

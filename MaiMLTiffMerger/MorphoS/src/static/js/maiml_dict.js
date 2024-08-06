@@ -37,7 +37,6 @@ function generalpurposedata(div3, elementname, globaluuid, properties_json, hier
         var div4 = document.createElement('div');
         div4.id = elementname+k4s+'_id'
         div4.className = classname
-        //div4.innerHTML = elementname
         var property_json = properties_json[k4s];   // property_json = {'key':'','xsi:type':'','value':'','property':{}} : propertied_json[0/1/2/3/4]
         if (property_json !== null && property_json !== undefined){
             var property_keyList = Object.keys(property_json)  // property_keyList=['@key','@xsi:type','value','property']
@@ -50,18 +49,14 @@ function generalpurposedata(div3, elementname, globaluuid, properties_json, hier
                 if (Object.prototype.toString.call(property_json[property_keyList[k4]])  === "[object Array]" || Object.prototype.toString.call(property_json[property_keyList[k4]])  === "[object Object]") { 
                     var n_properties_json = property_json[property_keyList[k4]];   //>=1
                     div4 = generalpurposedata(div4, property_keyList[k4], globaluuid, n_properties_json, hierarchy+1, w)
-
                 } else {
                     var htmlID = property_keyList[k4] + w + globaluuid
                     var p4 = {}
                     if(property_keyList[k4].substring(0,1) === "@"){
                         p4 = document.createElement('p');
-                        //p4 = document.createElement('span');
-                        //p4.className = spanclass
                     }else{
                         p4 = document.createElement('p');
                     }
-                    //if (!property_json[property_keyList[k4]]){
                     if (!property_json[property_keyList[k4]]){
                         p4.innerHTML = `<label class="${labelclass}">${property_keyList[k4]}:</label><input type="text" id="${htmlID}" value="""" />`
                     }else{
@@ -80,11 +75,8 @@ function generalpurposedata(div3, elementname, globaluuid, properties_json, hier
 
 /////[form data --> input data]/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 window.onload = function getFormValues() {
-    //var form = document.getElementById('maimldatavalue');
     var form = document.getElementById('id_maiml_dict')
-    //console.log(form)
     var maiml = JSON.parse(form.value)
-    //console.log(maiml)
 
     // create input data erea
     // document========================================================================================================================
@@ -102,8 +94,6 @@ window.onload = function getFormValues() {
     // data========================================================================================================================
     var data_json = maiml.maiml.data;
     var datavalue = document.getElementById('datavalue');
-    //datavalue.innerHTML = 'data'
-    //datavalue.textContent = JSON.stringify(data_json); //div要素のコンテンツを上書き
 
     // data->results->material/condition/result->property
     const data_keyList = Object.keys(data_json)
@@ -145,17 +135,45 @@ window.onload = function getFormValues() {
                         const globaluuid = instance_json['uuid']  // globaluuid=material-uuid/condition-uuid/result-uuid
                         for (let k3 in instance_keyList){
                             if (Object.prototype.toString.call(instance_json[instance_keyList[k3]])  === "[object Array]" || Object.prototype.toString.call(instance_json[instance_keyList[k3]])  === "[object Object]") { 
-                                //一つ目のproperty  再帰関数スタート
-                                const properties_json = instance_json[instance_keyList[k3]];   // instance_keyList[k3]='property'or'content'  properties_json=[{'key':'','xsi:type':'','value':''},{'key':'','xsi:type':'','value':''}]
-                                const hierarchy = 4
-                                div3 = generalpurposedata(div3, instance_keyList[k3], globaluuid, properties_json, hierarchy)
+                                insertion_json = instance_json[instance_keyList[k3]]
+                                if (instance_keyList[k3] == 'insertion' ){
+                                    const hierarchy = 4
+                                    var insertion_keyList = Object.keys(insertion_json) 
+                                    //var insertion_keyList = Object.keys(instance_json[instance_keyList[k3]])
+                                    var classname = 'div' + hierarchy + 'class'
+                                    const details3 = document.createElement('details')
+                                    details3.setAttribute('open', '')
+                                    details3.className = classname
+                                    const summary3 = document.createElement('summary')
+                                    summary3.innerHTML = instance_keyList[k3]
+                                    details3.appendChild(summary3)
+                                    var div4 = document.createElement('div');
+                                    div4.id = instance_keyList[k3] + k3 + '_id'
+                                    div4.className = classname
+                                    for (let k4s in insertion_keyList) { // k4s=0,1,2,3,4
+                                        //uri,hash=1
+                                        //uuid,format=0,1
+                                        p4 = document.createElement('p')
+                                        if (!insertion_json[insertion_keyList[k4s]]) {
+                                            p4.innerHTML = `<label class="${labelclass}">${insertion_keyList[k4s]}:</label><input type="text" id="${htmlID}" value="""" />`
+                                        } else {
+                                            p4.innerHTML = `<label class="${labelclass}">${insertion_keyList[k4s]}:</label><input type="text" id="${htmlID}" value="${valueEscape(insertion_json[insertion_keyList[k4s]])}" />`
+                                        }
+                                        div4.appendChild(p4)
+                                    }
+                                    details3.appendChild(div4)
+                                    div3.appendChild(details3)
+                                }else{
+                                    //一つ目のproperty  再帰関数スタート
+                                    const properties_json = instance_json[instance_keyList[k3]];   // instance_keyList[k3]='property'or'content'  properties_json=[{'key':'','xsi:type':'','value':''},{'key':'','xsi:type':'','value':''}]
+                                    const hierarchy = 4
+                                    div3 = generalpurposedata(div3, instance_keyList[k3], globaluuid, properties_json, hierarchy)
+                                }
                             } else {  // '@id','uuid','name'...  : material/condition/resultの単一コンテンツ
                                 var htmlID = instance_keyList[k3] + globaluuid
                                 var p3 = {}
                                 if(instance_keyList[k3].substring(0,1) === "@"){  // attribute
                                     p3 = document.createElement('p');
-                                    //p3 = document.createElement('span');
-                                    //p3.className = spanclass
                                 }else{  // child-element
                                     p3 = document.createElement('p');
                                 }
@@ -171,8 +189,6 @@ window.onload = function getFormValues() {
                     var p2 = {}
                     if(results_keyList[k2].substring(0,1) === "@"){
                         p2 = document.createElement('p');
-                        //p2 = document.createElement('span');
-                        //p2.className = spanclass
                     }else{
                         p2 = document.createElement('p');
                     }
@@ -187,8 +203,6 @@ window.onload = function getFormValues() {
             var p1 = {}
             if(data_keyList[k1].substring(0,1) === "@"){
                 p1 = document.createElement('p');
-                //p1 = document.createElement('span');
-                //p1.className = spanclass
             }else{
                 p1 = document.createElement('p');
             }
@@ -202,8 +216,6 @@ window.onload = function getFormValues() {
     //eventLog========================================================================================================================
     var eventLog_json = maiml.maiml.eventLog;
     var eventLogvalue = document.getElementById('eventLogvalue'); //div要素を取得
-    //eventLogvalue.innerHTML = 'eventLog'
-    // eventLog->log->trace->event->property
     const eventlog_keyList = Object.keys(eventLog_json)
     for (let k1 in eventlog_keyList){
         if (Object.prototype.toString.call(eventLog_json[eventlog_keyList[k1]]) === "[object Array]" || Object.prototype.toString.call(eventLog_json[eventlog_keyList[k1]]) === "[object Object]") {  //１以上の要素の場合
@@ -217,7 +229,6 @@ window.onload = function getFormValues() {
             const div2 = document.createElement('div');
             div2.id = eventlog_keyList[k1] + '_id'
             div2.className = div2class
-            //div2.innerHTML = eventlog_keyList[k1]
             const log_json = eventLog_json[eventlog_keyList[k1]][0];  //eventLog はlist[]
             const log_keyList = Object.keys(log_json)
             for (let k2 in log_keyList) {
@@ -309,7 +320,6 @@ window.onload = function getFormValues() {
 //////////////////////////////////////////////////
 function regeneralpurposedata(instance_json, elementname, globaluuid, properties_json, hierarchy, y=''){
     var properties_keyList = Object.keys(properties_json)  //properties_keyList=0/1/2/3/4
-    //var classname = 'div'+ hierarchy + 'class'
     for (let k4s in properties_keyList){ // k4s=0,1,2,3,4
         const property_json = properties_json[k4s];   // property_json = {'key':'','xsi:type':'','value':'','property':{}} : propertied_json[0/1/2/3/4]
         if (property_json !== null && property_json !== undefined) {
@@ -338,7 +348,6 @@ function regeneralpurposedata(instance_json, elementname, globaluuid, properties
 function setFormValues() {
     var form = document.getElementById('id_maiml_dict')
     const maiml = JSON.parse(form.value)
-    //console.log(maiml)
 
     // data========================================================================================================================
     var data_json = maiml.maiml.data; // data要素の元データ
@@ -379,11 +388,6 @@ function setFormValues() {
             data_json[data_keyList[k1]] = document.getElementById(htmlID).value  //変更後の値をformの持つjsonデータに格納
         }
     }
-    /*
-    console.log(data_json)
-    console.log(maiml)
-    console.log(document.getElementById('id_maiml_dict').value)
-    */
     // end data========================================================================================================================
 
     // eventLog========================================================================================================================
@@ -430,18 +434,10 @@ function setFormValues() {
             eventLog_json[eventlog_keyList[k1]] = document.getElementById(eventlog_keyList[k1] + eventLog_json['uuid']).value  //変更後の値
         }
     }
-
     // end eventLog========================================================================================================================
     document.getElementById('id_maiml_dict').value = JSON.stringify(maiml)
-    //console.log(document.getElementById('id_maiml_dict').value)
 };
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-document.getElementById("maiml_update_btn").onclick = function() {
-    setFormValues();
-};
-*/
 
 $(function () {
     $('#maiml_update_btn').click(function () {

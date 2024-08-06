@@ -1,5 +1,5 @@
 """
-ASGI config for MorphoS project.
+ASGI config for creatMaiML project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
