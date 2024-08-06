@@ -1122,7 +1122,7 @@ class ReadWriteMaiML:
         create_date = nowtimestamp.strftime('%Y-%m-%dT%H:%M:%S') + nowtimestamp.strftime('%z')[:3] + ':' + nowtimestamp.strftime('%z')[3:]
         date_Elem.text = create_date
 
-        chain = 'chain'   ## >=0    グローバル要素(?)
+        chain = 'chain'   ## >=0    グローバル要素
         if chain in document_dic.keys():
             if isinstance(document_dic[chain], list):
                 chain_list = document_dic[chain]
@@ -1144,14 +1144,14 @@ class ReadWriteMaiML:
                 ## nest
                 self.writeChainContents(chain_dic, chain_Elem)
 
-        parent = 'parent'   ## >=0    グローバル要素(?)
+        parent = 'parent'   ## >=0    グローバル要素
         if parent in document_dic.keys():
             if isinstance(document_dic[parent], list):
                 parent_list = document_dic[parent]
             else:
                 parent_list =[document_dic[parent]]
             for parent_dic in parent_list:
-                parent_Elem = ET.SubElement(document_Elem, parent, attrib={'id':parent_dic['@id']})
+                parent_Elem = ET.SubElement(document_Elem, parent)
                 if '@id' in parent_dic.keys():
                     parent_Elem.set('id', parent_dic['@id'])
                 ###########################################
