@@ -27,8 +27,8 @@ TIFF画像を出力する計測工程の情報をもつMaiMLファイルと、�
     4. 入力TIFFファイルのメタデータのキー'DateTime'の値を\<eventLog>要素の完了時刻としてもつ
     5. ⅳ.以外の入力TIFFファイルのメタデータを\<result>要素の汎用データコンテナとしてもつ
     6. 入力TIFFファイルのURI、hash値を\<result>要素の\<insertion>要素のコンテンツとしてもつ
-2. 1.のMaiMLファイル
-3. 1.のMaiMLファイルと入力TIFFファイルをZIPしたファイル
+2. 1.のMaiMLデータを書き出したファイル
+3. 2.のMaiMLファイルと入力TIFFファイルをZIPしたファイル
 
 ## (c) システムの起動方法
 1. docker composeサービスを起動
