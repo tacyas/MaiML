@@ -25,7 +25,7 @@ TIFF画像を出力する計測工程の情報をもつMaiMLファイルと、�
     2. protocol層でもっている参照関係が、自動でdata層に引き継がれることはない
     3. １つの\<instruction>要素に対して１つの\<event>要素をもつ
     4. TIFFのメタデータのキー'DateTime'の値を\<eventLog>要素の完了時刻としてもつ
-    5. 4以外のTIFFのメタデータを\<result>要素の汎用データコンテナとしてもつ
+    5. ⅳ.以外のTIFFのメタデータを\<result>要素の汎用データコンテナとしてもつ
     6. 入力TIFFファイルのURI、hash値を\<result>要素の\<insertion>要素のコンテンツとしてもつ
 2. 1.のMaiMLファイル
 3. 1.のMaiMLファイルと入力TIFFファイルをZIPしたファイル
