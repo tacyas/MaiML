@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<maiml xmlns="http://www.maiml.org/schemas"
+    xmlns:concept="http://www.xes-standard.org/concept.xesext#"
+    xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#"
+    xmlns:maiml="http://www.maiml.org/schemas" xmlns:time="http://www.xes-standard.org/time.xesext#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0"
+    xsi:type="protocolFileRootType">
+    <document id="MaimlSampleDoctest" xmlns:docNS="http://www.maiml.org/sampleNamespace">
+        <uuid>f531fc9b-5b38-4c10-8d06-50f681db8105</uuid>
+        <creator id="creatorSEM_B">
+            <uuid>7de44cb7-f020-3604-aed1-fcec4586525c</uuid>
+            <name>docNS:B</name>
+            <vendorRef id="vendorRef_VCompany" ref="VCompany" />
+            <instrumentRef id="instrumentRef_SEM" ref="SEM" />
+        </creator>
+        <vendor id="VCompany">
+            <uuid>6815f1a8-5d87-31a3-b8f2-576c8aa2f787</uuid>
+            <name>docNS:VCompany</name>
+        </vendor>
+        <owner id="CompanyA">
+            <uuid>42bd959b-86c5-3a93-a732-c3f2732701e2</uuid>
+            <name>docNS:CompanyA</name>
+        </owner>
+        <instrument id="SEM">
+            <uuid>7ab6569e-f33b-3ebe-8e19-b547c22a76d1</uuid>
+            <name>docNS:ScanningElectronMicroscope</name>
+            <description>SEM</description>
+        </instrument>
+        <date>2024-8-01T00:00:00+09:00</date>
+    </document>
+    <protocol id="MaimlSampleProtocoltest">
+        <uuid>12225456-a7b2-463c-9a6f-d62889938461</uuid>
+        <name>SEMSampleProtocol</name>
+        <method id="methodIDtest">
+            <uuid>00790ed6-f246-4b93-ac59-7bde3e2dac26</uuid>
+            <name>SEMSampleMethod</name>
+            <description>Juyo SEM Sample Protocol test</description>
+            <pnml id="pnmlIDtest">
+                <uuid>c88b8815-cde9-4d4e-8ffd-d462c36cb421</uuid>
+                <description>petri net</description>
+                <place id="MT1">
+                    <name>X</name>
+                </place>
+                <place id="CT1">
+                    <name>PreprocessingConditions</name>
+                </place>
+                <place id="RT1">
+                    <name>Outputs</name>
+                </place>
+                <transition id="TT-1">
+                    <name>Preprocessing</name>
+                </transition>
+                <arc id="arcID-1" source="MT1" target="TT-1" />
+                <arc id="arcID-2" source="CT1" target="TT-1" />
+                <arc id="arcID-3" source="TT-1" target="RT1" />
+            </pnml>
+            <program id="programIDtest">
+                <uuid>013f70cb-e3d4-406d-935f-64e1969830fd</uuid>
+                <instruction id="instructionpretest">
+                    <uuid>d7fb9dd3-3b22-4c61-9a8c-813885d0de4e</uuid>
+                    <name>SEM</name>
+                    <description>SEM</description>
+                    <property xsi:type="stringType" key="TreatmentType">
+                        <value>SEM</value>
+                    </property>
+                    <transitionRef id="transition1" ref="TT-1" />
+                </instruction>
+                <materialTemplate id="MaterialTemplate1test">
+                    <uuid>44c80bd6-210e-4bd4-939b-df7909b3dfc0</uuid>
+                    <name>material_XTemplate</name>
+                    <description>material X Template</description>
+                    <property xsi:type="stringType" key="MaterialSampleID">
+                        <description>Sample ID</description>
+                    </property>
+                    <property xsi:type="stringType" key="MaterialType">
+                        <value>Bulk</value>
+                        <property xsi:type="doubleType" key="Thickness" formatString="0.00"
+                            scaleFactor="1.00" unit="mm">
+                            <value>10.00</value>
+                        </property>
+                    </property>
+                    <property xsi:type="stringType" key="Comment">
+                        <value>Add comments.</value>
+                    </property>
+                    <placeRef id="material" ref="MT1" />
+                </materialTemplate>
+                <conditionTemplate id="ConditionTemplate1test">
+                    <uuid>149fc2bd-52bd-4573-8ab4-a4127067daa8</uuid>
+                    <name>SEMcondition_Template</name>
+                    <description>Conditions of SEM</description>
+                    <property xsi:type="stringType" key="materialconditions">
+                        <value>Grid</value>
+                        <property xsi:type="stringType" key="KindOfGrid">
+                            <property xsi:type="stringType" key="Grid_name" />
+                            <property xsi:type="stringType" key="Manufacture_name" />
+                            <property xsi:type="stringType" key="Product_no" />
+                        </property>
+                        <property xsi:type="stringType" key="Comment" />
+                    </property>
+                    <property xsi:type="stringType" key="SEMConditions">
+                        <value>SEM Conditions</value>
+                        <property xsi:type="doubleType" key="AcceleratingVoltage" formatString="1.00"
+                            units="kV" sacleFactor="1.0">
+                            <value> 5.00 </value>
+                        </property>
+                        <property xsi:type="doubleType" key="ScanningTime" formatString="1.00" units="s"
+                            sacleFactor="1.0">
+                            <value> 2.00 </value>
+                        </property>
+                        <property xsi:type="stringType" key="DetectionSignal">
+                            <value> Secondary Electron </value>
+                        </property>
+                        <property xsi:type="stringType" key="Note">
+                            <value> Low dose condition for redusing electron damage </value>
+                        </property>
+                    </property>
+                    <placeRef id="condition" ref="CT1"></placeRef>
+                </conditionTemplate>
+                <resultTemplate id="ResultTemplate1test">
+                    <uuid>5e75cb5a-4f0e-4292-81b5-74d631793d80</uuid>
+                    <name>SEMImage_Template</name>
+                    <description>Output Images</description>
+                    <property xsi:type="uriType" key="SEMImageUri">
+                        <!-- imageのパス、名前 image/tiff -->
+                    </property>
+                    <property xsi:type="uriType" key="SEMOutConditionUri">
+                        <!-- conditionDataのパス、名前 text/plain -->
+                    </property>
+                    <placeRef id="result" ref="RT1"></placeRef>
+                </resultTemplate>
+            </program>
+        </method>
+    </protocol>
+</maiml>
