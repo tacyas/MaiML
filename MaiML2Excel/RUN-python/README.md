@@ -1,9 +1,9 @@
 # [How to run 'MaiML to Excel']
 
-## (Ⅰ) 実行ファイル
+## (a) 実行ファイル
 　　`./maimltoxl.py`
 
-## (Ⅱ) 入出力データ
+## (b) 入出力データ
     　入力データは、MaiMLファイル、<result>要素のid属性（必須）の値、<result>要素が持つ汎用データコンテナのkey属性の値である。
      result要素のid属性、<result>要素が持つ汎用データのkey属性の指定がない場合は、MaiMLファイル内のそのコンテンツ全てが対象となる。
     　出力データは、エクセルファイルである。<result>要素のid属性の値をシート名とした、その要素の汎用データコンテナのコンテンツ一覧が出力される。
@@ -11,11 +11,11 @@
     　プログラム実行時に入力データを指定する方法は２通りあり、jsonファイルを使用する方法とコマンド引数を使用する方法である。
      入力データは、「./DATA/INPUT/」フォルダに置く。出力データは、「./DATA/OUTPUT/」フォルダで確認可能である。
 
-## (Ⅲ) 実行方法と入力データ
+## (c) 実行方法と入力データ
     　入力データの指定は、コマンドオプションを使用し区別される。
     　コマンドオプションについては[3-1]、JSONファイルを使用する方法については[3-2]、コマンド引数を使用する方法については[3-3]を参照。
 
-### (Ⅲ-ⅰ) コマンドオプションの説明
+### (c-1) コマンドオプションの説明
 |option|Specified data|description|required|
 |:--|:--|:--|:--|
 |-j|json|Specify when using a json file for input.|"-j" or "-m" is required.|
@@ -27,7 +27,7 @@
 |-t|test|tests run|Specify when running tests.|
 
 
-### (Ⅲ-ⅱ) JSONファイルを使用する方法
+### (c-2) JSONファイルを使用する方法
 - コマンド例<br>
 　`python3 ./maimltoxl.py -j`
 
@@ -63,7 +63,7 @@
     }
     ```
 
-### (Ⅲ-ⅲ) コマンド引数を使用する方法
+### (c-3) コマンド引数を使用する方法
 - コマンド例<br>
 　`python3 ./maimltoxl.py -m maimlfilename.maiml -sk exm:SampleValu1 exm:SampleValue2`　
 
