@@ -693,6 +693,452 @@ class ReadWriteMaiML:
                 ## nest
                 self.writeParentContents(parent_dic, parent_Elem)
 
+
+    ''' Protocol Contents の作成 '''
+    def createprotocolcontents(self, protocol_dic, protocol_Elem):
+        #print('create <protocol> contents')
+        ## global contents
+        self.writeGlobalContents(protocol_dic, protocol_Elem)
+        
+        method = 'method'  ##contents   # >=1
+        if isinstance(protocol_dic[method], list):
+            method_list = protocol_dic[method]
+        else:
+            method_list = [protocol_dic[method]]
+        for method_dic in method_list:
+            #print(dict(method_dic))
+            method_Elem = ET.SubElement(protocol_Elem, method, attrib={'id':method_dic['@id']})    # =1
+            ###########################################
+            # namespace
+            rens = re.compile("@xmlns:.*")
+            for key in method_dic:
+                if rens.search(key):
+                    method_Elem.set(key[1:],method_dic[key])
+            ###########################################
+            ## global contents
+            self.writeGlobalContents(method_dic, method_Elem)
+            
+            pnml = 'pnml'  ##  >=1
+            if isinstance(method_dic[pnml], list):
+                pnml_list = method_dic[pnml]
+            else:
+                pnml_list = [method_dic[pnml]]
+            for pnml_dic in pnml_list:    # >=1
+                pnml_Elem = ET.SubElement(method_Elem, pnml, attrib={'id':pnml_dic['@id']})   # =1
+                ###########################################
+                # namespace
+                rens = re.compile("@xmlns:.*")
+                for key in pnml_dic:
+                    if rens.search(key):
+                        pnml_Elem.set(key[1:],pnml_dic[key])
+                ###########################################
+                ## global contents
+                self.writeGlobalContents(pnml_dic, pnml_Elem)
+
+                place = 'place'    # >=1
+                if isinstance(pnml_dic[place], list):
+                    place_list = pnml_dic[place]
+                else:
+                    place_list = [pnml_dic[place]]
+                for place_dic in place_list:    # >=1
+                    place_Elem = ET.SubElement(pnml_Elem, place, attrib={'id':place_dic['@id']})
+                    #place_Elem.text = place_dic['#text']
+                    name = 'name'
+                    if name in place_dic.keys():   # 0/1
+                        place_name_dic = place_dic[name]
+                        place_name_Elem = ET.SubElement(place_Elem, name)
+                        place_name_Elem.text = place_name_dic
+                    description = 'description'
+                    if description in place_dic.keys():   # 0/1
+                        place_description_dic = place_dic[description]
+                        place_description_Elem = ET.SubElement(place_Elem, description)
+                        place_description_Elem.text = place_description_dic
+                transition = 'transition'    # >=1
+                if isinstance(pnml_dic[transition], list):
+                    transition_list = pnml_dic[transition]
+                else:
+                    transition_list = [pnml_dic[transition]]
+                for transition_dic in transition_list:    # >=1
+                    transition_Elem = ET.SubElement(pnml_Elem, transition, attrib={'id':transition_dic['@id']})
+                    #transition_Elem.text = transition_dic[#text]
+                    #transition_name = 'name'
+                    if name in transition_dic.keys():   # 0/1
+                        transition_name_dic = transition_dic[name]
+                        transition_name_Elem = ET.SubElement(transition_Elem, name)
+                        transition_name_Elem.text = transition_name_dic
+                    #transition_description = 'description'
+                    if description in transition_dic.keys():   # 0/1
+                        transition_description_dic = transition_dic[description]
+                        transition_description_Elem = ET.SubElement(transition_Elem, description)
+                        transition_description_Elem.text = transition_description_dic
+                arc = 'arc'    # >=1
+                if isinstance(pnml_dic[arc], list):
+                    arc_list = pnml_dic[arc]
+                else:
+                    arc_list = [pnml_dic[arc]]
+                for arc_dic in arc_list:    # >=1
+                    arc_Elem = ET.SubElement(pnml_Elem, arc, attrib={'id':arc_dic['@id'], 'source':arc_dic['@source'], 'target':arc_dic['@target']})
+                    name = 'name'
+                    if name in arc_dic.keys():   # 0/1
+                        arc_name_dic = arc_dic[name]
+                        arc_name_Elem = ET.SubElement(arc_Elem, name)
+                        arc_name_Elem.text = arc_name_dic
+                    description = 'description'
+                    if description in arc_dic.keys():   # 0/1
+                        arc_description_dic = arc_dic[description]
+                        arc_description_Elem = ET.SubElement(arc_Elem, description)
+                        arc_description_Elem.text = arc_description_dic
+
+            program = 'program'   ## contents   >=1
+            if isinstance(method_dic[program], list):
+                program_list = method_dic[program]
+            else:
+                program_list = [method_dic[program]]
+            for program_dic in program_list:
+                program_Elem = ET.SubElement(method_Elem, program, attrib={'id':program_dic['@id']})
+                ###########################################
+                # namespace
+                rens = re.compile("@xmlns:.*")
+                for key in program_dic:
+                    if rens.search(key):
+                        program_Elem.set(key[1:],program_dic[key])
+                ###########################################
+                ## global contents
+                self.writeGlobalContents(program_dic, program_Elem)
+
+                instruction = 'instruction'    #  >=1
+                if isinstance(program_dic[instruction], list):
+                    instruction_list = program_dic[instruction]
+                else:
+                    instruction_list = [program_dic[instruction]]
+                for instruction_dic in instruction_list:
+                    instruction_Elem = ET.SubElement(program_Elem, instruction, attrib={'id':instruction_dic['@id']})
+                    ###########################################
+                    # namespace
+                    rens = re.compile("@xmlns:.*")
+                    for key in instruction_dic:
+                        if rens.search(key):
+                            instruction_Elem.set(key[1:],instruction_dic[key])
+                    ###########################################
+                    ## global contents
+                    self.writeGlobalContents(instruction_dic, instruction_Elem)
+
+                    transitionRef = 'transitionRef'    ##  >=1 参照要素
+                    if isinstance(instruction_dic[transitionRef], list):
+                        transitionRef_list = instruction_dic[transitionRef]
+                    else:
+                        transitionRef_list = [instruction_dic[transitionRef]]
+                    for transitionRef_dic in transitionRef_list:
+                        transitionRef_Elem = ET.SubElement(instruction_Elem, transitionRef, attrib={'id':transitionRef_dic['@id'], 'ref':transitionRef_dic['@ref']})
+                        transitionRef_name = 'name'
+                        if transitionRef_name in transitionRef_dic.keys():   # 0/1
+                            transitionRef_name_dic = transitionRef_dic[transitionRef_name]
+                            transitionRef_name_Elem = ET.SubElement(transitionRef_Elem, transitionRef_name)
+                            transitionRef_name_Elem.text = transitionRef_name_dic
+                        transitionRef_description = 'description'
+                        if transitionRef_description in transitionRef_dic.keys():   # 0/1
+                            transitionRef_description_dic = transitionRef_dic[transitionRef_description]
+                            transitionRef_description_Elem = ET.SubElement(transitionRef_Elem, transitionRef_description)
+                            transitionRef_description_Elem.text = transitionRef_description_dic
+
+                ## program -- TEMPLATES
+                ## program -- materialTemplate  >=0
+                materialTemplate = 'materialTemplate' 
+                if materialTemplate in program_dic.keys():
+                    if isinstance(program_dic[materialTemplate], list):
+                       p_materialTemplate_list = program_dic[materialTemplate]
+                    else:
+                        p_materialTemplate_list = [program_dic[materialTemplate]]
+                    for p_materialTemplate_dic in p_materialTemplate_list:
+                        p_materialTemplate_Elem = ET.SubElement(program_Elem, materialTemplate, attrib={'id':p_materialTemplate_dic['@id']})
+                        ###########################################
+                        # namespace
+                        rens = re.compile("@xmlns:.*")
+                        for key in p_materialTemplate_dic:
+                            if rens.search(key):
+                                p_materialTemplate_Elem.set(key[1:],p_materialTemplate_dic[key])
+                        ###########################################
+                        # templates contents
+                        self.writeTemplates(p_materialTemplate_dic, p_materialTemplate_Elem)
+                ## program -- conditionTemplate  >=0
+                conditionTemplate = 'conditionTemplate'
+                if conditionTemplate in program_dic.keys():
+                    if isinstance(program_dic[conditionTemplate], list):
+                        p_conditionTemplate_list = program_dic[conditionTemplate]
+                    else:
+                        p_conditionTemplate_list = [program_dic[conditionTemplate]]
+                    for p_conditionTemplate_dic in p_conditionTemplate_list:
+                        p_conditionTemplate_Elem = ET.SubElement(program_Elem, conditionTemplate, attrib={'id':p_conditionTemplate_dic['@id']})
+                        ###########################################
+                        # namespace
+                        rens = re.compile("@xmlns:.*")
+                        for key in p_conditionTemplate_dic:
+                            if rens.search(key):
+                                p_conditionTemplate_Elem.set(key[1:],p_conditionTemplate_dic[key])
+                        ###########################################
+                        # templates contents
+                        self.writeTemplates(p_conditionTemplate_dic, p_conditionTemplate_Elem)
+                ## program -- resultTemplate  >=0
+                resultTemplate = 'resultTemplate'
+                if resultTemplate in program_dic.keys():
+                    if isinstance(program_dic[resultTemplate], list):
+                        p_resultTemplate_list = program_dic[resultTemplate]
+                    else:
+                        p_resultTemplate_list = [program_dic[resultTemplate]]
+                    for p_resultTemplate_dic in p_resultTemplate_list:
+                        p_resultTemplate_Elem = ET.SubElement(program_Elem, resultTemplate, attrib={'id':p_resultTemplate_dic['@id']})
+                        ###########################################
+                        # namespace
+                        rens = re.compile("@xmlns:.*")
+                        for key in p_resultTemplate_dic:
+                            if rens.search(key):
+                                p_resultTemplate_Elem.set(key[1:],p_resultTemplate_dic[key])
+                        ###########################################
+                        # templates contents
+                        self.writeTemplates(p_resultTemplate_dic, p_resultTemplate_Elem)
+
+            ## method -- TEMPLATES
+            ## method -- materialTemplate  >=0
+            materialTemplate = 'materialTemplate'
+            if materialTemplate in method_dic.keys():
+                if isinstance(program_dic[materialTemplate], list):
+                    m_materialTemplate_list = method_dic[materialTemplate]
+                else:
+                    m_materialTemplate_list = [method_dic[materialTemplate]]
+                for m_materialTemplate_dic in m_materialTemplate_list:
+                    m_materialTemplate_Elem = ET.SubElement(method_Elem, materialTemplate, attrib={'id':m_materialTemplate_dic['@id']})
+                    ###########################################
+                    # namespace
+                    rens = re.compile("@xmlns:.*")
+                    for key in m_materialTemplate_dic:
+                        if rens.search(key):
+                            m_materialTemplate_Elem.set(key[1:],m_materialTemplate_dic[key])
+                    ###########################################
+                    # templates contents
+                    self.writeTemplates(m_materialTemplate_dic, m_materialTemplate_Elem)
+            ## method -- conditionTemplate  >=0
+            conditionTemplate = 'conditionTemplate'
+            if conditionTemplate in method_dic:
+                if isinstance(program_dic[conditionTemplate], list):
+                    m_conditionTemplate_list = method_dic[conditionTemplate]
+                else:
+                    m_conditionTemplate_list = [method_dic[conditionTemplate]]
+                for m_conditionTemplate_dic in m_conditionTemplate_list:
+                    m_conditionTemplate_Elem = ET.SubElement(method_Elem, conditionTemplate, attrib={'id':m_conditionTemplate_dic['@id']})
+                    ###########################################
+                    # namespace
+                    rens = re.compile("@xmlns:.*")
+                    for key in m_conditionTemplate_dic:
+                        if rens.search(key):
+                            m_conditionTemplate_Elem.set(key[1:],m_conditionTemplate_dic[key])
+                    ###########################################
+                    # templates contents
+                    self.writeTemplates(m_conditionTemplate_dic, m_conditionTemplate_Elem)
+            ## method -- resultTemplate  >=0
+            resultTemplate = 'resultTemplate'
+            if resultTemplate in method_dic:
+                if isinstance(program_dic[resultTemplate], list):
+                    m_resultTemplate_list = method_dic[resultTemplate]
+                else:
+                    m_resultTemplate_list = [method_dic[resultTemplate]]
+                for m_resultTemplate_dic in m_resultTemplate_list:
+                    m_resultTemplate_Elem = ET.SubElement(method_Elem, resultTemplate, attrib={'id':m_resultTemplate_dic['@id']})
+                    ###########################################
+                    # namespace
+                    rens = re.compile("@xmlns:.*")
+                    for key in m_resultTemplate_dic:
+                        if rens.search(key):
+                            m_resultTemplate_Elem.set(key[1:],m_resultTemplate_dic[key])
+                    ###########################################
+                    # templates contents
+                    self.writeTemplates(m_resultTemplate_dic, m_resultTemplate_Elem)
+
+        ## protocol -- TEMPLATES
+        materialTemplate = 'materialTemplate'   ## >=0
+        if materialTemplate in protocol_dic.keys():
+            if isinstance(protocol_dic[materialTemplate], list):
+                materialTemplate_list = protocol_dic[materialTemplate]
+            else:
+                materialTemplate_list = [protocol_dic[materialTemplate]]
+            for materialTemplate_dic in materialTemplate_list:
+                materialTemplate_Elem = ET.SubElement(protocol_Elem, materialTemplate, attrib={'id':materialTemplate_dic['@id']})
+                ###########################################
+                # namespace
+                rens = re.compile("@xmlns:.*")
+                for key in materialTemplate_dic:
+                    if rens.search(key):
+                        materialTemplate_Elem.set(key[1:],materialTemplate_dic[key])
+                ###########################################
+                # templates contents
+                self.writeTemplates(materialTemplate_dic, materialTemplate_Elem)
+        conditionTemplate = 'conditionTemplate'  ## >=0
+        if conditionTemplate in protocol_dic:
+            if isinstance(protocol_dic[conditionTemplate], list):
+                conditionTemplate_list = protocol_dic[conditionTemplate]
+            else:
+                conditionTemplate_list = [protocol_dic[conditionTemplate]]
+            for conditionTemplate_dic in conditionTemplate_list:
+                conditionTemplate_Elem = ET.SubElement(protocol_Elem, conditionTemplate, attrib={'id':conditionTemplate_dic['@id']})
+                ###########################################
+                # namespace
+                rens = re.compile("@xmlns:.*")
+                for key in conditionTemplate_dic:
+                    if rens.search(key):
+                        conditionTemplate_Elem.set(key[1:],conditionTemplate_dic[key])
+                ###########################################
+                # templates contents
+                self.writeTemplates(conditionTemplate_dic, conditionTemplate_Elem)
+        resultTemplate = 'resultTemplate'  ##  >=0
+        if resultTemplate in protocol_dic:
+            if isinstance(protocol_dic[resultTemplate], list):
+                resultTemplate_list = protocol_dic[resultTemplate]
+            else:
+                resultTemplate_list = [protocol_dic[resultTemplate]]
+            for resultTemplate_dic in resultTemplate_list:
+                resultTemplate_Elem = ET.SubElement(protocol_Elem, resultTemplate, attrib={'id':resultTemplate_dic['@id']})
+                ###########################################
+                # namespace
+                rens = re.compile("@xmlns:.*")
+                for key in resultTemplate_dic:
+                    if rens.search(key):
+                        resultTemplate_Elem.set(key[1:],resultTemplate_dic[key])
+                ###########################################
+                # templates contents
+                self.writeTemplates(resultTemplate_dic, resultTemplate_Elem)
+
+
+    ''' Data Contents の作成 '''
+    def createdatacontents(self, data_dic, data_Elem):
+        #print('create <data> contents')
+        # global contents
+        self.writeGlobalContents(data_dic, data_Elem)
+
+        results = 'results'   ## >=1
+        if isinstance(data_dic[results], list):
+            results_list = data_dic[results]
+        else:
+            results_list = [data_dic[results]]
+        for results_dic in results_list:
+            results_Elem = ET.SubElement(data_Elem, results, attrib={'id':results_dic['@id']})
+            ###########################################
+            # namespace
+            rens = re.compile("@xmlns:.*")
+            for key in results_dic:
+                if rens.search(key):
+                    results_Elem.set(key[1:],results_dic[key])
+            ###########################################
+            # global contents
+            self.writeGlobalContents(results_dic, results_Elem)
+
+            material = 'material'     ## >=0
+            ## instance contents
+            self.writeInstanceData(results_dic, results_Elem, material)
+
+            condition = 'condition'     ## >=0
+            ## instance contents
+            self.writeInstanceData(results_dic, results_Elem, condition)
+
+            result = 'result'     ## >=0
+            ## instance contents
+            self.writeInstanceData(results_dic, results_Elem, result)
+
+
+    ''' EventLog Contents の作成 '''
+    def createeventlogcontents(self, eventlog_dic, eventlog_Elem):
+        #print('create <eventLog> contents')
+        # global contents
+        self.writeGlobalContents(eventlog_dic, eventlog_Elem)
+        log = 'log'   ##  >=1  参照付グローバル
+        if isinstance(eventlog_dic[log], list):
+            log_list = eventlog_dic[log]
+        else:
+            log_list = [eventlog_dic[log]]
+        for log_dic in log_list:
+            log_Elem = ET.SubElement(eventlog_Elem, log, attrib={'id':log_dic['@id'], 'ref':log_dic['@ref']})
+            # global contents
+            self.writeGlobalContents(log_dic, log_Elem)
+            trace = 'trace'   ## >=1  参照付グローバル
+            if isinstance(log_dic[trace], list):
+                trace_list = log_dic[trace]
+            else:
+                trace_list = [log_dic[trace]]
+            for trace_dic in trace_list:
+                trace_Elem = ET.SubElement(log_Elem, trace, attrib={'id':trace_dic['@id'], 'ref':trace_dic['@ref']})
+                # global contents
+                self.writeGlobalContents(trace_dic, trace_Elem)
+                event = 'event'   # >=1  参照付グローバル
+                if isinstance(trace_dic[event], list):
+                    event_list = trace_dic[event]
+                else:
+                    event_list = [trace_dic[event]]
+                for event_dic in event_list:
+                    event_Elem = ET.SubElement(trace_Elem, event, attrib={'id':event_dic['@id'], 'ref':event_dic['@ref']})
+                    # global contents
+                    self.writeGlobalContents(event_dic, event_Elem)
+                    resultsRef = 'resultsRef'    # >=0  参照要素
+                    if resultsRef in event_dic.keys():
+                        if isinstance(event_dic[resultsRef], list):
+                            resultsRef_list = event_dic[resultsRef]
+                        else:
+                            resultsRef_list = [event_dic[resultsRef]]
+                        for resultsRef_dic in resultsRef_list:
+                            # reference contents
+                            self.writeReferenceContents(resultsRef_dic, event_Elem, resultsRef)
+                    event_creatorRef = 'creatorRef'    # >=0  参照要素
+                    if event_creatorRef in event_dic.keys():
+                        if isinstance(event_dic[event_creatorRef], list):
+                            event_creatorRef_list = event_dic[event_creatorRef]
+                        else:
+                            event_creatorRef_list = [event_dic[event_creatorRef]]
+                        for event_creatorRef_dic in event_creatorRef_list:
+                            # reference contents
+                            self.writeReferenceContents(event_creatorRef_dic, event_Elem, event_creatorRef)
+                    event_ownerRef = 'ownerRef'    # >=0  参照要素
+                    if event_ownerRef in event_dic.keys():
+                        if isinstance(event_dic[event_ownerRef], list):
+                            event_ownerRef_list = event_dic[event_ownerRef]
+                        else:
+                            event_ownerRef_list = [event_dic[event_ownerRef]]
+                        for event_ownerRef_dic in event_ownerRef_list:
+                            # reference contents
+                            self.writeReferenceContents(event_ownerRef_dic, event_Elem, event_ownerRef)
+                trace_creatorRef = 'creatorRef'    # >=0  参照要素
+                if trace_creatorRef in trace_dic.keys():
+                    if isinstance(trace_dic[trace_creatorRef], list):
+                        trace_creatorRef_list = trace_dic[trace_creatorRef]
+                    else:
+                        trace_creatorRef_list = [trace_dic[trace_creatorRef]]
+                    for trace_creatorRef_dic in trace_creatorRef_list:
+                        # reference contents
+                        self.writeReferenceContents(trace_creatorRef_dic, trace_Elem, trace_creatorRef)
+                trace_ownerRef = 'ownerRef'    # >=0  参照要素
+                if trace_ownerRef in trace_dic.keys():
+                    if isinstance(trace_dic[trace_ownerRef], list):
+                        trace_ownerRef_list = trace_dic[trace_ownerRef]
+                    else:
+                        trace_ownerRef_list = [trace_dic[trace_ownerRef]]
+                    for trace_ownerRef_dic in trace_ownerRef_list:
+                        # reference contents
+                        self.writeReferenceContents(trace_ownerRef_dic, trace_Elem, trace_ownerRef)
+            log_creatorRef = 'creatorRef'    # >=0  参照要素
+            if log_creatorRef in log_dic.keys():
+                if isinstance(log_dic[log_creatorRef], list):
+                    log_creatorRef_list = log_dic[log_creatorRef]
+                else:
+                    log_creatorRef_list = [log_dic[log_creatorRef]]
+                for log_creatorRef_dic in log_creatorRef_list:
+                    # reference contents
+                    self.writeReferenceContents(log_creatorRef_dic, log_Elem, log_creatorRef)
+            log_ownerRef = 'ownerRef'    # >=0  参照要素
+            if log_ownerRef in log_dic.keys():
+                if isinstance(log_dic[log_ownerRef], list):
+                    log_ownerRef_list = log_dic[log_ownerRef]
+                else:
+                    log_ownerRef_list = [log_dic[log_ownerRef]]
+                for log_ownerRef_dic in log_ownerRef_list:
+                    # reference contents
+                    self.writeReferenceContents(log_ownerRef_dic, log_Elem, log_ownerRef)
+
     ''' xmlを整形 '''
     def pretty_print(self, current, parent=None, index=-1, depth=0):
         for i, node in enumerate(current):
@@ -813,4 +1259,5 @@ class ReadWriteMaiML:
 if __name__ == '__main__':
     createmaiml = ReadWriteMaiML()
     dict_obj = createmaiml.readFile()
-    createmaiml.writecontents(dict_obj)
+    filepath = './output.maiml'
+    createmaiml.writecontents(dict_obj, filepath)
