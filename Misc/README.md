@@ -4,6 +4,20 @@
 
 ---
 
+* createMaiMLFile.py
+    1. pythonのdict型からMaiMLファイルを作成する関数(writecontents)
+    2. MaiMLファイルからpythonのdict型のデータを生成する関数(readFile)
+    3. グローバル要素型のMaiMLデータを生成する関数(writeGlobalContents)
+    4. 汎用データコンテナ型のMaiMLデータを生成する関数(writeGenericdataContainer)
+    5. テンプレート要素のMaiMLデータを生成する関数(writeTemplates)
+    6. インスタンス要素のMaiMLデータを生成する関数(writeInstanceData)
+    7. chain要素のMaiMLデータを生成する関数(writeChainContents)
+    8. parent要素のMaiMLデータを生成する関数(writeParentContents)
+    9. 参照要素型のMaiMLデータを生成する関数(writeReferenceContents)
+    10. document要素のMaiMLデータを生成する関数(createdocumentcontents)
+    11. protocol要素のMaiMLデータを生成する関数(createprotocolcontents)
+    12. data要素のMaiMLデータを生成する関数(createdatacontents)
+    13. eventLog要素のMaiMLデータを生成する関数(createeventlogcontents)
 * filehash.py
     1. ファイルのハッシュ値を求めるプログラム
 * tiffTest.py
