@@ -199,9 +199,11 @@ def createcsv( resultId=[], selectkey=[], maiml_file_path = '', xl_file_path=fil
         if not isinstance(resultslist, list):
             resultslist = [resultslist]
         for resultstag in resultslist:
-            resultstaglist = resultstag.findall(maimlelement.result) if isinstance(resultstag.findall(maimlelement.result),list) else [resultstag.findall(maimlelement.result)]
-
-            for resulttag in resultstaglist:
+            resultshastaglist = resultstag.findall(maimlelement.result) if isinstance(resultstag.findall(maimlelement.result),list) else [resultstag.findall(maimlelement.result)]
+            ## material & conditionも出力したい場合は、次２行のコメントを外す
+            #resultshastaglist += resultstag.findall(maimlelement.material)
+            #resultshastaglist += resultstag.findall(maimlelement.condition)
+            for resulttag in resultshastaglist:
                 if resultId == [] or resulttag.get(maimlelement.id) in resultId:
                     ## maiml file lineNo
                     ws_name = resulttag.get(maimlelement.id)
