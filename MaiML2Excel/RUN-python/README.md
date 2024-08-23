@@ -95,4 +95,14 @@
             -OUTPUT/
                 -**outputexcelfile.xlsx
             -TMP/
-    ``` 
+    ```
+- 実行に必要なpythonパッケージ
+    ```
+    sys
+    os
+    re
+    json
+    openpyxl
+    lxml
+    argparse
+    ```
