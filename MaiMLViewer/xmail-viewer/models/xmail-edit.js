@@ -273,7 +273,7 @@ function cmdExecute(cmd) {
 		logger.app.debug('[cmdExecute]' + cmd);
 		//var result = exec('python -c "import sys; print("hoge"); sys.exit(-1)"');
 		//var result = exec(cmd, { timeout: 30000 });
-		var result = exec(cmd, { timeout: 300000 });  //20240516 edit
+		var result = exec(cmd, { timeout: 400000 });  //20240516 edit
 		return result.toString();
 
 	} catch (err) {
@@ -285,7 +285,7 @@ function cmdExecute(cmd) {
 }
 
 /*
- * XMAILデータ登録処理
+ * XMAILデータ削除処理
  *
  * ・引数に指定されたNIDをキーに、GraphDBのXMAILデータ一式を削除する
  * ・GrpahDBに接続する

@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 #sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
 
 ###
-
+##  subtree(e=elem, h="", n=top_node, p=xmail_node, r='XML_Root', file=output)
 def subtree(e, h, n, p, r, file=sys.stdout):
   tag2 = re.sub(r'^{.*}', '', e.tag)
   #print '#', h, n, e.tag, e.attrib, '=> "%s"' % tag2
@@ -23,7 +23,8 @@ def subtree(e, h, n, p, r, file=sys.stdout):
 
   if (e.text is not None) and (re.match('\S', e.text)):
     #print '#', h, "text: '%s'" % e.text
-    print('create (%s:XMLdata { value: "%s" })' % (n + "d", e.text), file=file)
+    #print('create (%s:XMLdata { value: "%s" })' % (n + "d", e.text), file=file)
+    print('create (%s:XMLdata { value: "%s" })' % (n + "d", e.text if e.text[-1] != '\\' else e.text+'\\'), file=file)
     print('create (%s)-[:XML_Data]->(%s)' % (n, n + "d"), file=file)
   if (e.tail is not None) and (re.match('\S', e.tail)):
     #print '#', h, "tail: '%s'" % e.tail
@@ -35,15 +36,26 @@ def subtree(e, h, n, p, r, file=sys.stdout):
 ###
 
 def xml2cypher(fname, output=sys.stdout):
-
+  import xml.sax.saxutils as  saxutils
   try:
     xmail_node = "nx"
     top_node = "n"
     #fname = sys.argv[1]
     #filename = os.path.basename(fname)
-    tree = ET.parse(fname)
 
-  except:
+    ## 20240522 add
+    with open(fname, "rt", encoding='utf-8') as f:
+      maimlstr = f.read()   ## 改行とスペースが文字コードのリスト
+    maimlstr_strip = maimlstr.strip("\t")
+    #maimlstr_rstrip = maimlstr_strip.rstrip("\n")
+    maimlstr_rstrip = maimlstr_strip.rstrip("\n")
+    maimldata = maimlstr_rstrip.replace('&', '&amp;')
+    #maimldata = maimlstr_rstrip.replace("¥", '&yen;')
+    
+    #tree = ET.parse(fname)  ## error -> maimldata.replace('&', '&amp;')
+    elem = ET.fromstring(maimldata)
+  except Exception as e:
+    #sys.stderr.write('XMAIL:ERROR::{0}'.format(e))
     sys.stderr.write('XMAIL: XML file not found\n')
     sys.exit(-1)
 
@@ -51,7 +63,7 @@ def xml2cypher(fname, output=sys.stdout):
   try:
     print('create (%s:XMAIL { file: %s})' % (xmail_node, ascii(str(fname))), file=output)
 
-    elem = tree.getroot()
+    #elem = tree.getroot()
     #sys.stderr.write('top level : ' + elem.tag + '\n')
     xmail_version = elem.attrib.get('xmail.version')
     if xmail_version is None:

@@ -530,7 +530,9 @@ exports.node_material = async function(node_id) {
 	const session = driver.session();
 	logger.app.debug(C_MODEL + 'Graph DB connected.');
 
-	let cypher = cypher_api.get_cypher('get_properties', node_id);
+	/* */
+	let cypher = cypher_api.get_cypher('get_generals', node_id);
+	//let cypher = cypher_api.get_cypher('get_properties', node_id);
 	/*
 	var cypher =
 		`match
@@ -581,12 +583,12 @@ exports.node_material = async function(node_id) {
 
 				var attrib = record.get('attrib');
 				delete attrib.__tag;
-
+				
 				var arrayTmp = {
 					'nid': String(record.get('nid')),
 					'parent_nid': String(record.get('parent_nid')),
 					'description': record.get('description'),
-					'value': record.get('value'),
+					'value': record.get('value') ? record.get('value').substring(0, 96): "",  /* 20240523 edit */
 					'attrib': jsonPrettier(attrib)
 				};
 				graphJson =
