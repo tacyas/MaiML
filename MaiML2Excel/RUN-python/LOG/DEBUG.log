@@ -1,0 +1,15 @@
+2024-08-23 09:55:48,306 maimltoxl.py:<module>:324 [INFO]: run argument:Namespace(json=False, maiml='', xl='', selectid='', selectkey='', test=False)
+2024-08-23 09:55:48,306 maimltoxl.py:<module>:351 [ERROR]: Arguments is incorrect.
+2024-08-23 09:55:58,933 maimltoxl.py:<module>:324 [INFO]: run argument:Namespace(json=True, maiml='', xl='', selectid='', selectkey='', test=False)
+2024-08-23 09:55:58,934 maimltoxl.py:<module>:334 [INFO]: use json file. Input json-filepath="/Users/kibakun/Desktop/JIS-ISO/2024ISO/90_PublicGithub/MaiML/MaiML/MaiML2Excel/RUN-python/DATA/INPUT/input.json"
+2024-08-23 09:55:58,934 maimltoxl.py:openinputjson:271 [DEBUG]: input data: {'maiml_file_name': 'test.maiml', 'xl_file_name': 'test.xlsx', 'resultId': [], 'selectkey': []}
+2024-08-23 09:55:58,934 maimltoxl.py:<module>:354 [INFO]: Input filepath="/Users/kibakun/Desktop/JIS-ISO/2024ISO/90_PublicGithub/MaiML/MaiML/MaiML2Excel/RUN-python/DATA/INPUT/test.maiml"
+2024-08-23 09:55:58,934 maimltoxl.py:<module>:355 [DEBUG]: result ID:[] , key:[]
+2024-08-23 09:55:58,934 maimltoxl.py:createcsv:178 [DEBUG]: createcsv method start.
+2024-08-23 09:55:58,934 maimltoxl.py:createcsv:189 [INFO]: parsed maiml.:::<Element maiml at 0x102c451c0>
+2024-08-23 09:55:58,934 maimltoxl.py:createcsv:195 [DEBUG]: user select resultId:[]
+2024-08-23 09:55:58,944 maimltoxl.py:createcsv:213 [DEBUG]: create ws. ws-name is 131-juyosample_RT_ver1-1
+2024-08-23 09:55:58,948 maimltoxl.py:createcsv:213 [DEBUG]: create ws. ws-name is 176-2juyosample_RT_ver1-
+2024-08-23 09:55:58,955 maimltoxl.py:<module>:357 [INFO]: Successful creation of Excel file. Output filepath="/Users/kibakun/Desktop/JIS-ISO/2024ISO/90_PublicGithub/MaiML/MaiML/MaiML2Excel/RUN-python/DATA/OUTPUT/test.xlsx"
+2024-08-23 09:57:05,525 maimltoxl.py:<module>:324 [INFO]: run argument:Namespace(json=False, maiml='', xl='', selectid='', selectkey='', test=False)
+2024-08-23 09:57:05,525 maimltoxl.py:<module>:351 [ERROR]: Arguments is incorrect.

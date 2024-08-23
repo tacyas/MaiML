@@ -1,0 +1,8 @@
+2024-08-23 09:55:48,306 [INFO]: run argument:Namespace(json=False, maiml='', xl='', selectid='', selectkey='', test=False)
+2024-08-23 09:55:48,306 [ERROR]: Arguments is incorrect.
+2024-08-23 09:55:58,933 [INFO]: run argument:Namespace(json=True, maiml='', xl='', selectid='', selectkey='', test=False)
+2024-08-23 09:55:58,934 [INFO]: use json file. Input json-filepath="/Users/kibakun/Desktop/JIS-ISO/2024ISO/90_PublicGithub/MaiML/MaiML/MaiML2Excel/RUN-python/DATA/INPUT/input.json"
+2024-08-23 09:55:58,934 [INFO]: Input filepath="/Users/kibakun/Desktop/JIS-ISO/2024ISO/90_PublicGithub/MaiML/MaiML/MaiML2Excel/RUN-python/DATA/INPUT/test.maiml"
+2024-08-23 09:55:58,955 [INFO]: Successful creation of Excel file. Output filepath="/Users/kibakun/Desktop/JIS-ISO/2024ISO/90_PublicGithub/MaiML/MaiML/MaiML2Excel/RUN-python/DATA/OUTPUT/test.xlsx"
+2024-08-23 09:57:05,525 [INFO]: run argument:Namespace(json=False, maiml='', xl='', selectid='', selectkey='', test=False)
+2024-08-23 09:57:05,525 [ERROR]: Arguments is incorrect.

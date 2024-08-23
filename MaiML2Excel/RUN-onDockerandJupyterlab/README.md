@@ -18,6 +18,7 @@
 1. "Notebook" の　"Python 3(ipykernel)"アイコンをクリック
 2. 下記コマンドを入力し、実行してみる  
     　`run /WORK/CODE/maimltoxl.py`
+    >"[ERROR]: Arguments is incorrect." のメッセージが出力されたら、実行環境の構築に成功している。
 
 <br><br>
 

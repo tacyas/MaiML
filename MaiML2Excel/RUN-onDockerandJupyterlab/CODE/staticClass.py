@@ -1,40 +1,9 @@
+
 #################################
 ##   static class
 #################################
-'''
-from datetime import datetime as DT
-from datetime import timezone as TZ
-from datetime import timedelta as TD
-'''
 
-#################################
-##   static val
-#################################
-'''
-class staticVal():
-    ## default UUID value
-    upload_maiml_id = '88aff11e-a38c-4e65-b3d1-e62a76fbd75f'
-    default_data_filepath = '/defaultdata/datasample.maiml'
-
-    tiffmetatype = {
-        '1' : 'unsignedByteType', # xs:unsignedByte 1	1byte	BYTE	UInt8(符号無し8bit整数)
-        #'ASCII' : 2,
-        '3' : 'unsignedShortType', # xs:unsignedShort 3	2byte	SHORT	Uint16(符号無し16bit整数)
-        '4' : 'unsignedLongType', # xs:unsignedLong 4	4byte	LONG	Uint32(符号無し32bit整数)
-        #'5' : 'RATIONAL',
-        '6' : 'byteType', # xs:byte 6	1byte	SBYTE	SInt8(符号付き8bit)
-        #'7' : 'UNDEFINED',
-        '8' : 'shortType', # xs:short 8	2byte	SSHORT	SInt16(符号付き16bit整数)
-        '9' : 'longType', # xs:long 9	4byte	SLONG	SInt32(符号付き32bit整数)
-        # '10' : 'SIGNED_RATIONAL',
-        '11' : 'floatType', # xs:float 11	4byte	FLOAT	浮動小数点（IEEE 単精度浮動小数点)
-        '12' : 'doubleType', # xs:double 12	8byte	DOUBLE	浮動小数点（IEEE 倍精度浮動小数点)
-        #'13' : 'IFD',
-        #'16' : 'LONG8',
-        }
-'''
-
-## MaiML DATA FORMAT element and attribute name
+## MaiML DATA FORMAT element and attribute name #################################
 class maimlelement():
     ## elements
     maiml = 'maiml'
@@ -91,7 +60,6 @@ class maimlelement():
     condition = 'condition'     ## >=0
     result = 'result'     ## >=0
 
-
     log = 'log'   ##  >=1  参照付グローバル
     trace = 'trace'   ## >=1  参照付グローバル
     event = 'event'   # >=1  参照付グローバル
@@ -141,8 +109,107 @@ class maimlelement():
     # insertion要素の値を判別するための名前
     insertiontext = '#text'
 
-'''
-class tiffKeys():
-    datetime = 'DateTime'
-    time = 'time:timestamp'
-'''
+
+#################################
+##   プログラム実行に関する定数
+#################################
+## FILE DIR PATH #################################################
+import os
+class filepath:
+    ## FILE DIR PATH #################################################
+    cur_file = __file__  #このファイルのパス
+    print(os.path.dirname(cur_file))
+
+    codedir = os.path.dirname(cur_file) + '/'
+    rootdir = os.path.abspath(os.path.join(codedir, os.pardir)) + '/'
+    input_dir = rootdir + 'DATA/INPUT/'
+    output_dir = rootdir + 'DATA/OUTPUT/'
+    tmp_dir = rootdir + 'DATA/TMP/'
+
+## コマンド引数定義  #################################################################
+import argparse
+class commandargs():
+    parser = argparse.ArgumentParser()
+    # '-t' > '-j' > '-m'
+    parser.add_argument('-j', '--json', action='store_true') # use json file Flag
+    parser.add_argument('-m', '--maiml',default='') # input maiml file name
+    parser.add_argument('-o', '--xl', default='') # output file name
+    parser.add_argument('-si', '--selectid',  nargs="*", default='') # result ID
+    parser.add_argument('-sk', '--selectkey',  nargs="*", default='') # general container key
+    #parser.add_argument('-d', '--doc', action='store_true') # get document contents Flag
+    parser.add_argument('-t', '--test', action='store_true') # tests run Flag
+
+
+#################################
+##   static val
+#################################
+from openpyxl.styles import PatternFill
+
+### excel header定義 ###############################################################
+headerlistA={
+    'A':'hierarchy',
+    'B':'element',
+    'C':'@xsi:type',
+    'D':'@key',
+    'E':'@formatString',
+    'F':'@units',
+    'G':'@scaleFactor',
+    'H':'@axis',
+    'I':'@size',
+    'J':'@id',
+    'K':'@ref',
+    'L':'childUri',
+    'M':'childHash',
+    'N':'childUuid',
+    'O':'EncryptedData',
+    'P':'description',
+    'Q':'value',
+    }
+
+### excel header定義 ###############################################################
+headerlist={
+    'A':'MaiML file lineNo',
+    'B':'hierarchy',
+    'C':'element',
+    'D':'description',
+    'E':'element data',
+    'F':'@xsi:type',
+    'G':'@key',
+    'H':'@formatString',
+    'I':'@units',
+    'J':'@scaleFactor',
+    'K':'@axis',
+    'L':'@size',
+    'M':'@id',
+    'N':'@ref',
+    'O':'value'
+    }
+
+### excel header定義 ###############################################################
+headerlistET={
+    'A':'MaiML file lineNo',
+    'B':'hierarchy',
+    'C':'element',
+    'D':'description',
+    'E':'element data',
+    'F':'{http://www.w3.org/2001/XMLSchema-instance}type',
+    'G':'key',
+    'H':'formatString',
+    'I':'units',
+    'J':'scaleFactor',
+    'K':'axis',
+    'L':'size',
+    'M':'id',
+    'N':'ref',
+    'O':'value'
+    }
+
+encheaderlist = [
+    "childUri",
+    "childHash",
+    "childUuid",
+    "EncryptedData"
+]
+
+### excel headerのstyle定義 ########################################################
+fill = PatternFill(patternType='solid', fgColor='EAE7F3')
