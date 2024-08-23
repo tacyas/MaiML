@@ -1,7 +1,7 @@
 # [How to build 'MaiML to Excel']
 
 ## (a) Docker install
-- 前提：Docker Desktop等のDockerDeamonが起動している
+- 前提：Docker Desktop、Rancher Desktop　等のDocker　Deamonが起動している
 
 ## (b) Build Docker
 1. dockerjupyterlabディレクトリに移動
