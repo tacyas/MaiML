@@ -33,6 +33,6 @@ TIFF画像を出力する計測工程の情報をもつMaiMLファイルと、�
 ## (c) システムの起動方法
 1. docker composeサービスを起動
 2. docker環境を下記コマンドで起動
-   docker-compose up -d
+   docker compose up -d
 3. webブラウザからローカルホストにアクセス
    http://127.0.0.1:80/
