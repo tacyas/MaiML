@@ -1,14 +1,14 @@
 # [How to build 'MaiML to Excel']
 
 ## (a) Docker install
-- 前提：Docker Desktop、Rancher Desktop　等のDocker　Deamonが起動している
+- 前提：Docker Desktop、Rancher Desktop 等のDocker Deamonが起動している
 
 ## (b) Build Docker
 1. dockerjupyterlabディレクトリに移動
 2. Docker compose build command  
     　`>docker compose build`
 3. Docker compose run command  
-    　`>docker-compose up -d`
+    　`>docker compose up -d`
 
 ## (c) Use Jupyter Notebook
 - ブラウザで下記URLにアクセスする
@@ -28,11 +28,12 @@
 　　`/WORK/CODE/maimltoxl.py`
 
 ## (b) 入出力データ
-    　入力データは、MaiMLファイル、<result>要素のid属性（必須）の値、<result>要素が持つ汎用データコンテナのkey属性の値である。
-     result要素のid属性、<result>要素が持つ汎用データのkey属性の指定がない場合は、MaiMLファイル内のそのコンテンツ全てが対象となる。
-    　出力データは、エクセルファイルである。<result>要素のid属性の値をシート名とした、その要素の汎用データコンテナのコンテンツ一覧が出力される。
+    　入力データは、MaiMLファイル、instance要素（<result>、<material>、<condition>）のid属性の値、instance要素が持つ汎用データコンテナの
+     key属性の値である。
+     instance要素のid属性、instance要素が持つ汎用データのkey属性の指定がない場合は、MaiMLファイル内のinstance要素のコンテンツ全てが対象となる。
+     出力データは、エクセルファイルである。instance要素のid属性の値をシート名とした、その要素の汎用データコンテナのコンテンツ一覧が出力される。
      実行時にkey属性の値を指定した場合は、そのkey属性の値を持つ汎用データコンテナのコンテンツのみが出力される。
-    　プログラム実行時に入力データを指定する方法は２通りあり、jsonファイルを使用する方法とコマンド引数を使用する方法である。入力データは、
+     プログラム実行時に入力データを指定する方法は２通りあり、jsonファイルを使用する方法とコマンド引数を使用する方法である。入力データは、
      「/WORK/DATA/INPUT/」フォルダにアップデートする。出力データは、「/WORK/DATA/OUTPUT/」フォルダからダウンロード可能である。
 
 ## (c) 実行方法と入力データ
@@ -45,11 +46,11 @@
 |-j|json|Specify when using a json file for input.|"-j" or "-m" is required.|
 |-m|maiml|input File Path of MaiML data file|"-j" or "-m" is required.|
 |-o|xl|output File Path of excel||
-|-si|resultid|select 'result' element ID||
+|-si|resultid|select 'instance' element ID||
 |-sk|selectkey|select 'key' data of property/content/uncertainty data content ||
-|another:|
+|another||||
 |-t|test|tests run|Specify when running tests.|
-||
+
 
 ### (c-2) JSONファイルを使用する方法
 - コマンド例<br>
@@ -65,7 +66,7 @@
     |:--|:--|:--|:--:|
     |maiml_file_name|File Name of input MaiML data|URI|⭕️|
     |xl_file_name|File Name of output excel data|URI|-|""|
-    |resultId|select 'result' element ID|List of string|-|
+    |resultId|select 'instance' element ID|List of string|-|
     |selectkey|select 'key' of property/content/uncertainty data content |List of string|-|
 
 - input.jsonの記述例 <br>
@@ -97,7 +98,7 @@
     |:--|:--|:--|:--:|
     |-m "filename"|"filename" is File Name of input MaiML data|URI|⭕️|
     |-o "filename"|"filename" is File Name of output excel data|URI|-|
-    |-si "list of ID"|\<result> element ID|List of string|-|
+    |-si "list of ID"|'instance' element ID|List of string|-|
     |-sk "list of key"|key data of \<property>/\<content>/\<uncertainty> data content|List of string|-|
 　　
 <br><br>
