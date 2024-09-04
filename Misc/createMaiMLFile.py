@@ -534,7 +534,7 @@ class ReadWriteMaiML:
 
 
     ''' Document Contents の作成 '''
-    def createdocumentcontents(self,document_dic, document_Elem):
+    def createDocumentContents(self,document_dic, document_Elem):
         #print('create <document> contents')
         ## Signature    0/1  署名のためのコンテンツ：未実装
         ## global contents 特定グローバル要素
@@ -695,7 +695,7 @@ class ReadWriteMaiML:
 
 
     ''' Protocol Contents の作成 '''
-    def createprotocolcontents(self, protocol_dic, protocol_Elem):
+    def createProtocolContents(self, protocol_dic, protocol_Elem):
         #print('create <protocol> contents')
         ## global contents
         self.writeGlobalContents(protocol_dic, protocol_Elem)
@@ -1008,7 +1008,7 @@ class ReadWriteMaiML:
 
 
     ''' Data Contents の作成 '''
-    def createdatacontents(self, data_dic, data_Elem):
+    def createDataContents(self, data_dic, data_Elem):
         #print('create <data> contents')
         # global contents
         self.writeGlobalContents(data_dic, data_Elem)
@@ -1044,7 +1044,7 @@ class ReadWriteMaiML:
 
 
     ''' EventLog Contents の作成 '''
-    def createeventlogcontents(self, eventlog_dic, eventlog_Elem):
+    def createEventLogContents(self, eventlog_dic, eventlog_Elem):
         #print('create <eventLog> contents')
         # global contents
         self.writeGlobalContents(eventlog_dic, eventlog_Elem)
@@ -1152,7 +1152,7 @@ class ReadWriteMaiML:
                 current.tail = '\n' + ('\t' * (depth - 1))
 
     ''' dict型オブジェクトから新たなmaimlファイルを作成'''
-    def writecontents(self, maiml_dic, filepath):
+    def writeContents(self, maiml_dic, filepath):
         ## maiml root contents
         maiml = 'maiml'
         uuid = 'uuid'
@@ -1184,7 +1184,7 @@ class ReadWriteMaiML:
             if rens.search(key):
                 document_Elem.set(key[1:],document_dic[key])
         ###########################################
-        self.createdocumentcontents(document_dic, document_Elem)
+        self.createDocumentContents(document_dic, document_Elem)
         #print('writed <document> contents!')
         ## document_uuid = str(UUID.uuid4())
         
@@ -1199,7 +1199,7 @@ class ReadWriteMaiML:
             if rens.search(key):
                 protocol_Elem.set(key[1:],protocol_dic[key])
         ###########################################
-        self.createprotocolcontents(protocol_dic, protocol_Elem)
+        self.createProtocolContents(protocol_dic, protocol_Elem)
         #print('writed <protocol> contents!')
         
         ## data & eventLog contents
@@ -1217,7 +1217,7 @@ class ReadWriteMaiML:
                 if rens.search(key):
                     data_Elem.set(key[1:],data_dic[key])
             ###########################################
-            self.createdatacontents(data_dic, data_Elem)
+            self.createDataContents(data_dic, data_Elem)
             #print('writed <data> contents!')
 
             ## eventlog contents
@@ -1239,7 +1239,7 @@ class ReadWriteMaiML:
                     if timeAttrib in eventLog_ns_dic.keys():
                         eventlog_Elem.set('xmlns:'+timeAttrib, eventLog_ns_dic[timeAttrib])
 
-            self.createeventlogcontents(eventlog_dic, eventlog_Elem)
+            self.createEventLogContents(eventlog_dic, eventlog_Elem)
             #print('writed <eventLog> contents!')
         else:
             maimlroot.set('xsi:type','protocolFileRootType')
@@ -1260,4 +1260,4 @@ if __name__ == '__main__':
     createmaiml = ReadWriteMaiML()
     dict_obj = createmaiml.readFile()
     filepath = './output.maiml'
-    createmaiml.writecontents(dict_obj, filepath)
+    createmaiml.writeContents(dict_obj, filepath)
