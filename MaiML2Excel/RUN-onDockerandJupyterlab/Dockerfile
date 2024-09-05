@@ -5,7 +5,7 @@ RUN apt-get update && \
 RUN pip install --upgrade pip  && \
     pip install jupyterlab  && \
     pip install openpyxl
-RUN pip install xmltodict
+RUN pip install lxml
 #RUN mkdir -p /WORK/DATA/INPUT
 #RUN mkdir -p /WORK/DATA/OUTPUT
 #RUN mkdir -p /WORK/DATA/TMP
