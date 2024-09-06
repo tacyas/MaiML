@@ -91,13 +91,16 @@ $(document).ready(function() {
 			id: getParam('id')
 		},
 		success: function(data) {
+
 			cy = cytoscape({
 				container: $('#cy'),
 				style: [
 					{
 						selector: 'node',
 						style: {
-							'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
+							// 20240906 update
+							'label': function (ele) { return ele.data('name') },
+							//'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
 							'color': 'black',
 							'text-outline-color': 'white',
 							'text-outline-width': 1,
