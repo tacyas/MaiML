@@ -97,6 +97,26 @@ $(document).ready(function() {
 		order: [[0, 'asc']]
 	});
 
+	// 20240912 add
+	var table2 = $('#insertiondatagrid').DataTable({
+		paging: false,
+		searching: false,
+		select: true,
+		columns: [
+			{ data: 'uri' },
+			{ data: 'hash' },
+			{ data: 'format' },
+			{ data: 'uuid' }
+		],
+		columnDefs: [
+			{
+				//targets: [2, 4],
+				className: 'left-aligned-cell'
+			}
+		],
+		order: [[0, 'asc']]
+	});
+
 	loadPetrinet();
 });
 
@@ -126,7 +146,8 @@ $(document).ready(function() {
 					{
 						selector: 'node',
 						style: {
-							'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
+							'label': function (ele) { return ele.data('name') },
+							//'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
 							'color': 'black',
 							'text-outline-color': 'white',
 							'text-outline-width': 1,
@@ -343,11 +364,11 @@ $(document).ready(function() {
 					},
 				],
 				//wheelSensitivity: 1,
-				//layout: layoutConfig,
+				layout: layoutConfig,
 				//独自で作成したlayoutを適用する場合↓
-				layout: {
-					name: 'preset'
-				},
+				//layout: {
+				//	name: 'preset'
+				//},
 				elements: data,
 			})
 	
@@ -587,6 +608,35 @@ function getNodeDetails(node_id) {
  * @returns
  * @throws {xhr error}
  */
+function getNodeMaterial00(node_id) {
+	// eslint-disable-line
+
+	$.ajax({
+		url: '/node/node-material',
+		type: 'post',
+		dataType: 'json',
+		data: {
+			node_id: node_id
+		},
+		success: function (data) {
+			$('#datagrid')
+				.dataTable()
+				.fnClearTable();
+			if (data.length > 0) {
+				$('#datagrid')
+					.dataTable()
+					.fnAddData(data);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			var msg = 'ノードマテリアル情報の取得に失敗しました。';
+			formatErrorMessage(jqXHR, textStatus, errorThrown, msg);
+		}
+	});
+
+	return;
+}
+
 function getNodeMaterial(node_id) {
 	// eslint-disable-line
 
@@ -598,14 +648,46 @@ function getNodeMaterial(node_id) {
 			node_id: node_id
 		},
 		success: function(data) {
+			// dataからgeneralを取得
+			var generaldata = data[0].graphJson1;
+			//generaldata = JSON.parse(generaldata);
+
+			/*
+			console.log('data[0]:::' + data[0]);
+			console.log('data[0]:::' + JSON.stringify(data[0]));
+			console.log('graphJson1::::' + data[0].graphJson1);
+			console.log('generaldata::::' + generaldata);
+			*/
+
 			$('#datagrid')
 				.dataTable()
 				.fnClearTable();
-			if (data.length > 0) {
+			if (generaldata != undefined) {
 				$('#datagrid')
 					.dataTable()
-					.fnAddData(data);
+					.fnAddData(JSON.parse('[' + generaldata + ']'));	//generalを追加
 			}
+			//console.log('#datagrid::::'+$('#datagrid').dataTable().fnGetData());
+
+			// dataからinsertionを取得
+			//var insdata = '[' + data[0].graphJson2 + ']';
+			var insdata = data[0].graphJson2;
+			//insdata = JSON.parse(insdata);
+			
+			console.log('data[0]:::' + JSON.stringify(data[0]));
+			//console.log('graphJson2::::' + data[0].graphJson2);
+			console.log('insdata::::' + insdata);
+			console.log('insdata::::' + JSON.stringify(JSON.parse('[' + insdata + ']')));
+
+			$('#insertiondatagrid')
+				.dataTable()
+				.fnClearTable();
+			if (insdata != undefined) {
+				$('#insertiondatagrid')
+					.dataTable()
+					.fnAddData(JSON.parse('[' + insdata + ']'));	//insertionを追加
+			}
+			console.log('#insertiondatagrid::::' + JSON.stringify($('#insertiondatagrid').dataTable().fnGetData()));
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			var msg = 'ノードマテリアル情報の取得に失敗しました。';
