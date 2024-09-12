@@ -568,18 +568,15 @@ exports.node_material = async function(node_id) {
 	*/
 	logger.app.debug(C_MODEL + 'Cypher : ' + cypher.toString());
 
-	var graphJson = '[';
+	// 20240906 edit
+	// property,content
+	var graphJson1;
 	var idx = 0;
-
 	await session
 		.run(cypher)
 		.then(function(result) {
 			result.records.forEach(function(record) {
 				session.close();
-
-				if (idx >= 1) {
-					graphJson = graphJson + ',';
-				}
 
 				var attrib = record.get('attrib');
 				delete attrib.__tag;
@@ -591,20 +588,61 @@ exports.node_material = async function(node_id) {
 					'value': record.get('value') ? record.get('value').substring(0, 96): "",  /* 20240523 edit */
 					'attrib': jsonPrettier(attrib)
 				};
-				graphJson =
-					graphJson + JSON.stringify(arrayTmp);
+
+				if (idx >= 1) {
+					graphJson1 = graphJson1 + ',' + JSON.stringify(arrayTmp);
+				}else {
+					graphJson1 = JSON.stringify(arrayTmp);
+				};
 				idx = idx + 1;
 			});
-
-			graphJson = graphJson + ']';
 		})
 		.catch(function(error) {
 			session.close();
 			logger.app.error(C_MODEL + error.message);
 			throw error;
 		});
+	
+	// 20240906 add
+	// get insertion contents
+	const session2 = driver.session();
+	let cypher2 = cypher_api.get_cypher('get_insertions', node_id);
+	
+	var graphJson2;
+	var idx = 0;
+	await session2
+		.run(cypher2)
+		.then(function (result2) {
+			result2.records.forEach(function (record) {
+				session2.close();
 
+				var arrayTmp2 = {
+					'uri': record.get('uri'),
+					'hash': record.get('hash'),
+					'format': record.get('format'),
+					'uuid': record.get('uuid')
+				};
+
+				if (idx >= 1) {
+					graphJson2 = graphJson2 + ',' + JSON.stringify(arrayTmp2);
+				}else {
+					graphJson2 = JSON.stringify(arrayTmp2);
+				};
+				idx = idx + 1;
+			});
+		})
+		.catch(function (error) {
+			session2.close();
+			logger.app.error(C_MODEL + error.message);
+			throw error;
+		});
+	
+	var graphJson = [{
+		graphJson1 : graphJson1,
+		graphJson2 : graphJson2
+	}];
 	logger.app.debug(C_MODEL + 'GraphJson : ' + graphJson);
+
 	driver.close();
 	return graphJson;
 };

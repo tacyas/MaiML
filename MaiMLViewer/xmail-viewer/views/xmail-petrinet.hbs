@@ -44,44 +44,6 @@
             <div class="col-lg-3">
                 <div class="card">
                     <div class="card-body divscroll" >
-                        <h6 class="card-title" style="font-size: 0.9rem;">Edit Petrinet:</h6>
-                        <div class="input-group input-group-sm mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Source</span>
-                            </div>
-                            <input type="text" id="txtSourceNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping" readonly>
-                            <div class="input-group-prepend">
-                                <!--
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Destination</span>
-                                -->
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Target</span>
-                            </div>
-                            <input type="text" id="txtDestinationNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping" readonly>
-                        </div>
-						<button type="button" id="btnDeleteConn" class="btn btn-danger btn-sm">Delete connection</button>&nbsp;
-						<button type="button" id="btnClearDelSelect" class="btn btn-outline-secondary btn-sm">Clear</button>
-						<br><br>			
-                        <div class="input-group input-group-sm mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Source</span>
-                            </div>
-                            <input type="number" min="0" step="1" id="txtNewSourceNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping" >
-                            <div class="input-group-prepend">
-                                <!--
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Destination</span>
-                                -->
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Target</span>
-                            </div>
-                            <input type="number" min="0" step="1" id="txtNewDestinationNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping" >
-                        </div>
-						<button type="button" id="btnCreateConn" class="btn btn-primary btn-sm">Create connection</button>&nbsp;
-						<button type="button" id="btnClearNewSelect" class="btn btn-outline-secondary btn-sm">Clear</button>&nbsp;
-						<br><br>
-                        <div class="input-group input-group-sm mb-3">
-							<button type="button" id="btnAddNode" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalNodeCreation">Add node</button>&nbsp;&nbsp;
-							<button type="button" id="btnExportXmail" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalExportXmail">Export MaiML</button>
-						</div>
-
                         <h6 class="card-title" style="font-size: 0.9rem;">Node Details:</h6>
                         <div class="input-group input-group-sm mb-3">
                             <div class="input-group-prepend">
@@ -135,10 +97,65 @@
 							</div>
 							<input type="text" id="txtTemplateDescription1" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
 						</div>
+
+                        <!-- 20240906 add -->
+                        <h6 class="card-title" style="font-size: 0.9rem;">Insertion contents:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover" style="font-size:0.7rem; text-align:center;"
+                                id="insertiondatagrid">
+                                <thead>
+                                    <th style="width:8.0rem;">uri</th>
+                                    <th style="width:10.0rem;">hash</th>
+                                    <th style="width:6.0rem;">format</th>
+                                    <th style="width:10.0rem;">uuid</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!--
+                        <h6 class="card-title" style="font-size: 0.9rem;">Edit Petrinet:</h6>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Source</span>
+                            </div>
+                            <input type="text" id="txtSourceNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq"
+                                aria-describedby="addon-wrapping" readonly>
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Target</span>
+                            </div>
+                            <input type="text" id="txtDestinationNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq"
+                                aria-describedby="addon-wrapping" readonly>
+                        </div>
+                        <button type="button" id="btnDeleteConn" class="btn btn-danger btn-sm">Delete connection</button>&nbsp;
+                        <button type="button" id="btnClearDelSelect" class="btn btn-outline-secondary btn-sm">Clear</button>
+                        <br><br>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Source</span>
+                            </div>
+                            <input type="number" min="0" step="1" id="txtNewSourceNode" class="form-control" style="font-size: 0.7rem;"
+                                aria-label="seq" aria-describedby="addon-wrapping">
+                            <div class="input-group-prepend">\
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Target</span>
+                            </div>
+                            <input type="number" min="0" step="1" id="txtNewDestinationNode" class="form-control" style="font-size: 0.7rem;"
+                                aria-label="seq" aria-describedby="addon-wrapping">
+                        </div>
+                        <button type="button" id="btnCreateConn" class="btn btn-primary btn-sm">Create connection</button>&nbsp;
+                        <button type="button" id="btnClearNewSelect" class="btn btn-outline-secondary btn-sm">Clear</button>&nbsp;
+                        <br><br>
+                        <div class="input-group input-group-sm mb-3">
+                            <button type="button" id="btnAddNode" class="btn btn-primary btn-sm" data-toggle="modal"
+                                data-target="#modalNodeCreation">Add node</button>&nbsp;&nbsp;
+                            <button type="button" id="btnExportXmail" class="btn btn-primary btn-sm" data-toggle="modal"
+                                data-target="#modalExportXmail">Export MaiML</button>
+                        </div>
+                        -->
                     </div>
                 </div>
             </div>
-
 			<div class="col-lg-4">
 				<br>
 				<h6 style="font-size: 0.9rem;">Properties:</h6>
@@ -161,6 +178,7 @@
 </section>
 
 <!-- place modal -->
+<!--
 <div class="modal fade" id="modalNodeCreation" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
   <div class="modal-dialog" role="document" style="font-size: 0.8rem;">
     <div class="modal-content">
@@ -201,8 +219,9 @@
     </div>
   </div>
 </div>
-
+-->
 <!-- export xmail -->
+<!--
 <div class="modal fade" id="modalExportXmail" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
   <div class="modal-dialog" role="document" style="font-size: 0.8rem;">
     <div class="modal-content">
@@ -228,7 +247,7 @@
     </div>
   </div>
 </div>
-
+-->
 
     <script src="/views/js/vendor-util/jquery.min.js"></script>
     <script src="/views/js/vendor-util/bootstrap.min.js"></script>
@@ -240,7 +259,8 @@
     
 	<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script> 
 
-    <script src="/views/js/xmail-petrinet.js"></script>
+    <script src="/views/js/xmail-petrinet2.js"></script>
+    <!--<script src="/views/js/xmail-petrinet.js"></script>-->
     <script src="/views/js/utils.js"></script>
 
 	<script src="/views/js/cytoscape.min.js"></script>
