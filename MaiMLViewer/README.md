@@ -78,18 +78,20 @@ MaiMLに格納されているPetri-Netと各要素の詳細情報の表示画面
 * MaiMLグループをダブルクリックすると、そのMaiMLのPetri-Net要素情報画面へ遷移
 （編集対象のMaiMLを切り替えることができる）
 
-##### 4.3.2. 編集 + 要素情報表示(中カラム)
-* ノード間の接続の削除：
-左カラムで接続を選択して `Delete connection` 押下
-* ノード間に接続を追加：
-左カラムで place/transition を順に選択して `Create connection` 押下
-* place/transition 追加：
-`Add node` &rarr; `ID`文字列を入力, `Node type`選択 &rarr; `実行`
-* 編集結果のMaiMLファイル出力：
-`Export MaiML` &rarr; `Filename` を入力 &rarr; `実行`
+##### 4.3.2. ~~編集 +~~ 要素情報表示(中カラム) + insertion要素情報表示
+~~* ノード間の接続の削除：~~
+~~左カラムで接続を選択して `Delete connection` 押下~~
+~~* ノード間に接続を追加：~~
+~~左カラムで place/transition を順に選択して `Create connection` 押下~~
+~~* place/transition 追加：~~
+~~`Add node` &rarr; `ID`文字列を入力, `Node type`選択 &rarr; `実行`~~
+~~* 編集結果のMaiMLファイル出力：~~
+~~`Export MaiML` &rarr; `Filename` を入力 &rarr; `実行`~~
 * Node Details：
 選択したノードに含まれる情報を表示
-
+* Insertion contents：
+選択したノードが持つinsertion要素の情報を表示
+  
 ##### 4.3.3. Properties(右カラム)
 
 左カラムで選択したノードに存在する属性情報を表示する。
