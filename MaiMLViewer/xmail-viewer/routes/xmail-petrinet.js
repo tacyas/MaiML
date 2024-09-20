@@ -62,4 +62,40 @@ router.post('/xmail-petrinet', async (req, res, next) => {
 	return next;
 });
 
+// 20240912 add
+/**
+ * ルートサービス  XMAILペトリネット図の位置情報を保存
+ * @name get/view
+ * @function
+ * @memberof module:routes/xmail-petrinet
+ * @inner
+ * @param {string} node - XMAIL自身のnode id
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.post('/xmail-position', async (req, res, next) => {
+	logger.app.debug('[router-petrinet] param:' + util.inspect(req.body.nid) + util.inspect(req.body.pnml_data));
+	//nodes & edges
+	await xmail
+		.pn_position(req.body.nid, req.body.pnml_data)
+		.then(result => {
+			logger.app.debug('[router-petrinet]' + util.inspect(result));
+
+			res.setHeader('Content-Type', 'application/json');
+			if (result === '[') {
+				res.status(404);
+			} else {
+				res.status(200);
+			}
+			res.send(result);
+		})
+		.catch(error => {
+			res.status(500);
+			logger.app.error('[router-petrinet]' + error.message);
+			res.send(error.message);
+		});
+
+	return next;
+});
+
 module.exports = router;

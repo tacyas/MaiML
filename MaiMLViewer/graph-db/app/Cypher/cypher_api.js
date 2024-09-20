@@ -123,7 +123,7 @@ query_list = {
 			return nodes, collect(r) as edges;
 		`
 		*/
-		
+
 		// 2023/4/18 add
 		cypher_str: `
 			match (a:XMAIL)
@@ -962,6 +962,28 @@ detach delete n, te, plR, uu, uud, na, nad, de, ded;
 				n:PN:Layer1,
 				n.__layer = 0,
 				n.__xmail_nid = $xmail_nid;
+		`
+	},
+	get_docuuid: {
+		/*
+		20240913 add
+		* document要素のuuid取得
+
+		Args:
+				xmail_nid   : node-ID of XMAIL
+		Returns:
+				uuid	: uuid of document element
+		*/
+		params: [
+			'xmail_nid'
+		],
+		cypher_str: `
+			match
+				(a:XMAIL)-[:XML_Root]->(d)-[:XML_Child]->(do {__tag: 'document'})-[:XML_Child]->(uu {__tag: 'uuid'})-[:XML_Data]->(uuid)
+			where
+				id(a)=$xmail_nid
+			return
+				uuid.value as uuid
 		`
 	},
 	/*

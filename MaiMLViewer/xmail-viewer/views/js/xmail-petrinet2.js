@@ -364,11 +364,12 @@ $(document).ready(function() {
 					},
 				],
 				//wheelSensitivity: 1,
-				layout: layoutConfig,
+				
+				//layout: layoutConfig,
 				//独自で作成したlayoutを適用する場合↓
-				//layout: {
-				//	name: 'preset'
-				//},
+				layout: {
+					name: 'preset'
+				},
 				elements: data,
 			})
 	
@@ -650,6 +651,43 @@ function getNodeMaterial(node_id) {
 
 	return;
 }
+
+
+// 20240912 add
+/**
+* ペトリネット図座標記憶ボタンイベントハンドラ
+*/
+$('#pnml_position_btn').click(function () {
+	//positionデータを保存するためにメモリ上のペトリネットデータを取得
+	var cy = window.cy;
+	var s = "";
+	var nodes = cy.nodes();
+	nodes.forEach(function (node) {
+		s += JSON.stringify(node.json());
+		s += "\n";
+	});
+	//console.log(s);
+	//var uuid; 
+	//サーバーへ送る
+	$.ajax({
+		url: '/petrinet/xmail-position',
+		type: 'post',
+		dataType: 'json',
+		data: {
+			nid: getParam('id'),
+			pnml_data: s
+		},
+		success: function (data) {   //通信成功時の処理(dataは返り値でjson型)
+			//特になし
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			var msg = 'ペトリネット位置情報の保存に失敗しました。';
+			formatErrorMessage(jqXHR, textStatus, errorThrown, msg);
+		}
+	});
+});
+
+
 
 /**
 * ノード選択エリアのクリアボタンイベントハンドラ

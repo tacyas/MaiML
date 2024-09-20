@@ -25,7 +25,7 @@ const C_MODEL = '[xmail]';
  * @returns graphJson - XMAILデータ一覧JSON
  * @throws {cypher error}
  */
- exports.list = async function() {
+exports.list = async function () {
 	const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
 	const session = driver.session();
 	logger.app.debug(C_MODEL + 'Graph DB connected.');
@@ -38,8 +38,8 @@ const C_MODEL = '[xmail]';
 
 	await session
 		.run(cypher)
-		.then(function(result) {
-			result.records.forEach(function(record) {
+		.then(function (result) {
+			result.records.forEach(function (record) {
 				session.close();
 
 				if (idx >= 1) {
@@ -48,10 +48,10 @@ const C_MODEL = '[xmail]';
 
 				// テーブル形式データをセル内における表現に変換する関数
 				function tableToString(table, titles) {
-					return table.map(function(elm) {
-						return elm.map(function(s) { return s === null ? '' : s; })
-									.map( (v, i) => '<b>[' + titles[i] + ']</b> ' + v)
-									.join('<br>');
+					return table.map(function (elm) {
+						return elm.map(function (s) { return s === null ? '' : s; })
+							.map((v, i) => '<b>[' + titles[i] + ']</b> ' + v)
+							.join('<br>');
 					}).join('<br><br>');
 				}
 
@@ -124,7 +124,7 @@ const C_MODEL = '[xmail]';
 
 			graphJson = graphJson + ']';
 		})
-		.catch(function(error) {
+		.catch(function (error) {
 			session.close();
 			logger.app.error(C_MODEL + error.message);
 			throw error;
@@ -134,6 +134,7 @@ const C_MODEL = '[xmail]';
 
 	return graphJson;
 };
+
 
 /*
  * [UI-2] PN図出力 - nodes & edges
@@ -146,14 +147,14 @@ const C_MODEL = '[xmail]';
  * @returns graphJson - ペトリネットJSON
  * @throws {cypher error}
  */
-exports.pn_nodes = async function(id) {
+exports.pn_nodes = async function (id) {
 	let cypher = cypher_api.get_cypher('get_PNall', id);
 	logger.app.debug(C_MODEL + 'Cypher : ' + cypher.toString());
 
 	var graphJson = '';
 	var idx = 0;
 
-	return new Promise(function(resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		request.post(
 			{
 				uri: url,
@@ -167,7 +168,7 @@ exports.pn_nodes = async function(id) {
 					]
 				}
 			},
-			function(error, response, body) {
+			async function (error, response, body) {
 				if (error) {
 					logger.app.error(C_MODEL + error.message);
 					reject(error);
@@ -185,8 +186,58 @@ exports.pn_nodes = async function(id) {
 					nodes = body.results[0].data[0].graph.nodes;
 					edges = body.results[0].data[0].graph.relationships;
 				}
+
+
+				// add 240912
+				// get document uuid
+				const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+				const session = driver.session();
+				logger.app.debug(C_MODEL + 'Graph DB connected.');
+
+				let cypher = cypher_api.get_cypher('get_docuuid', id);
+				logger.app.debug(C_MODEL + 'Cypher : ' + cypher.toString());
+
+				var uuid;
+				await session
+					.run(cypher)
+					.then(function (result) {
+						//logger.app.debug("getuuid records:" +JSON.stringify(result.records));
+						result.records.forEach(function (record) {
+							//logger.app.debug("getuuid record:"+JSON.stringify(record));
+							uuid = record.get('uuid');
+							//logger.app.debug("uuid:" + uuid);
+							session.close();
+						});
+					})
+					.catch(function (error) {
+						session.close();
+						logger.app.error(C_MODEL + error.message);
+						throw error;
+					});
+				//driver.close();
+
+				// get position's file
+				var filename = id + '_' + uuid + '.position';
+				var filepath = path.join(__dirname, '../exports/pnmlpositions', filename);
+				logger.app.debug(C_MODEL + 'positions filepath=' + JSON.stringify(filepath));
+				const fs = require('fs');
+				var fdata;
+				if (fs.existsSync(filepath)) {
+					try {
+						fdata = fs.readFileSync(filepath, 'utf8');
+						if (fdata) {
+							// 改行で分割して、各JSONオブジェクトをパース
+							fdata = fdata.replace(/\\\"/g, '"').slice(1).slice(0, -1);
+							logger.app.debug(C_MODEL + 'position file data :' + JSON.stringify(fdata, null, 2));
+						};
+					} catch (err) {
+						logger.app.error(C_MODEL + error.message);
+					}
+				}
+
 				graphJson = graphJson + '[';
-				nodes.forEach(function(record) {
+				nodes.forEach(function (record) {
+					logger.app.debug("record:" + JSON.stringify(record));
 					if (idx >= 1) {
 						graphJson = graphJson + ',';
 					}
@@ -195,7 +246,7 @@ exports.pn_nodes = async function(id) {
 
 					graphJson = graphJson + '{"group":"nodes",';
 
-					graphJson = graphJson + '"data":{';	
+					graphJson = graphJson + '"data":{';
 					graphJson = graphJson +
 						'"id": "' +
 						record.id +
@@ -221,23 +272,59 @@ exports.pn_nodes = async function(id) {
 						'"ownNode": "' +
 						JSON.stringify(own_node) +
 						'"';
-						if (!own_node) {
-							graphJson = graphJson + ',"type": "otherNode"';
-							graphJson = graphJson + ',"readonly": "true"';
-						} else {
-							graphJson = graphJson + ',"type": "ownNode"';
-							graphJson = graphJson + ',"readonly": "false"';
-						}
-						if (idx == 1) {
-							graphJson = graphJson + ',"root": true';
-						}
-						if (!parents.includes(record.properties.__xmail_nid)) {
-							parents.push(record.properties.__xmail_nid);
-						}
+					if (!own_node) {
+						graphJson = graphJson + ',"type": "otherNode"';
+						graphJson = graphJson + ',"readonly": "true"';
+					} else {
+						graphJson = graphJson + ',"type": "ownNode"';
+						graphJson = graphJson + ',"readonly": "false"';
+					}
+					if (idx == 1) {
+						graphJson = graphJson + ',"root": true';
+					}
+					if (!parents.includes(record.properties.__xmail_nid)) {
+						parents.push(record.properties.__xmail_nid);
+					}
 
-						graphJson = graphJson + '},';
+					graphJson = graphJson + '},';
 
-					graphJson = graphJson + 
+
+					// add 240910
+					//positionを追加する
+					if (fdata) {
+						var pt = false;
+						const positions = fdata.split('\\n')
+							.filter(line => line.trim() !== '') // 空行を除去
+							.map(jsonString => {
+								//logger.app.debug("jsonString:" + jsonString);
+								try {
+									const obj = JSON.parse(jsonString);
+									const po = obj.position;
+									const id = obj.data.id;
+									//logger.app.debug('record.id:id='+ record.id + ':' + id);
+									if (record.id === id) {
+										pt = true;
+										return po;
+									} else {
+										return null;
+									}
+								} catch (error) {
+									logger.app.error(C_MODEL + error.message);
+									return null; // パースエラーの場合はnull
+								}
+							})
+							.filter(position => position !== null); // nullを除去
+
+						if (pt) {
+							graphJson = graphJson + '"position":';
+							graphJson = graphJson + JSON.stringify(positions[0]);
+							graphJson = graphJson + ',';
+						}
+					} else {
+						logger.app.debug(C_MODEL + "file data is null.");
+					}
+
+					graphJson = graphJson +
 						'"classes": "' +
 						record.properties.__tag +
 						'"';
@@ -251,7 +338,7 @@ exports.pn_nodes = async function(id) {
 				 * groups json
 				 */
 				//idx = 0;
-				parents.forEach(function(elem) {
+				parents.forEach(function (elem) {
 					graphJson = graphJson + ',';
 					graphJson = graphJson + '{"group":"nodes", "data":{' +
 						'"id": "' + elem +
@@ -275,13 +362,13 @@ exports.pn_nodes = async function(id) {
 				 * edges json
 				 */
 				//idx = 0;
-				edges.forEach(function(
+				edges.forEach(function (
 					record
 				) {
 					let own_node = (record.properties.__xmail_nid == id);
 					logger.app.debug("record.__xmail_nid:" + record.properties.__xmail_nid);
-					logger.app.debug("id:"+id);
-					logger.app.debug("own_node:"+own_node);
+					logger.app.debug("id:" + id);
+					logger.app.debug("own_node:" + own_node);
 
 					if (idx >= 1) {
 						graphJson = graphJson + ',';
@@ -303,25 +390,85 @@ exports.pn_nodes = async function(id) {
 						'"ownNode": "' +
 						JSON.stringify(own_node) +
 						'"';
-						//Do not to display "PNarc" on the conneciton
-						if (record.type=='SAME'){
-							graphJson = 
-								graphJson +
-								', "arrow":  "none"';
-						}
+					//Do not to display "PNarc" on the conneciton
+					if (record.type == 'SAME') {
 						graphJson =
 							graphJson +
-							'} }';
+							', "arrow":  "none"';
+					}
+					graphJson =
+						graphJson +
+						'} }';
 					idx = idx + 1;
 				});
 				graphJson = graphJson + '] ';
-				logger.app.debug(C_MODEL + 'GraphJson : ' + graphJson);
+				//logger.app.debug(C_MODEL +'GraphJson : ' + graphJson);
 
 				resolve(graphJson);
 			}
 		);
 	});
 };
+
+
+// 20240912 add
+/*
+ * PN図の座標記録
+ *・GraphDBへ接続
+ *・Cypher生成
+ *・Cypher実行
+ *・結果を元に座標ファイルを保存
+ *
+ * @returns true
+ * @throws {cypher error}
+*/
+const path = require('path');
+const fs = require('fs');
+exports.pn_position = async function (id, position) {
+	const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+	const session = driver.session();
+	logger.app.debug(C_MODEL + 'Graph DB connected.');
+
+	let cypher = cypher_api.get_cypher('get_docuuid', id);
+	logger.app.debug(C_MODEL + 'Cypher : ' + cypher.toString());
+
+	// document要素のuuidを取得
+	var uuid;
+	await session
+		.run(cypher)
+		.then(function (result) {
+			//logger.app.debug(JSON.stringify(result.records));
+			result.records.forEach(function (record) {
+				//logger.app.debug(JSON.stringify(record));
+				session.close();
+				uuid = record.get('uuid');
+			});
+		})
+		.catch(function (error) {
+			session.close();
+			logger.app.error(C_MODEL + error.message);
+			throw error;
+		});
+
+	var filename = id + '_' + uuid + '.position'
+	var filepath = path.join(__dirname, '../exports/pnmlpositions', filename)
+	// save file
+	fs.writeFile(filepath, JSON.stringify(position), 'utf8', (error) => {
+		if (error) {
+			logger.app.error(C_MODEL + error.message);
+			throw error;
+		}
+	});
+
+	driver.close();
+	var t = true;
+	return t;
+
+};
+
+
+
+
 
 /*
  * [UI-3] node詳細情報取得（個別）
@@ -334,7 +481,7 @@ exports.pn_nodes = async function(id) {
  * @returns graphJson - node詳細情報JSON
  * @throws {cypher error}
  */
-exports.node_list = async function(node_list) {
+exports.node_list = async function (node_list) {
 
 
 	const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
@@ -350,8 +497,8 @@ exports.node_list = async function(node_list) {
 
 	await session
 		.run(cypher)
-		.then(function(result) {
-			result.records.forEach(function(record) {
+		.then(function (result) {
+			result.records.forEach(function (record) {
 				session.close();
 
 				if (idx >= 1) {
@@ -395,7 +542,7 @@ exports.node_list = async function(node_list) {
 
 			graphJson = graphJson + ']';
 		})
-		.catch(function(error) {
+		.catch(function (error) {
 			session.close();
 			logger.app.error(C_MODEL + error.message);
 			throw error;
@@ -417,7 +564,7 @@ exports.node_list = async function(node_list) {
  * @returns graphJson - node詳細情報JSON
  * @throws {cypher error}
  */
-exports.node_all = async function(node_id) {
+exports.node_all = async function (node_id) {
 	const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
 	const session = driver.session();
 	logger.app.debug(C_MODEL + 'Graph DB connected.');
@@ -458,8 +605,8 @@ exports.node_all = async function(node_id) {
 
 	await session
 		.run(cypher)
-		.then(function(result) {
-			result.records.forEach(function(record) {
+		.then(function (result) {
+			result.records.forEach(function (record) {
 				session.close();
 
 				if (idx >= 1) {
@@ -503,7 +650,7 @@ exports.node_all = async function(node_id) {
 
 			graphJson = graphJson + ']';
 		})
-		.catch(function(error) {
+		.catch(function (error) {
 			session.close();
 			logger.app.error(C_MODEL + error.message);
 			throw error;
@@ -525,7 +672,7 @@ exports.node_all = async function(node_id) {
  * @returns graphJson - node詳細情報JSON
  * @throws {cypher error}
  */
-exports.node_material = async function(node_id) {
+exports.node_material = async function (node_id) {
 	const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
 	const session = driver.session();
 	logger.app.debug(C_MODEL + 'Graph DB connected.');
@@ -568,46 +715,48 @@ exports.node_material = async function(node_id) {
 	*/
 	logger.app.debug(C_MODEL + 'Cypher : ' + cypher.toString());
 
-	// 20240906 edit
+	//var graphJson = '[';
+
 	// property,content
+	//var graphJson1 = '[';
 	var graphJson1;
 	var idx = 0;
 	await session
 		.run(cypher)
-		.then(function(result) {
-			result.records.forEach(function(record) {
+		.then(function (result) {
+			result.records.forEach(function (record) {
 				session.close();
-
 				var attrib = record.get('attrib');
 				delete attrib.__tag;
-				
+
 				var arrayTmp = {
 					'nid': String(record.get('nid')),
 					'parent_nid': String(record.get('parent_nid')),
 					'description': record.get('description'),
-					'value': record.get('value') ? record.get('value').substring(0, 96): "",  /* 20240523 edit */
+					'value': record.get('value') ? record.get('value').substring(0, 96) : "",  /* 20240523 edit */
 					'attrib': jsonPrettier(attrib)
 				};
 
 				if (idx >= 1) {
 					graphJson1 = graphJson1 + ',' + JSON.stringify(arrayTmp);
-				}else {
+				} else {
 					graphJson1 = JSON.stringify(arrayTmp);
 				};
 				idx = idx + 1;
 			});
 		})
-		.catch(function(error) {
+		.catch(function (error) {
 			session.close();
 			logger.app.error(C_MODEL + error.message);
 			throw error;
 		});
-	
+	logger.app.debug(C_MODEL + 'GraphJson1 : ' + graphJson1);
+
 	// 20240906 add
 	// get insertion contents
 	const session2 = driver.session();
 	let cypher2 = cypher_api.get_cypher('get_insertions', node_id);
-	
+
 	var graphJson2;
 	var idx = 0;
 	await session2
@@ -625,7 +774,7 @@ exports.node_material = async function(node_id) {
 
 				if (idx >= 1) {
 					graphJson2 = graphJson2 + ',' + JSON.stringify(arrayTmp2);
-				}else {
+				} else {
 					graphJson2 = JSON.stringify(arrayTmp2);
 				};
 				idx = idx + 1;
@@ -636,11 +785,12 @@ exports.node_material = async function(node_id) {
 			logger.app.error(C_MODEL + error.message);
 			throw error;
 		});
-	
+
 	var graphJson = [{
-		graphJson1 : graphJson1,
-		graphJson2 : graphJson2
+		graphJson1: graphJson1,
+		graphJson2: graphJson2
 	}];
+	//graphJson = graphJson + ']';
 	logger.app.debug(C_MODEL + 'GraphJson : ' + graphJson);
 
 	driver.close();
