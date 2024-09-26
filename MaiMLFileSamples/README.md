@@ -10,5 +10,5 @@
 3. XRF.maiml </br>
   XRF工程の情報を記載。
 
-4. SEM.maiml </br>
+4. SEM.maiml (uncommitted)</br>
   SEM計測工程の情報を記載。
