@@ -4,7 +4,7 @@
 1. Raman.maiml </br>
   ラマン分光工程の情報を記載。
 
-2. GCMS.maiml </br>
+2. GC-MS.maiml </br>
   GC-MS分析工程の情報を記載。
 
 3. XRF.maiml </br>
