@@ -60,10 +60,14 @@ const layoutConfig_breadthfirst = {
 		e.cy.center()
 	}
 };
+const layputConfigD = {
+	name: 'preset'
+};
 //230425 add
+const layoutConfig = layputConfigD;
 //const layoutConfig = layoutConfig_grid;
 //const layoutConfig = layoutConfig_cose;
-const layoutConfig = layoutConfig_cola;
+//const layoutConfig = layoutConfig_cola;
 //const layoutConfig = layoutConfig_circle;
 //const layoutConfig = layoutConfig_breadthfirst;
 
@@ -140,13 +144,15 @@ $(document).ready(function() {
 			id: getParam('id')
 		},
 		success: function(data) {   //通信成功時の処理(dataは返り値でjson型)
+			//console.log(data);
+
 			cy = cytoscape({
 				container: $('#cy'),
 				style: [
 					{
 						selector: 'node',
 						style: {
-							'label': function (ele) { return ele.data('name') },
+							'label': function (ele) { return ele.data('elementID') },
 							//'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
 							'color': 'black',
 							'text-outline-color': 'white',
@@ -365,14 +371,27 @@ $(document).ready(function() {
 				],
 				//wheelSensitivity: 1,
 				
-				//layout: layoutConfig,
+				layout: layoutConfig,
 				//独自で作成したlayoutを適用する場合↓
 				layout: {
 					name: 'preset'
 				},
 				elements: data,
 			})
-	
+			
+			// add 20240930 layoutの定義がなければcolaで表示
+			var layout_out = layoutConfig_cola;
+			for (var i = 0; i < data.length; i++) {
+				var keys = Object.keys(data[i]);
+				for (var j = 0; j < keys.length; j++) {
+					if (keys[j] == 'position') {
+						layout_out = layoutConfig;
+					};
+				};
+			};
+			const layout = cy.makeLayout(layout_out);
+			layout.run();
+
 			var tappedBefore;
 			var tappedTimeout;
 
@@ -526,6 +545,7 @@ $(document).ready(function() {
 }
 
 /**
+ * 
  * ノード詳細情報取得（対象ノードリスト指定）
  * ・ノードリストで列挙したノードの詳細情報を取得する。
  * ・ここで取得した内容はメモリ上に保持され、ペトリネット図のノード選択時に参照される。
@@ -633,7 +653,7 @@ function getNodeMaterial(node_id) {
 
 			// dataからinsertionを取得
 			var insdata = data[0].graphJson2;
-
+			
 			$('#insertiondatagrid')
 				.dataTable()
 				.fnClearTable();
@@ -648,7 +668,6 @@ function getNodeMaterial(node_id) {
 			formatErrorMessage(jqXHR, textStatus, errorThrown, msg);
 		}
 	});
-
 	return;
 }
 
@@ -667,7 +686,6 @@ $('#pnml_position_btn').click(function () {
 		s += "\n";
 	});
 	//console.log(s);
-	//var uuid; 
 	//サーバーへ送る
 	$.ajax({
 		url: '/petrinet/xmail-position',
@@ -686,6 +704,7 @@ $('#pnml_position_btn').click(function () {
 		}
 	});
 });
+
 
 
 
