@@ -188,6 +188,6 @@ Delete all data registered with the specified NID for the uploaded MaiML file.
 
 Directly display the Petri net diagram.
 
-	http://localhost:3000/petronet/view?id=0
-	http://localhost:3000/petronet/view?id=30862
+	http://localhost:3000/petrinet/view?id=0
+	http://localhost:3000/petrinet/view?id=30862
 	etc.
