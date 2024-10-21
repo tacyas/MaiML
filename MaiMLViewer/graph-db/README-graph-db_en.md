@@ -20,7 +20,7 @@ First, start the DB server to ensure it is operational for queries. After that, 
 #### Script Execution Steps
 
 ```sh
-cd kyutech/graph-db
+cd MaiMLViewer/graph-db
 sh ./docker-run-neo4j.sh
 
 # Place the MaiML file to be inserted in the ./XMAIL directory in advance.
