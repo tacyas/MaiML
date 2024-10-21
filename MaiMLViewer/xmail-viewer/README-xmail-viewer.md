@@ -54,25 +54,24 @@ GraphDBに登録されているMaiMLデータを一覧で照会し、さらに�
 
 ### アプリケーション起動方法
 ＜開発モード＞
-１）前提条件として開発環境にnodejs及び、npmがインストールされていること
-　　　　`\xmail-viewer> node -v`
-　　　　`v10.5.0`
-　　　　`\xmail-viewer> npm -v`
-　　　　`6.1.0`
+1) 前提条件として開発環境にnodejs及び、npmがインストールされていること </br>
+　　　　`\xmail-viewer> node -v` </br>
+　　　　`v10.5.0` </br>
+　　　　`\xmail-viewer> npm -v` </br>
+　　　　`6.1.0` </br>
 
-２）当リポジトリ(xmail-viewer)をクローン
-３）package.jsonが存在するディレクトリにて`npm install`を実行
-
+2) 当リポジトリ(xmail-viewer)をクローン
+3) package.jsonが存在するディレクトリにて`npm install`を実行 </br>
 	※ クライアントセキュリティソフトウェアが有効になっている場合、npm installが失敗する場合があるので、その場合は一旦セキュリティソフトウェアを停止して実行し、後で必ずセキュリティソフトウェアを有効にしてください。
-　　
-４）同ディレクトリにおいて下記コマンドを実行
+4) 同ディレクトリにおいて下記コマンドを実行 </br>
   　　　　`node ./bin/www`
-５）Chromeブラウザから下記URLへアクセス
+5) Chromeブラウザから下記URLへアクセス </br>
 　　　　`http://localhost:3000`
-６）XMAILデータ一覧照会画面が表示される
-
-＜プロダクションモード＞
-　　　　`TBD`
+6) XMAILデータ一覧照会画面が表示される
+ </br>
+ 
+＜プロダクションモード＞ </br>
+       `TBD`
 
 ### ディレクトリ構成
 	./xmail-viewer
@@ -197,8 +196,8 @@ docker hubからnode image を取得（10.5.0で開発だが、とりあえずla
 
 ペトリネット図を直接表示
 
-	http://localhost:3000/petronet/view?id=0
-	http://localhost:3000/petronet/view?id=30862
+	http://localhost:3000/petrinet/view?id=0
+	http://localhost:3000/petrinet/view?id=30862
 	など
 
 > Written with [StackEdit](https://stackedit.io/).
