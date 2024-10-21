@@ -50,7 +50,7 @@ https://marketplace.visualstudio.com/items?itemName=joelday.docthis
 |8|Orchestration|docker-compose|
 
 ### アプリケーション概要
-GraphDBに登録されているXMAILデータを一覧で照会し、さらに一覧上で選択されたXMAILに対するペトリネット図を生成する。
+GraphDBに登録されているMaiMLデータを一覧で照会し、さらに一覧上で選択されたMaiMLに対するペトリネット図を生成する。
 
 ### アプリケーション起動方法
 ＜開発モード＞
@@ -96,11 +96,11 @@ GraphDBに登録されているXMAILデータを一覧で照会し、さらに�
 ## Docker
 ### Prerequisites
 githubからソースをクローン
-git clone [https://mntUsk@github.com/Micronet-Techno/kyutech.git](https://mntUsk@github.com/Micronet-Techno/kyutech.git)
+git clone [https://github.com/tacyas/MaiML.git](https://github.com/tacyas/MaiML.git)
 
 	cd ~
 	cd kyutech
-	git clone https://mntUsk@github.com/Micronet-Techno/kyutech.git
+	git clone https://github.com/tacyas/MaiML.git
 	(password)
 	cd kyutech
 	sudo cp -r xmail-viewer/ /usr/kyutech/
@@ -171,11 +171,11 @@ docker hubからnode image を取得（10.5.0で開発だが、とりあえずla
 
 |#|Feature|概要|
 |:-----:|:-----|:-----|
-|1|XMAILデータ一覧照会|Graph DBに格納されているデータを一覧表示します。|
-|2|XMAILペトリネット図生成|Alchemy.jsを使用し、XMAILデータからペトリネット図を生成します。|
-|3|XMAIL構成ノード情報照会|ペトリネット図を構成するノートの情報を照会します。|
-|4|XMAILファイルアップロード(1件)|ローカルPC上のXMAILファイルを一覧表示とペトリネット図データとしてGraph DBへ登録します。NIDは自動で採番され、同じファイルを複数回登録することができる。|
-|5|XMAILデータ削除(1件)|一覧上で選択された行（キー：NID）を対象にGraphDBに登録されているXMAILデータを削除する。|
+|1|MaiMLデータ一覧照会|Graph DBに格納されているデータを一覧表示します。|
+|2|MaiMLペトリネット図生成|Alchemy.jsを使用し、MaiMLデータからペトリネット図を生成します。|
+|3|MaiML構成ノード情報照会|ペトリネット図を構成するノートの情報を照会します。|
+|4|MaiMLファイルアップロード(1件)|ローカルPC上のMaiMLファイルを一覧表示とペトリネット図データとしてGraph DBへ登録します。NIDは自動で採番され、同じファイルを複数回登録することができる。|
+|5|MaiMLデータ削除(1件)|一覧上で選択された行（キー：NID）を対象にGraphDBに登録されているMaiMLデータを削除する。|
 ||||
 
 #### ログ
