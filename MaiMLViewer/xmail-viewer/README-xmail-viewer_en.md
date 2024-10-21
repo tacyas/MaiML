@@ -163,7 +163,7 @@ Obtain the Node image from Docker Hub (development is done with version 10.5.0, 
 |#|Feature|Overview|
 |:-----:|:-----|:-----|
 |1|Query MaiML Data List|Displays a list of data stored in the Graph DB.|
-|2|Generate MaiML Petri Net Diagram|Using Alchemy.js, generate a Petri net diagram from the XMAIL data.|
+|2|Generate MaiML Petri Net Diagram|Using Cytoscape.js, generate a Petri net diagram from the XMAIL data.|
 |3|Query MaiML Structure Node Information|Queries the information of the nodes that make up the Petri net diagram.|
 |4|Upload MaiML File (1 item)|The MaiML file on your local PC will be registered in the Graph DB as a list and Petri net diagram data. NIDs are automatically assigned, allowing the same file to be registered multiple times.|
 |5|Delete MaiML File (1 item)|Delete the MaiML data registered in GraphDB for the selected row in the list (key: NID).|
