@@ -1370,7 +1370,7 @@ class ReadWriteMaiML:
             ## method -- materialTemplate  >=0
             materialTemplate = 'materialTemplate'
             if materialTemplate in method_dic.keys():
-                if isinstance(program_dic[materialTemplate], list):
+                if isinstance(method_dic[materialTemplate], list):
                     m_materialTemplate_list = method_dic[materialTemplate]
                 else:
                     m_materialTemplate_list = [method_dic[materialTemplate]]
@@ -1388,7 +1388,7 @@ class ReadWriteMaiML:
             ## method -- conditionTemplate  >=0
             conditionTemplate = 'conditionTemplate'
             if conditionTemplate in method_dic:
-                if isinstance(program_dic[conditionTemplate], list):
+                if isinstance(method_dic[conditionTemplate], list):
                     m_conditionTemplate_list = method_dic[conditionTemplate]
                 else:
                     m_conditionTemplate_list = [method_dic[conditionTemplate]]
@@ -1406,7 +1406,7 @@ class ReadWriteMaiML:
             ## method -- resultTemplate  >=0
             resultTemplate = 'resultTemplate'
             if resultTemplate in method_dic:
-                if isinstance(program_dic[resultTemplate], list):
+                if isinstance(method_dic[resultTemplate], list):
                     m_resultTemplate_list = method_dic[resultTemplate]
                 else:
                     m_resultTemplate_list = [method_dic[resultTemplate]]
