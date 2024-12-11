@@ -83,6 +83,7 @@ var style = [
 // 座標記録
 function addpositiontodata(){
     var form = document.getElementById('id_petri_data')
+    petridata = JSON.parse(form.value)
     for (let i = 0; i < petridata.length; i++) {
         if (petridata[i].data.hasOwnProperty('maiml_type')){
             petridata[i].position={
