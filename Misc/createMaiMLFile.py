@@ -241,7 +241,7 @@ class ReadWriteMaiML:
                 ##  EncryptedData  0/1
                 ###############################
                 if 'description' in a_mydic.keys():    # 0/1
-                    a_mydic_ET.set('description', a_mydic['@description'])
+                    a_mydic_ET.set('description', a_mydic['description'])
                 ##  value  >=0
                 if 'value' in a_mydic.keys():    #  >=0
                     if isinstance(a_mydic['value'], list):
@@ -327,7 +327,7 @@ class ReadWriteMaiML:
                 ##  EncryptedData  0/1
                 #####################################
                 if 'description' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('description', b_mydic['@description'])
+                    b_mydic_ET.set('description', b_mydic['description'])
                 ##  value  >=0
                 if 'value' in b_mydic.keys():    #  >=0
                     if isinstance(b_mydic['value'], list):

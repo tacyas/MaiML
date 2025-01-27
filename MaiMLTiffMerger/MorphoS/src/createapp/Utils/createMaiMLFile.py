@@ -520,11 +520,12 @@ class UpdateMaiML():
 class ReadWriteMaiML:
     ''' Global contents    nomal=(True:グローバル要素/False:特定グローバル要素) '''
     def writeGlobalContents(self, mydic, parentET, nomal=True):
-        uuid = 'uuid'
+        #print('writeGlobalContents')
+        uuid = maimlelement.uuid
         global_uuid = ET.SubElement(parentET, uuid)    # =1
         global_uuid.text = mydic[uuid]
         
-        childUri = 'childUri'     ## >=0
+        childUri = maimlelement.childUri     ## >=0
         if childUri in mydic.keys():
             if isinstance(mydic[childUri], list):
                 childUri_list = mydic[childUri]
@@ -533,7 +534,7 @@ class ReadWriteMaiML:
             for childUri_dic in childUri_list:
                 global_childUri_Elem = ET.SubElement(parentET, childUri)
                 global_childUri_Elem.text = childUri_dic
-        childHash = 'childHash'     ## >=0
+        childHash = maimlelement.childHash     ## >=0
         if childHash in mydic.keys():
             if isinstance(mydic[childHash], list):
                 childHash_list = mydic[childHash]
@@ -542,7 +543,7 @@ class ReadWriteMaiML:
             for childHash_dic in childHash_list:
                 global_childHash_Elem = ET.SubElement(parentET, childHash)
                 global_childHash_Elem.text = childHash_dic
-        childUuid = 'childUuid'     ##  >=0
+        childUuid = maimlelement.childUuid     ##  >=0
         if childUuid in mydic.keys():
             if isinstance(mydic[childUuid], list):
                 childUuid_list = mydic[childUuid]
@@ -556,7 +557,7 @@ class ReadWriteMaiML:
         ## EncryptedData(@xmlns':'http://www.w3.org/2001/04/xmlenc#)   0/1
         ################################
 
-        insertion = 'insertion'  ## >=0
+        insertion = maimlelement.insertion  ## >=0
         if insertion in mydic.keys():
             if isinstance(mydic[insertion], list):
                 insertion_list = mydic[insertion]
@@ -564,31 +565,32 @@ class ReadWriteMaiML:
                 insertion_list =[mydic[insertion]]
             for insertion_dic in insertion_list:
                 global_isnertion_Elem = ET.SubElement(parentET, insertion)
-                insertion_uri = 'uri'  ## =1
+                insertion_uri = maimlelement.uri  ## =1
                 insertion_uri_Elem = ET.SubElement(global_isnertion_Elem, insertion_uri)
                 insertion_uri_Elem.text = insertion_dic[insertion_uri]
-                insertion_hash = 'hash'  ## =1
+                insertion_hash = maimlelement.hash  ## =1
                 insertion_hash_Elem = ET.SubElement(global_isnertion_Elem, insertion_hash)
                 insertion_hash_Elem.text = insertion_dic[insertion_hash]
-                insertion_uuid = 'uuid'   ## 0/1
+                
+                insertion_uuid = maimlelement.uuid   ## 0/1
                 if insertion_uuid in insertion_dic.keys():
                     insertion_uuid_Elem = ET.SubElement(global_isnertion_Elem, insertion_uuid)
                     insertion_uuid_Elem.text = insertion_dic[insertion_uuid]
-                insertion_format = 'format'   # 0/1
+                insertion_format = maimlelement.format   # 0/1
                 if insertion_format in insertion_dic.keys():
                     insertion_format_Elem = ET.SubElement(global_isnertion_Elem, insertion_format)
                     insertion_format_Elem.text = insertion_dic[insertion_format]
-        name = 'name'        
+        name = maimlelement.name        
         if name in mydic.keys():   # 0/1
             p_name_dic = mydic[name]
             p_name_Elem = ET.SubElement(parentET, name)
             p_name_Elem.text = p_name_dic
-        description = 'description'
+        description = maimlelement.description
         if description in mydic.keys():   # 0/1
             p_description_dic = mydic[description]
             p_description_Elem = ET.SubElement(parentET, description)
             p_description_Elem.text = p_description_dic
-        annotation = 'annotation'
+        annotation = maimlelement.annotation
         if annotation in mydic.keys():    # 0/1
             p_annotation_dic = mydic[annotation]
             p_annotation_Elem = ET.SubElement(parentET, annotation)
@@ -596,7 +598,7 @@ class ReadWriteMaiML:
         
         ###################################################################################
         ## 汎用データコンテナ
-        generalTagList = ['property', 'content']
+        generalTagList = [maimlelement.property, maimlelement.content, maimlelement.uncertainty]
         ## property, content    >=0
         for generalTag in generalTagList:
             if generalTag in mydic.keys():
@@ -605,32 +607,37 @@ class ReadWriteMaiML:
                 else:
                     property_list = [mydic[generalTag]]
                 for property_nest in property_list:
-                    self.writeGenericdataContainer(property_nest, parentET, generalTag)
+                    try:
+                        self.writeGenericdataContainer(property_nest, parentET, generalTag)
+                    except Exception as e:
+                        print('Error in writeGenericdataContainer.',e)
+                        raise e
         ################################################################################### 
         
+
     ''' 汎用データコンテナのネスト構造に対応 '''
     def writeGenericdataContainer(self, mydic, parentET, mytag):
+        #print('writeGenericdataContainer')
         # set attrib
-        my_Elem = ET.SubElement(parentET, mytag, attrib={'xsi:type':mydic['@xsi:type'], 'key':mydic['@key']})    # =1
+        my_Elem = ET.SubElement(parentET, mytag, attrib={maimlelement.type:mydic[maimlelement.typed], maimlelement.key:mydic[maimlelement.keyd]})    # =1
         # set values  
-        if '@formatString' in mydic.keys() and mydic['@formatString'] != '':    # 0/1
-            my_Elem.set('formatString', mydic['@formatString'])
-        if '@units' in mydic.keys() and mydic['@units'] != '':    # 0/1
-            my_Elem.set('units', mydic['@units'])
-        if '@scaleFactor' in mydic.keys() and mydic['@scaleFactor'] != '':    # 0/1
-            my_Elem.set('scaleFactor', mydic['@scaleFactor'])
-        
+        if maimlelement.formatStringd in mydic.keys() and mydic[maimlelement.formatStringd] != '':    # 0/1
+            my_Elem.set(maimlelement.formatString, mydic[maimlelement.formatStringd])
+        if maimlelement.unitsd in mydic.keys() and mydic[maimlelement.unitsd] != '':    # 0/1
+            my_Elem.set(maimlelement.units, mydic[maimlelement.unitsd])
+        if maimlelement.scaleFactord in mydic.keys() and mydic[maimlelement.scaleFactord] != '':    # 0/1
+            my_Elem.set(maimlelement.scaleFactor, mydic[maimlelement.scaleFactord])
         ## content, uncertaintyが持つ属性
-        if '@axis' in mydic.keys() and mydic['@axis'] != '':    # 0/1
-            my_Elem.set('axis', mydic['@axis'])
-        if '@size' in mydic.keys() and mydic['@size'] != '':    # 0/1
-            my_Elem.set('size', mydic['@size'])
-        if '@id' in mydic.keys() and mydic['@id'] != '':    # 0/1
-            my_Elem.set('id', mydic['@id'])
-        if '@ref' in mydic.keys() and mydic['@ref'] != '':    # 0/1
-            my_Elem.set('ref', mydic['@ref'])
+        if maimlelement.axisd in mydic.keys() and mydic[maimlelement.axisd] != '':    # 0/1
+            my_Elem.set(maimlelement.axis, mydic[maimlelement.axisd])
+        if maimlelement.sized in mydic.keys() and mydic[maimlelement.sized] != '':    # 0/1
+            my_Elem.set(maimlelement.size, mydic[maimlelement.sized])
+        if maimlelement.idd in mydic.keys() and mydic[maimlelement.idd] != '':    # 0/1
+            my_Elem.set(maimlelement.id, mydic[maimlelement.idd])
+        if maimlelement.refd in mydic.keys() and mydic[maimlelement.refd] != '':    # 0/1
+            my_Elem.set(maimlelement.ref, mydic[maimlelement.refd])
 
-        childUri = 'childUri'   # >=0
+        childUri = maimlelement.childUri   # >=0
         if childUri in mydic.keys():
             if isinstance(mydic[childUri], list):
                 childUri_list = mydic[childUri]
@@ -639,7 +646,7 @@ class ReadWriteMaiML:
             for childUri_dic in childUri_list:
                 childUri_Elem = ET.SubElement(my_Elem, childUri)
                 childUri_Elem.text = childUri_dic
-        childHash = 'childHash'   # >=0
+        childHash = maimlelement.childHash   # >=0
         if childHash in mydic.keys():
             if isinstance(mydic[childHash], list):
                 childHash_list = mydic[childHash]
@@ -648,7 +655,7 @@ class ReadWriteMaiML:
             for childHash_dic in childHash_list:
                 childHash_Elem = ET.SubElement(my_Elem, childHash)
                 childHash_Elem.text = childHash_dic
-        childUuid = 'childUuid'   # >=0
+        childUuid = maimlelement.childUuid   # >=0
         if childUuid in mydic.keys():
             if isinstance(mydic[childUuid], list):
                 childUuid_list = mydic[childUuid]
@@ -659,10 +666,11 @@ class ReadWriteMaiML:
                 childUuid_Elem.text = childUuid_dic
 
         ##  EncryptedData  ## 0/1
-        description = 'description'
+        #print('Templates内のEncryptedDataの実装を忘れない')
+        description = maimlelement.description
         if description in mydic.keys():    # 0/1
             my_Elem.set(description,mydic[description])
-        value = 'value'  ## >=0
+        value = maimlelement.value  ## >=0
         if value in mydic.keys():    #  >=0
             if isinstance(mydic[value], list):
                 valueList = mydic[value]
@@ -671,25 +679,22 @@ class ReadWriteMaiML:
             for value_dic in valueList:
                 value_Elem = ET.SubElement(my_Elem, value)
                 value_Elem.text = value_dic
-        ###############################
-        ##  uncertainty    >=0
-        ###############################
-        ##  property, content  >=0
-        if 'property' in mydic.keys():
-            mytag = 'property'
-            if isinstance(mydic['property'], list):
-                for sinmydic in mydic['property']:
+        ##  property, content, uncertainty  >=0
+        if maimlelement.property in mydic.keys():
+            mytag = maimlelement.property
+            if isinstance(mydic[mytag], list):
+                for sinmydic in mydic[mytag]:
                     self.writeGenericdataContainer(sinmydic, my_Elem, mytag)
             else:
-                a_mydic = mydic['property']
-                a_mydic_ET = ET.SubElement(my_Elem, mytag, attrib={'xsi:type':a_mydic['@xsi:type'], 'key':a_mydic['@key']})    # =1
-                if '@formatString' in a_mydic.keys():    # 0/1
-                    a_mydic_ET.set('formatString', a_mydic['@formatString'])
-                if '@units' in a_mydic.keys():    # 0/1
-                    a_mydic_ET.set('units', a_mydic['@units'])
-                if '@scaleFactor' in a_mydic.keys():    # 0/1
-                    a_mydic_ET.set('scaleFactor', a_mydic['@scaleFactor'])
-                childUri = 'childUri'   # >=0
+                a_mydic = mydic[mytag]
+                a_mydic_ET = ET.SubElement(my_Elem, mytag, attrib={maimlelement.type:a_mydic[maimlelement.typed], maimlelement.key:a_mydic[maimlelement.keyd]})    # =1
+                if maimlelement.formatStringd in a_mydic.keys():    # 0/1
+                    a_mydic_ET.set(maimlelement.formatString, a_mydic[maimlelement.formatStringd])
+                if maimlelement.unitsd in a_mydic.keys():    # 0/1
+                    a_mydic_ET.set(maimlelement.units, a_mydic[maimlelement.unitsd])
+                if maimlelement.scaleFactord in a_mydic.keys():    # 0/1
+                    a_mydic_ET.set(maimlelement.scaleFactor, a_mydic[maimlelement.scaleFactor])
+                childUri = maimlelement.childUri   # >=0
                 if childUri in a_mydic.keys():
                     if isinstance(a_mydic[childUri], list):
                         a_childUri_list = a_mydic[childUri]
@@ -698,7 +703,7 @@ class ReadWriteMaiML:
                     for a_childUri_dic in a_childUri_list:
                         a_childUri_Elem = ET.SubElement(a_mydic_ET, childUri)
                         a_childUri_Elem.text = a_childUri_dic
-                childHash = 'childHash'   # >=0
+                childHash = maimlelement.childHash   # >=0
                 if childHash in a_mydic.keys():
                     if isinstance(a_mydic[childHash], list):
                          a_childHash_list = a_mydic[childHash]
@@ -707,7 +712,7 @@ class ReadWriteMaiML:
                     for a_childHash_dic in a_childHash_list:
                         a_childHash_Elem = ET.SubElement(a_mydic_ET, childHash)
                         a_childHash_Elem.text = a_childHash_dic
-                childUuid = 'childUuid'   # >=0
+                childUuid = maimlelement.childUuid   # >=0
                 if childUuid in a_mydic.keys():
                     if isinstance(a_mydic[childUuid], list):
                         a_childUuid_list = a_mydic[childUuid]
@@ -719,63 +724,56 @@ class ReadWriteMaiML:
                 ################# ##############
                 ##  EncryptedData  0/1
                 ###############################
-                if 'description' in a_mydic.keys():    # 0/1
-                    a_mydic_ET.set('description', a_mydic['@description'])
+                if maimlelement.description in a_mydic.keys():    # 0/1
+                    a_mydic_ET.set(maimlelement.description, a_mydic[maimlelement.description])
                 ##  value  >=0
-                if 'value' in a_mydic.keys():    #  >=0
-                    if isinstance(a_mydic['value'], list):
-                        valueList = a_mydic['value']
+                if maimlelement.value in a_mydic.keys():    #  >=0
+                    if isinstance(a_mydic[maimlelement.value], list):
+                        valueList = a_mydic[maimlelement.value]
                     else:
-                        valueList = [a_mydic['value']]
+                        valueList = [a_mydic[maimlelement.value]]
                     for value_dic in valueList:
-                        value_Elem = ET.SubElement(a_mydic_ET, 'value')
+                        value_Elem = ET.SubElement(a_mydic_ET, maimlelement.value)
                         value_Elem.text = value_dic
                         #print(value_dic)
-                ###############################
-                ##  uncertainty    >=0
-                ###############################
-                if 'property' in a_mydic.keys():
-                    mytag = 'property'
-                    if isinstance(a_mydic['property'], list):
-                        for sinmydic in a_mydic['property']:
+                if maimlelement.property in a_mydic.keys():
+                    mytag = maimlelement.property
+                elif maimlelement.content in a_mydic.keys():
+                    mytag = maimlelement.content    
+                elif maimlelement.uncertainty in a_mydic.keys():
+                    mytag = maimlelement.uncertainty
+                if mytag != '':
+                    if isinstance(a_mydic[mytag], list):
+                        for sinmydic in a_mydic[mytag]:
                             self.writeGenericdataContainer(sinmydic, a_mydic_ET, mytag)
                     else:
-                        sinmydic = a_mydic['property']
-                        #print(sinmydic['@key'],'　　何もしない')     # Debug用
+                        sinmydic = a_mydic[mytag]
                         self.writeGenericdataContainer(sinmydic, a_mydic_ET, mytag)
-                if 'content' in a_mydic.keys():
-                    mytag = 'content'
-                    if isinstance(a_mydic['content'], list):
-                        for sinmydic in a_mydic['content']:
-                            self.writeGenericdataContainer(sinmydic, a_mydic_ET, mytag)
-                    else:
-                        sinmydic = a_mydic['content']
-                        self.writeGenericdataContainer(sinmydic, a_mydic_ET, mytag)
-        if 'content' in mydic.keys():
-            mytag = 'content'
-            if isinstance(mydic['content'], list):
-                for sinmydic in mydic['content']:
+        if maimlelement.content in mydic.keys():
+            mytag = maimlelement.content
+            if isinstance(mydic[mytag], list):
+                for sinmydic in mydic[mytag]:
                     self.writeGenericdataContainer(sinmydic, my_Elem, mytag)
             else:
-                b_mydic = mydic['content']
-                b_mydic_ET = ET.SubElement(my_Elem, mytag, attrib={'xsi:type':b_mydic['@xsi:type'], 'key':b_mydic['@key']})    # =1
-                if '@formatString' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('formatString', b_mydic['@formatString'])
-                if '@units' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('units', b_mydic['@units'])
-                if '@scaleFactor' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('scaleFactor', b_mydic['@scaleFactor'])
+                b_mydic = mydic[mytag]
+                b_mydic_ET = ET.SubElement(my_Elem, mytag, attrib={maimlelement.type:b_mydic[maimlelement.typed], maimlelement.key:b_mydic[maimlelement.keyd]})    # =1
+                if maimlelement.formatStringd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.formatString, b_mydic[maimlelement.formatStringd])
+                if maimlelement.unitsd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.units, b_mydic[maimlelement.unitsd])
+                if maimlelement.scaleFactord in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.scaleFactor, b_mydic[maimlelement.scaleFactord])
                 ## content, uncertaintyが持つ属性
-                if '@axis' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('axis', b_mydic['@axis'])
-                if '@size' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('size', b_mydic['@size'])
-                if '@id' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('id', b_mydic['@id'])
-                if '@ref' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('ref', b_mydic['@ref'])
+                if maimlelement.axisd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.axis, b_mydic[maimlelement.axisd])
+                if maimlelement.sized in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.size, b_mydic[maimlelement.sized])
+                if maimlelement.idd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.id, b_mydic[maimlelement.idd])
+                if maimlelement.refd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.ref, b_mydic[maimlelement.refd])
 
-                childUri = 'childUri'   # >=0
+                childUri = maimlelement.childUri   # >=0
                 if childUri in b_mydic.keys():
                     if isinstance(b_mydic[childUri], list):
                         b_childUri_list = b_mydic[childUri]
@@ -784,7 +782,7 @@ class ReadWriteMaiML:
                     for b_childUri_dic in b_childUri_list:
                         b_childUri_Elem = ET.SubElement(b_mydic_ET, childUri)
                         b_childUri_Elem.text = b_childUri_dic
-                childHash = 'childHash'   # >=0
+                childHash = maimlelement.childHash   # >=0
                 if childHash in b_mydic.keys():
                     if isinstance(b_mydic[childHash], list):
                          b_childHash_list = b_mydic[childHash]
@@ -793,7 +791,7 @@ class ReadWriteMaiML:
                     for b_childHash_dic in b_childHash_list:
                         b_childHash_Elem = ET.SubElement(b_mydic_ET, childHash)
                         b_childHash_Elem.text = b_childHash_dic
-                childUuid = 'childUuid'   # >=0
+                childUuid = maimlelement.childUuid   # >=0
                 if childUuid in b_mydic.keys():
                     if isinstance(b_mydic[childUuid], list):
                         b_childUuid_list = b_mydic[childUuid]
@@ -805,86 +803,160 @@ class ReadWriteMaiML:
                 #####################################
                 ##  EncryptedData  0/1
                 #####################################
-                if 'description' in b_mydic.keys():    # 0/1
-                    b_mydic_ET.set('description', b_mydic['@description'])
+                if maimlelement.description in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.description, b_mydic[maimlelement.description])
                 ##  value  >=0
-                if 'value' in b_mydic.keys():    #  >=0
-                    if isinstance(b_mydic['value'], list):
-                        valueList = b_mydic['value']
+                if maimlelement.value in b_mydic.keys():    #  >=0
+                    if isinstance(b_mydic[maimlelement.value], list):
+                        valueList = b_mydic[maimlelement.value]
                     else:
-                        valueList = [b_mydic['value']]
+                        valueList = [b_mydic[maimlelement.value]]
                     for value_dic in valueList:
-                        value_Elem = ET.SubElement(b_mydic_ET, 'value')
+                        value_Elem = ET.SubElement(b_mydic_ET, maimlelement.value)
                         value_Elem.text = value_dic
-                ###############################
-                ##  uncertainty    >=0
-                ###############################
-                ##  property, content  >=0
-                if 'property' in b_mydic.keys():
-                    mytag = 'property'
-                    if isinstance(b_mydic['property'], list):
-                        for sinmydic in b_mydic['property']:
+                ##  property, content, uncertainty  >=0
+                mytag = ''
+                if maimlelement.property in b_mydic.keys():
+                    mytag = maimlelement.property
+                elif maimlelement.content in b_mydic.keys():
+                    mytag = maimlelement.content
+                elif maimlelement.uncertainty in b_mydic.keys():
+                    mytag = maimlelement.uncertainty
+                if mytag != '':
+                    if isinstance(b_mydic[mytag], list):
+                        for sinmydic in b_mydic[mytag]:
                             self.writeGenericdataContainer(sinmydic, b_mydic_ET, mytag)
                     else:
-                        sinmydic = b_mydic['property']
+                        sinmydic = b_mydic[mytag]
                         self.writeGenericdataContainer(sinmydic, b_mydic_ET, mytag)
-                if 'content' in b_mydic.keys():
-                    mytag = 'content'
-                    if isinstance(b_mydic['content'], list):
-                        for sinmydic in b_mydic['content']:
+        if maimlelement.uncertainty in mydic.keys():
+            mytag = maimlelement.uncertainty
+            if isinstance(mydic[maimlelement.uncertainty], list):
+                for sinmydic in mydic[maimlelement.uncertainty]:
+                    self.writeGenericdataContainer(sinmydic, my_Elem, mytag)
+            else:
+                b_mydic = mydic[maimlelement.uncertainty]
+                b_mydic_ET = ET.SubElement(my_Elem, mytag, attrib={maimlelement.type:b_mydic[maimlelement.typed], maimlelement.key:b_mydic[maimlelement.keyd]})    # =1
+                if maimlelement.formatStringd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.formatString, b_mydic[maimlelement.formatStringd])
+                if maimlelement.unitsd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.units, b_mydic[maimlelement.unitsd])
+                if maimlelement.scaleFactord in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.scaleFactor, b_mydic[maimlelement.scaleFactord])
+                ## content, uncertaintyが持つ属性
+                if maimlelement.axisd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.axis, b_mydic[maimlelement.axis])
+                if maimlelement.sized in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.size, b_mydic[maimlelement.sized])
+                if maimlelement.idd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.id, b_mydic[maimlelement.idd])
+                if maimlelement.refd in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.ref, b_mydic[maimlelement.refd])
+                childUri = maimlelement.childUri   # >=0
+                if childUri in b_mydic.keys():
+                    if isinstance(b_mydic[childUri], list):
+                        b_childUri_list = b_mydic[childUri]
+                    else:
+                        b_childUri_list = [b_mydic[childUri]]
+                    for b_childUri_dic in b_childUri_list:
+                        b_childUri_Elem = ET.SubElement(b_mydic_ET, childUri)
+                        b_childUri_Elem.text = b_childUri_dic
+                childHash = maimlelement.childHash   # >=0
+                if childHash in b_mydic.keys():
+                    if isinstance(b_mydic[childHash], list):
+                         b_childHash_list = b_mydic[childHash]
+                    else:
+                        b_childHash_list = [b_mydic[childHash]]
+                    for b_childHash_dic in b_childHash_list:
+                        b_childHash_Elem = ET.SubElement(b_mydic_ET, childHash)
+                        b_childHash_Elem.text = b_childHash_dic
+                childUuid = maimlelement.childUuid   # >=0
+                if childUuid in b_mydic.keys():
+                    if isinstance(b_mydic[childUuid], list):
+                        b_childUuid_list = b_mydic[childUuid]
+                    else:
+                        b_childUuid_list = [b_mydic[childUuid]]
+                    for b_childUuid_dic in b_childUuid_list:
+                        b_childUuid_Elem = ET.SubElement(b_mydic_ET, childUuid)
+                        b_childUuid_Elem.text = b_childUuid_dic
+                #####################################
+                ##  EncryptedData  0/1
+                #####################################
+                if maimlelement.description in b_mydic.keys():    # 0/1
+                    b_mydic_ET.set(maimlelement.description, b_mydic[maimlelement.description])
+                ##  value  >=0
+                if maimlelement.value in b_mydic.keys():    #  >=0
+                    if isinstance(b_mydic[maimlelement.value], list):
+                        valueList = b_mydic[maimlelement.value]
+                    else:
+                        valueList = [b_mydic[maimlelement.value]]
+                    for value_dic in valueList:
+                        value_Elem = ET.SubElement(b_mydic_ET, maimlelement.value)
+                        value_Elem.text = value_dic
+                ##  property, content, uncertainty    >=0
+                mytag = ''
+                if maimlelement.property in b_mydic.keys():
+                    mytag = maimlelement.property
+                elif maimlelement.content in b_mydic.keys():
+                    mytag = maimlelement.content
+                elif maimlelement.uncertainty in b_mydic.keys():
+                    mytag = maimlelement.uncertainty
+                if mytag != '':
+                    if isinstance(b_mydic[mytag], list):
+                        for sinmydic in b_mydic[mytag]:
                             self.writeGenericdataContainer(sinmydic, b_mydic_ET, mytag)
                     else:
-                        sinmydic = b_mydic['content']
+                        sinmydic = b_mydic[mytag]
                         self.writeGenericdataContainer(sinmydic, b_mydic_ET, mytag)
 
 
     ''' TEMPLATESの作成 '''
     def writeTemplates(self, mydic, parentET):
+        #print('writeTemplates')
         ## global contents
         self.writeGlobalContents(mydic, parentET)
-
         ## placeRef      >=1  参照要素
-        if isinstance(mydic['placeRef'], list):
-            p_placeRef_list = mydic['placeRef']
+        if isinstance(mydic[maimlelement.placeRef], list):
+            p_placeRef_list = mydic[maimlelement.placeRef]
         else:
-            p_placeRef_list = [mydic['placeRef']]
+            p_placeRef_list = [mydic[maimlelement.placeRef]]
         for p_placeRef_dic in p_placeRef_list:
-            p_placeRef_Elem = ET.SubElement(parentET, 'placeRef', attrib={'id':p_placeRef_dic['@id'], 'ref':p_placeRef_dic['@ref']})
-            if 'name' in p_placeRef_dic.keys():   # 0/1
-                p_placeRef_name_dic = p_placeRef_dic['name']
-                p_placeRef_name_Elem = ET.SubElement(p_placeRef_Elem, 'name')
+            p_placeRef_Elem = ET.SubElement(parentET, maimlelement.placeRef, attrib={maimlelement.id:p_placeRef_dic[maimlelement.idd], maimlelement.ref:p_placeRef_dic[maimlelement.refd]})
+            if maimlelement.name in p_placeRef_dic.keys():   # 0/1
+                p_placeRef_name_dic = p_placeRef_dic[maimlelement.name]
+                p_placeRef_name_Elem = ET.SubElement(p_placeRef_Elem, maimlelement.name)
                 p_placeRef_name_Elem.text = p_placeRef_name_dic
-            if 'description' in p_placeRef_dic.keys():   # 0/1
-                p_placeRef_description_dic = p_placeRef_dic['description']
-                p_placeRef_description_Elem = ET.SubElement(p_placeRef_Elem, 'description')
+            if maimlelement.description in p_placeRef_dic.keys():   # 0/1
+                p_placeRef_description_dic = p_placeRef_dic[maimlelement.description]
+                p_placeRef_description_Elem = ET.SubElement(p_placeRef_Elem, maimlelement.description)
                 p_placeRef_description_Elem.text = p_placeRef_description_dic
         ## templateRef      >=0
-        if 'templateRef' in mydic.keys():
-            if isinstance(mydic['templateRef'], list):
-                p_templateRef_list = mydic['templateRef']
+        if maimlelement.templateRef in mydic.keys():
+            if isinstance(mydic[maimlelement.templateRef], list):
+                p_templateRef_list = mydic[maimlelement.templateRef]
             else:
-                p_templateRef_list = [mydic['templateRef']]
+                p_templateRef_list = [mydic[maimlelement.templateRef]]
             for p_templateRef_dic in p_templateRef_list:
-                p_templateRef_Elem = ET.SubElement(parentET, 'templateRef', attrib={'id':p_templateRef_dic['@id'], 'ref':p_templateRef_dic['@ref']})
-                if 'name' in p_templateRef_dic.keys():   # 0/1
-                    p_templateRef_name_dic = p_templateRef_dic['name']
-                    p_templateRef_name_Elem = ET.SubElement(p_templateRef_Elem, 'name')
+                p_templateRef_Elem = ET.SubElement(parentET, maimlelement.templateRef, attrib={maimlelement.id:p_templateRef_dic[maimlelement.idd], maimlelement.ref:p_templateRef_dic[maimlelement.refd]})
+                if maimlelement.name in p_templateRef_dic.keys():   # 0/1
+                    p_templateRef_name_dic = p_templateRef_dic[maimlelement.name]
+                    p_templateRef_name_Elem = ET.SubElement(p_templateRef_Elem, maimlelement.name)
                     p_templateRef_name_Elem.text = p_templateRef_name_dic
-                if 'description' in p_templateRef_dic.keys():   # 0/1
-                    p_templateRef_description_dic = p_templateRef_dic['description']
-                    p_templateRef_description_Elem = ET.SubElement(p_templateRef_Elem, 'description')
+                if maimlelement.description in p_templateRef_dic.keys():   # 0/1
+                    p_templateRef_description_dic = p_templateRef_dic[maimlelement.description]
+                    p_templateRef_description_Elem = ET.SubElement(p_templateRef_Elem, maimlelement.description)
                     p_templateRef_description_Elem.text = p_templateRef_description_dic
-        
 
     ''' INSTANCEの作成 '''
     def writeInstanceData(self, results_dic, results_Elem, mytag):
+        #print('writeInstanceData:',mytag)
         if mytag in results_dic.keys():
             if isinstance(results_dic[mytag], list):
                 mytag_list = results_dic[mytag]
             else:
                 mytag_list = [results_dic[mytag]]
             for mytag_dic in mytag_list:
-                mytag_Elem = ET.SubElement(results_Elem, mytag, attrib={'id':mytag_dic['@id'], 'ref':mytag_dic['@ref']})
+                mytag_Elem = ET.SubElement(results_Elem, mytag, attrib={maimlelement.id:mytag_dic[maimlelement.idd], maimlelement.ref:mytag_dic[maimlelement.refd]})
                 ###########################################
                 # namespace
                 rens = re.compile("@xmlns:.*")
@@ -893,15 +965,19 @@ class ReadWriteMaiML:
                         mytag_Elem.set(key[1:],mytag_dic[key])
                 ###########################################
                 #global contents
-                self.writeGlobalContents(mytag_dic, mytag_Elem)
-                instanceRef = 'instanceRef'    # >=0  参照要素
+                try:
+                    self.writeGlobalContents(mytag_dic, mytag_Elem)
+                except Exception as e:
+                    print('Error in writeGlobalContents.',e)
+                    raise e
+                instanceRef = maimlelement.instanceRef    # >=0  参照要素
                 if instanceRef in mytag_dic.keys():
                     if isinstance(mytag_dic[instanceRef], list):
                         mytag_instanceRef_list = mytag_dic[instanceRef]
                     else:
                         mytag_instanceRef_list = [mytag_dic[instanceRef]]
                     for mytag_instanceRef_dic in mytag_instanceRef_list:
-                        mytag_instanceRef_Elem = ET.SubElement(mytag_Elem, instanceRef, attrib={'id':mytag_instanceRef_dic['@id'],'ref':mytag_instanceRef_dic['@ref']})
+                        mytag_instanceRef_Elem = ET.SubElement(mytag_Elem, instanceRef, attrib={maimlelement.id:mytag_instanceRef_dic[maimlelement.idd],maimlelement.ref:mytag_instanceRef_dic[maimlelement.refd]})
                         ###########################################
                         # namespace
                         rens = re.compile("@xmlns:.*")
@@ -909,23 +985,24 @@ class ReadWriteMaiML:
                             if rens.search(key):
                                 mytag_instanceRef_Elem.set(key[1:],mytag_instanceRef_dic[key])
                         ###########################################
-                        isinstanceRef_name = 'name'   # 0/1
+                        isinstanceRef_name = maimlelement.name   # 0/1
                         if isinstanceRef_name in mytag_instanceRef_dic.keys():
                             mytag_instanceRef_name_Elem = ET.SubElement(mytag_instanceRef_Elem, isinstanceRef_name)
                             mytag_instanceRef_name_Elem.text = mytag_instanceRef_dic[isinstanceRef_name]
-                        isinstanceRef_description = 'description'   # 0/1
+                        isinstanceRef_description = maimlelement.description   # 0/1
                         if isinstanceRef_description in mytag_instanceRef_dic.keys():
                             mytag_instanceRef_description_Elem = ET.SubElement(mytag_instanceRef_Elem, isinstanceRef_description)
                             mytag_instanceRef_description_Elem.text = mytag_instanceRef_dic[isinstanceRef_description]
 
+
     ''' chain要素のネスト構造に対応 '''  ## 未テスト
     def writeChainContents(self, mydic, parentET):
-        ## global contents グローバル要素
+        ## global contents 特定グローバル要素
         self.writeGlobalContents(mydic, parentET)
-        chain_hash = 'hash'   ## =1
+        chain_hash = maimlelement.hash   ## =1
         chain_hash_Elem = ET.SubElement(parentET, chain_hash)
         chain_hash_Elem.text = mydic[chain_hash]
-        chain = 'chain'  ## >=0
+        chain = maimlelement.chain  ## >=0
         if chain in mydic.keys():
             if isinstance(mydic[chain], list):
                 chain_chain_list = mydic[chain]
@@ -933,8 +1010,8 @@ class ReadWriteMaiML:
                 chain_chain_list = [mydic[chain]]
             for chain_chain_dic in chain_chain_list:
                 child_chain_Elem = ET.SubElement(parentET, chain)
-                if '@id' in chain_chain_dic.keys():
-                    child_chain_Elem.set('id',chain_chain_dic['@id'])
+                if maimlelement.idd in chain_chain_dic.keys():
+                    child_chain_Elem.set(maimlelement.id,chain_chain_dic[maimlelement.idd])
                 ###########################################
                 # namespace
                 rens = re.compile("@xmlns:.*")
@@ -944,14 +1021,15 @@ class ReadWriteMaiML:
                 ###########################################
                 self.writeChainContents(chain_chain_dic, child_chain_Elem)
 
-    ''' parent要素のネスト構造に対応 ''' 
+
+    ''' parent要素のネスト構造に対応 '''  ## 未テスト
     def writeParentContents(self, mydic, parentET):
-        ## global contents グローバル要素
+        ## global contents 特定グローバル要素
         self.writeGlobalContents(mydic, parentET)
-        parentT_hash = 'hash'   ## =1
+        parentT_hash = maimlelement.hash   ## =1
         parentT_hash_Elem = ET.SubElement(parentET, parentT_hash)
         parentT_hash_Elem.text = mydic[parentT_hash]
-        parentT = 'parent'  ## >=0
+        parentT = maimlelement.parent  ## >=0
         if parentT in mydic.keys():
             if isinstance(mydic[parentT], list):
                 parent_parent_list = mydic[parentT]
@@ -959,8 +1037,8 @@ class ReadWriteMaiML:
                 parent_parent_list = [mydic[parentT]]
             for parent_parent_dic in parent_parent_list:
                 child_parent_Elem = ET.SubElement(parentET, parentT)
-                if '@id' in parent_parent_dic.keys():
-                    child_parent_Elem.set('id',parent_parent_dic['@id'])
+                if maimlelement.idd in parent_parent_dic.keys():
+                    child_parent_Elem.set(maimlelement.id,parent_parent_dic[maimlelement.idd])
                 ###########################################
                 # namespace
                 rens = re.compile("@xmlns:.*")
@@ -973,12 +1051,13 @@ class ReadWriteMaiML:
 
     ''' 参照要素型 '''
     def writeReferenceContents(self, mydic, parentET, mytag):
-        mytag_Elem = ET.SubElement(parentET, mytag, attrib={'id':mydic['@id'], 'ref':mydic['@ref']})
-        mytag_name = 'name'
+        #print('writeReferenceContents')
+        mytag_Elem = ET.SubElement(parentET, mytag, attrib={maimlelement.id:mydic[maimlelement.idd], maimlelement.ref:mydic[maimlelement.refd]})
+        mytag_name = maimlelement.name
         if mytag_name in mydic.keys():
             resultsRef_name_Elem = ET.SubElement(mytag_Elem, mytag_name)
             resultsRef_name_Elem.text = mydic[mytag_name]
-        mytag_description = 'description'
+        mytag_description = maimlelement.description
         if mytag_description in mydic.keys():
             resultsRef_description_Elem = ET.SubElement(mytag_Elem, mytag_description)
             resultsRef_description_Elem.text = mydic[mytag_description]
@@ -1009,6 +1088,7 @@ class ReadWriteMaiML:
 
     ''' Document Contents の作成 '''
     def createdocumentcontents(self,document_dic, document_Elem):
+        #print('create <document> contents')
         ## Signature    0/1  署名のためのコンテンツ：未実装
         ## global contents 特定グローバル要素
         self.writeGlobalContents(document_dic, document_Elem)
@@ -1122,7 +1202,7 @@ class ReadWriteMaiML:
         create_date = nowtimestamp.strftime('%Y-%m-%dT%H:%M:%S') + nowtimestamp.strftime('%z')[:3] + ':' + nowtimestamp.strftime('%z')[3:]
         date_Elem.text = create_date
 
-        chain = 'chain'   ## >=0    グローバル要素
+        chain = 'chain'   ## >=0    グローバル要素(?)
         if chain in document_dic.keys():
             if isinstance(document_dic[chain], list):
                 chain_list = document_dic[chain]
@@ -1144,7 +1224,7 @@ class ReadWriteMaiML:
                 ## nest
                 self.writeChainContents(chain_dic, chain_Elem)
 
-        parent = 'parent'   ## >=0    グローバル要素
+        parent = 'parent'   ## >=0    グローバル要素(?)
         if parent in document_dic.keys():
             if isinstance(document_dic[parent], list):
                 parent_list = document_dic[parent]
@@ -1166,8 +1246,10 @@ class ReadWriteMaiML:
                 ## nest
                 self.writeParentContents(parent_dic, parent_Elem)
 
+
     ''' Protocol Contents の作成 '''
     def createprotocolcontents(self, protocol_dic, protocol_Elem):
+        #print('create <protocol> contents')
         ## global contents
         self.writeGlobalContents(protocol_dic, protocol_Elem)
         
@@ -1177,6 +1259,7 @@ class ReadWriteMaiML:
         else:
             method_list = [protocol_dic[maimlelement.method]]
         for method_dic in method_list:
+            #print(dict(method_dic))
             method_Elem = ET.SubElement(protocol_Elem, maimlelement.method, attrib={'id':method_dic['@id']})    # =1
             ###########################################
             # namespace
@@ -1230,6 +1313,7 @@ class ReadWriteMaiML:
                     transition_list = [pnml_dic[maimlelement.transition]]
                 for transition_dic in transition_list:    # >=1
                     transition_Elem = ET.SubElement(pnml_Elem, maimlelement.transition, attrib={'id':transition_dic['@id']})
+                    #transition_Elem.text = transition_dic[#text]
                     #transition_name = 'name'
                     if maimlelement.name in transition_dic.keys():   # 0/1
                         transition_name_dic = transition_dic[maimlelement.name]
@@ -1257,7 +1341,6 @@ class ReadWriteMaiML:
                         arc_description_dic = arc_dic[maimlelement.description]
                         arc_description_Elem = ET.SubElement(arc_Elem, maimlelement.description)
                         arc_description_Elem.text = arc_description_dic
-
             program = 'program'   ## contents   >=1
             if isinstance(method_dic[program], list):
                 program_list = method_dic[program]
@@ -1291,7 +1374,6 @@ class ReadWriteMaiML:
                     ###########################################
                     ## global contents
                     self.writeGlobalContents(instruction_dic, instruction_Elem)
-
                     transitionRef = 'transitionRef'    ##  >=1 参照要素
                     if isinstance(instruction_dic[transitionRef], list):
                         transitionRef_list = instruction_dic[transitionRef]
@@ -1370,7 +1452,7 @@ class ReadWriteMaiML:
             ## method -- materialTemplate  >=0
             materialTemplate = 'materialTemplate'
             if materialTemplate in method_dic.keys():
-                if isinstance(method_dic[materialTemplate], list):
+                if isinstance(program_dic[materialTemplate], list):
                     m_materialTemplate_list = method_dic[materialTemplate]
                 else:
                     m_materialTemplate_list = [method_dic[materialTemplate]]
@@ -1388,7 +1470,7 @@ class ReadWriteMaiML:
             ## method -- conditionTemplate  >=0
             conditionTemplate = 'conditionTemplate'
             if conditionTemplate in method_dic:
-                if isinstance(method_dic[conditionTemplate], list):
+                if isinstance(program_dic[conditionTemplate], list):
                     m_conditionTemplate_list = method_dic[conditionTemplate]
                 else:
                     m_conditionTemplate_list = [method_dic[conditionTemplate]]
@@ -1406,7 +1488,7 @@ class ReadWriteMaiML:
             ## method -- resultTemplate  >=0
             resultTemplate = 'resultTemplate'
             if resultTemplate in method_dic:
-                if isinstance(method_dic[resultTemplate], list):
+                if isinstance(program_dic[resultTemplate], list):
                     m_resultTemplate_list = method_dic[resultTemplate]
                 else:
                     m_resultTemplate_list = [method_dic[resultTemplate]]
@@ -1475,11 +1557,14 @@ class ReadWriteMaiML:
                 # templates contents
                 self.writeTemplates(resultTemplate_dic, resultTemplate_Elem)
 
+
     ''' Data Contents の作成 '''
     def createdatacontents(self, data_dic, data_Elem):
+        #print('create <data> contents')
+        # global contents
         self.writeGlobalContents(data_dic, data_Elem)
-
-        results = 'results'   ## >=1
+        
+        results = maimlelement.results   ## >=1
         if isinstance(data_dic[results], list):
             results_list = data_dic[results]
         else:
@@ -1495,21 +1580,22 @@ class ReadWriteMaiML:
             ###########################################
             # global contents
             self.writeGlobalContents(results_dic, results_Elem)
-
-            material = 'material'     ## >=0
+            material = maimlelement.material     ## >=0
             ## instance contents
             self.writeInstanceData(results_dic, results_Elem, material)
 
-            condition = 'condition'     ## >=0
+            condition = maimlelement.condition     ## >=0
             ## instance contents
             self.writeInstanceData(results_dic, results_Elem, condition)
 
-            result = 'result'     ## >=0
+            result = maimlelement.result     ## >=0
             ## instance contents
             self.writeInstanceData(results_dic, results_Elem, result)
 
+
     ''' EventLog Contents の作成 '''
     def createeventlogcontents(self, eventlog_dic, eventlog_Elem):
+        #print('create <eventLog> contents')
         # global contents
         self.writeGlobalContents(eventlog_dic, eventlog_Elem)
         log = 'log'   ##  >=1  参照付グローバル
@@ -1614,13 +1700,15 @@ class ReadWriteMaiML:
                 parent[index - 1].tail = '\n' + ('\t' * depth)
             if index == len(parent) - 1:
                 current.tail = '\n' + ('\t' * (depth - 1))
+        
 
     ''' dict型オブジェクトから新たなmaimlファイルを作成'''
     def writecontents(self, maiml_dic, filepath):
         ## maiml root contents
         #maiml = 'maiml'
         ''' maimlの属性値を入れる '''
-        maimlroot = ET.Element(maimlelement.maiml, attrib={'version':'1.0', 'features':'nested-attributes', })
+        maimlroot = ET.Element(maimlelement.maiml, attrib={'version':'1.0', 'features':'nested-attributes', 
+                                         })
         if '@xmlns' in maiml_dic[maimlelement.maiml].keys():
             if isinstance(maiml_dic[maimlelement.maiml]['@xmlns'], list):
                 maiml_ns_dic_list = maiml_dic[maimlelement.maiml]['@xmlns']
@@ -1647,7 +1735,8 @@ class ReadWriteMaiML:
                 document_Elem.set(key[1:],document_dic[key])
         ###########################################
         self.createdocumentcontents(document_dic, document_Elem)
-        
+        #print('writed <document> contents!')
+        ## document_uuid = str(UUID.uuid4())
         ## protocol contents
         #protocol = 'protocol'
         protocol_dic = maiml_dic[maimlelement.maiml][maimlelement.protocol]
@@ -1660,6 +1749,7 @@ class ReadWriteMaiML:
                 protocol_Elem.set(key[1:],protocol_dic[key])
         ###########################################
         self.createprotocolcontents(protocol_dic, protocol_Elem)
+        #print('writed <protocol> contents!')
         
         ## data & eventLog contents
         #data = 'data'
@@ -1677,6 +1767,7 @@ class ReadWriteMaiML:
                     data_Elem.set(key[1:],data_dic[key])
             ###########################################
             self.createdatacontents(data_dic, data_Elem)
+            #print('writed <data> contents!')
 
             ## eventlog contents
             #concept = 'concept'
@@ -1698,16 +1789,24 @@ class ReadWriteMaiML:
                         eventlog_Elem.set('xmlns:'+maimlelement.timeAttrib, eventLog_ns_dic[maimlelement.timeAttrib])
 
             self.createeventlogcontents(eventlog_dic, eventlog_Elem)
+            #print('writed <eventLog> contents!')
         else:
             maimlroot.set('xsi:type','protocolFileRootType')
 
         if filepath is None:
-            print('Filepath of putput is not found.')
+            print('Filepath of output is not found.')
         else:
             #文字列をそのまま扱えるが、改行、インデントがない
             maimltree = ET.ElementTree(maimlroot)
             self.pretty_print(maimltree.getroot())
-            maimltree.write(filepath, encoding='utf-8', xml_declaration=True)
+            #print(maimltree)
+            try:
+                maimltree.write(filepath, encoding='utf-8', xml_declaration=True)
+            except Exception as e:
+                print(e)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                raise e
         
         return filepath, maiml_dic[maimlelement.maiml][maimlelement.document][maimlelement.uuid]
 
