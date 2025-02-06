@@ -5,14 +5,14 @@
    1. RUN-python
    2. Run on Docker
    3. README
-3. MaiMLViewer　　: `MaiMLファイルに記載されている計測分析のフローを可視化するWEBシステム`
+2. MaiMLViewer　　: `MaiMLファイルに記載されている計測分析のフローを可視化するWEBシステム`
    1. docker-compose.yml
    2. README
-4. MaiMLTiffMerger 　　: `MaiMLファイルに記載された計測分析工程の情報に、TIFFのメタ情報などの計測結果情報を追加するWEBシステム`
+3. MaiMLTiffMerger 　　: `MaiMLファイルに記載された計測分析工程の情報に、TIFFのメタ情報などの計測結果情報を追加するWEBシステム`
    1. MorphoS
    2. README
    3. MaiMLTiffMerger説明.pdf
    4. MorphoSmanual.pdf
-5. Misc 　　: `MaiMLデータフォーマットを作成、解析するためのサンプルプログラム`
-6. MaiMLFileSamples　　: `MaiMLファイルのサンプル集`
-7. Excel2MaiML　　:　`計測フローを定義したMaiMLファイルと計測結果を記載したExcelファイルをマージするプログラム`
+4. Misc 　　: `MaiMLデータフォーマットを作成、解析するためのサンプルプログラム`
+5. MaiMLFileSamples　　: `MaiMLファイルのサンプル集`
+6. Excel2MaiML　　:　`計測フローを定義したMaiMLファイルと計測結果を記載したExcelファイルをマージするプログラム`
