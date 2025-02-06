@@ -46,7 +46,7 @@
 　　・The first row contains the template's ID in the columns <br/>
 　　　・Row 3 and onward contain the values corresponding to the \<property\> element's keys <br/> 
 <p align="center">
-  <img src="https://github.com/MaiMLFileHandlingPrograms/Excel2MaiML/blob/main/setting/%E5%85%A5%E5%8A%9B%E3%82%A8%E3%82%AF%E3%82%BB%E3%83%AB%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E8%AA%AC%E6%98%8E.jpeg" />
+  <img src="https://github.com/tacyas/MaiML/blob/main/Excel2MaiML/setting/INPUTExcel.png" />
 </p>
 <p align="center">The method for writing in Excel</p>
 
