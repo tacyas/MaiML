@@ -1,0 +1,73 @@
+A：前提条件
+１シートに１以上の操作のデータが存在すること
+シート名がmethodのIDであること
+
+
+B：実行方法
+[入出力データ]
+・入力データ
+　①document,protocolをもつMaiMLデータファイル
+　　INPUT/maiml/input.maiml  or  INPUT/xxxxx/yyyyyy.maiml 
+　②計測に使用した情報をもつエクセルデータ　※条件等は下記
+　　INPUT/excel/input.xlsx  or  INPUT/xxxxx/zzzzzz.xlsx
+・出力データ
+　①入力データをマージしたMaiMLファイル
+　　OUTPUT/output.maiml
+
+[実行方法]
+その１.
+　①入力ファイルを準備
+　　/INPUT/maiml/ ディレクトリにMaiMLファイル
+　　/INPUT/excel/ ディレクトリにエクセルファイル
+　　/INPUT/others/ ディレクトリに外部ファイル
+　②コマンド実行
+　　python3 excel2maiml.py
+その２.
+　①入力ファイルを準備
+　　/INPUT/XXXXX/　ディレクトリにMaiMLファイル、エクセルファイル、外部ファイル　
+　　　※'XXXXX'は任意の名前
+　②コマンド実行
+　　python3 excel2maiml.py XXXXX
+
+
+C:詳細
+[入力するMaiMLデータ]
+・program１つ（保証）
+
+[エクセルデータ]
+・シート名はmethodのID
+・１行目
+　・１列目　’’
+　・２列目以降にinstructionのID、もしくは、templateのID
+・２行目
+　・１行目がtemplateのIDの列
+　　・２行目にprotocol以下がもつpropertyのキー名
+・３行目以降は計測データ（複数行＝複数回計測）
+　・１列目にresultsのID
+　・１行目がinstructionのIDの列
+　　・３行目以降に計測した日時
+　・１行目がtemplateのIDの列
+　　・３行目以降にpropertyのキーに対する値
+
+［作成するMaiMLデータ］
+・複数回の計測データをもつ場合はresultsを複数作成
+　（１行のデータ→results１つ）
+・汎用データコンテナはpropertyのみ作成
+・入力MaiMLファイルのtemplateをインスタンスとしてコピーする
+・templateがもつ汎用データコンテナのkeyとエクセルのkeyが一致した場合のみvalueをエクセルデータで更新
+　（一致しなければ、エクセルデータは無視される）
+・エクセルのkeyにINSERTIONが存在した場合はtemplateIDに基づくインスタンスにinertionコンテンツを作成
+　①INPUTディレクトリに外部ファイルが存在する場合
+　　insertionのコンテンツ　uri : ./+ファイル名、hash値：ファイルから算出したhash値
+　②INPUTディレクトリに外部ファイルが存在しない場合
+　　insertionのコンテンツ　uri : ./+ファイル名、hash値：空
+・eventLogを１つ作成
+・計測日時のデータが存在する場合にtraceを作成
+・複数回の計測データをもつ場合はtraceを複数作成
+・エクセルデータにinstructionIDが存在し、かつ、日時のデータが存在する場合にeventを１つ作成
+　　key=lifecycle:transitionのvalueがcompleteのみ
+
+
+D:python実行環境の構築
+[pythonパッケージのインストール]
+・requirements.txt
