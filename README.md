@@ -15,4 +15,4 @@
    4. MorphoSmanual.pdf
 5. Misc 　　: `MaiMLデータフォーマットを作成、解析するためのサンプルプログラム`
 6. MaiMLFileSamples　　: `MaiMLファイルのサンプル集`
-7. Excel2MaiML   :　`計測フローを定義したMaiMLファイルと計測結果を記載したExcelファイルをマージするプログラム`
+7. Excel2MaiML　　:　`計測フローを定義したMaiMLファイルと計測結果を記載したExcelファイルをマージするプログラム`
