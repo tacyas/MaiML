@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <maiml version="1.0" features="nested-attributes" xmlns="http://www.maiml.org/schemas" xmlns:concept="http://www.xes-standard.org/concept.xesext#" xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#" xmlns:maiml="http://www.maiml.org/schemas" xmlns:time="http://www.xes-standard.org/time.xesext#" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="maimlRootType">
 	<document id="MaimlSampleDoctest">
-		<uuid>0b001922-b88a-4af9-bba8-db0895b2c33b</uuid>
+		<uuid>724eac23-c45d-4a44-886b-0852c87a735e</uuid>
 		<creator id="creatorSEM_B">
 			<uuid>7de44cb7-f020-3604-aed1-fcec4586525c</uuid>
 			<name>docNS:B</name>
 			<vendorRef id="vendorRef_VCompany" ref="VCompany" />
-			<instrumentRef id="instrumentRef_SEM" ref="SEM" />
+			<instrumentRef id="instrumentRef_SEM" ref="instructionID2" />
 		</creator>
 		<vendor id="VCompany">
 			<uuid>6815f1a8-5d87-31a3-b8f2-576c8aa2f787</uuid>
@@ -21,47 +21,65 @@
 			<name>docNS:ScanningElectronMicroscope</name>
 			<description>SEM</description>
 		</instrument>
-		<date>2025-01-27T13:51:56+09:00</date>
+		<date>2025-02-07T11:25:31+09:00</date>
 	</document>
-	<protocol id="MaimlSampleProtocoltest">
-		<uuid>12225456-a7b2-463c-9a6f-d62889938461</uuid>
-		<name>SEMSampleProtocol</name>
-		<method id="methodID">
-			<uuid>00790ed6-f246-4b93-ac59-7bde3e2dac26</uuid>
+	<protocol id="MaimlSampleProtocoltest2">
+		<uuid>4da28bef-a5a4-4a52-a49e-6e5eb6bfd7c1</uuid>
+		<name>SEMSampleProtocol2</name>
+		<method id="methodID2">
+			<uuid>d99673f8-6c83-4a9c-8a1e-340cf0006bef</uuid>
 			<name>SEMSampleMethod</name>
 			<description>Juyo SEM Sample Protocol test</description>
-			<pnml id="pnmlIDtest">
-				<uuid>c88b8815-cde9-4d4e-8ffd-d462c36cb421</uuid>
+			<pnml id="pnmlIDtest2">
+				<uuid>2a6713d3-bf3e-4781-ab1f-9fef6130a33d</uuid>
 				<description>petri net</description>
 				<place id="MT1">
 					<name>X</name>
 				</place>
 				<place id="CT1">
-					<name>PreprocessingConditions</name>
+					<name>PreprocessingConditions1</name>
 				</place>
-				<place id="RT1">
+				<place id="MT2">
+					<name>OutputsandMaterial</name>
+				</place>
+				<place id="CT2">
+					<name>PreprocessingConditions2</name>
+				</place>
+				<place id="RT2">
 					<name>Outputs</name>
 				</place>
 				<transition id="TT-1">
-					<name>Preprocessing</name>
+					<name>Preprocessing1</name>
+				</transition>
+				<transition id="TT-2">
+					<name>Preprocessing2</name>
 				</transition>
 				<arc id="arcID-1" source="MT1" target="TT-1" />
 				<arc id="arcID-2" source="CT1" target="TT-1" />
-				<arc id="arcID-3" source="TT-1" target="RT1" />
+				<arc id="arcID-3" source="TT-1" target="MT2" />
+				<arc id="arcID-4" source="MT2" target="TT-2" />
+				<arc id="arcID-5" source="CT2" target="TT-2" />
+				<arc id="arcID-6" source="TT-2" target="RT2" />
 			</pnml>
-			<program id="programIDtest">
-				<uuid>013f70cb-e3d4-406d-935f-64e1969830fd</uuid>
-				<instruction id="instructionID">
-					<uuid>d7fb9dd3-3b22-4c61-9a8c-813885d0de4e</uuid>
+			<program id="programIDtest2">
+				<uuid>7ad93f9b-66db-414e-b438-c34de3099982</uuid>
+				<instruction id="instructionID1">
+					<uuid>a790bce4-d556-4a45-97dd-55d8f70d943d</uuid>
+					<name>PRE</name>
+					<description>PRE</description>
+					<transitionRef id="transition1" ref="TT-1" />
+				</instruction>
+				<instruction id="instructionID2">
+					<uuid>1da93770-c445-4b40-9845-5cfae56ec1b8</uuid>
 					<name>SEM</name>
 					<description>SEM</description>
 					<property xsi:type="stringType" key="TreatmentType">
 						<value>SEM</value>
 					</property>
-					<transitionRef id="transition1" ref="TT-1" />
+					<transitionRef id="transition2" ref="TT-2" />
 				</instruction>
 				<materialTemplate id="sample001">
-					<uuid>44c80bd6-210e-4bd4-939b-df7909b3dfc0</uuid>
+					<uuid>88bab86d-9066-4802-8f79-ac7ac754b637</uuid>
 					<description>sample template</description>
 					<property xsi:type="stringType" key="name">
 						<value />
@@ -74,36 +92,63 @@
 					</property>
 					<placeRef id="material" ref="MT1" />
 				</materialTemplate>
+				<materialTemplate id="sample002">
+					<uuid>50a8579b-828b-4886-ad9b-309ac116d925</uuid>
+					<description>PRE result and SEM material template</description>
+					<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+						<value>0.10</value>
+					</property>
+					<property xsi:type="stringType" key="comments">
+						<value>Add comments.</value>
+					</property>
+					<placeRef id="material" ref="MT2" />
+				</materialTemplate>
 				<conditionTemplate id="condition001">
-					<uuid>149fc2bd-52bd-4573-8ab4-a4127067daa8</uuid>
-					<description>condition template</description>
+					<uuid>3d5dccab-99c6-4ae7-a596-70eea4881100</uuid>
+					<description>PRE condition template</description>
 					<property xsi:type="intType" key="temperature" formatString="0.0">
 						<value />
 					</property>
 					<property xsi:type="intType" key="waitingtime" formatString="0">
-						<value />
+						<value>330</value>
 					</property>
 					<placeRef id="condition" ref="CT1" />
 				</conditionTemplate>
+				<conditionTemplate id="condition002">
+					<uuid>a86c5dac-b429-408e-9fd4-a2b1e24f03fc</uuid>
+					<description>SEM condition template</description>
+					<property xsi:type="stringType" key="SEMInputConditions">
+						<value>SEM Conditions</value>
+						<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+							<value>5.00</value>
+						</property>
+						<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+							<value>15.00</value>
+						</property>
+					</property>
+					<property xsi:type="stringType" key="note">
+						<value>Low dose condition for redusing electron damage</value>
+					</property>
+					<placeRef id="condition" ref="CT2" />
+				</conditionTemplate>
 				<resultTemplate id="result001">
-					<uuid>5e75cb5a-4f0e-4292-81b5-74d631793d80</uuid>
+					<uuid>4a39e7b3-d99d-47d7-aca6-d79768aa8819</uuid>
 					<name>Result_Template</name>
 					<description>Output Images</description>
-					<property xsi:type="stringType" key="key002">
+					<property xsi:type="stringType" key="comments">
 						<value />
 					</property>
-					<property xsi:type="uriType" key="SEMImageUri" />
 					<placeRef id="result" ref="RT1" />
 				</resultTemplate>
 			</program>
 		</method>
 	</protocol>
 	<data id="dataID">
-		<uuid>f7206b93-7dab-42a8-bb2f-d85b91f82248</uuid>
+		<uuid>1e4fc35a-7f75-44a8-9485-4446e70f5358</uuid>
 		<results id="results001">
-			<uuid>9ac478e3-569d-4f46-b9a5-029661bc53e5</uuid>
+			<uuid>f57ad6c3-e66f-4c21-886f-5a8ee8fcefd1</uuid>
 			<material id="sample001_instance2" ref="sample001">
-				<uuid>427744c8-f4ae-48c2-8930-be37f81b9df0</uuid>
+				<uuid>145e72ca-67f0-4470-9358-82066a6fea27</uuid>
 				<description>sample template</description>
 				<property xsi:type="stringType" key="name">
 					<value>lot 1-0002</value>
@@ -115,9 +160,19 @@
 					<value>Add comments.</value>
 				</property>
 			</material>
+			<material id="sample002_instance2" ref="sample002">
+				<uuid>48143feb-6d5d-47e5-ba41-8127acb562a0</uuid>
+				<description>PRE result and SEM material template</description>
+				<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+					<value>0.10</value>
+				</property>
+				<property xsi:type="stringType" key="comments">
+					<value>Add comments.</value>
+				</property>
+			</material>
 			<condition id="condition001_instance2" ref="condition001">
-				<uuid>80bbb2b4-e70f-4024-9264-fc3245e71c53</uuid>
-				<description>condition template</description>
+				<uuid>4b72655a-3763-4298-a52b-3c70a4658269</uuid>
+				<description>PRE condition template</description>
 				<property xsi:type="intType" key="temperature" formatString="0.0">
 					<value>19.4</value>
 				</property>
@@ -125,27 +180,40 @@
 					<value>300</value>
 				</property>
 			</condition>
+			<condition id="condition002_instance2" ref="condition002">
+				<uuid>06806ce5-7cb9-40e6-8af2-e752183afa59</uuid>
+				<description>SEM condition template</description>
+				<property xsi:type="stringType" key="SEMInputConditions">
+					<value>SEM Conditions</value>
+					<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+						<value>5.00</value>
+					</property>
+					<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+						<value>10.00</value>
+					</property>
+				</property>
+				<property xsi:type="stringType" key="note">
+					<value>Low dose condition for redusing electron damage</value>
+				</property>
+			</condition>
 			<result id="result001_instance2" ref="result001">
-				<uuid>bbc5b777-40d1-4ee6-819d-5f9c77851ff3</uuid>
+				<uuid>9964b2bd-9daf-48e3-b57b-c5bf587e7933</uuid>
 				<insertion>
 					<uri>./test.txt</uri>
-					<hash />
+					<hash>669a980a680292c63d72ab707b1eacb9ca508d17a0dc22f73b96662df4c8c295</hash>
 					<format>text/plain</format>
 				</insertion>
 				<name>Result_Template</name>
 				<description>Output Images</description>
-				<property xsi:type="stringType" key="key002">
+				<property xsi:type="stringType" key="comments">
 					<value>waiting time 300</value>
-				</property>
-				<property xsi:type="uriType" key="SEMImageUri">
-					<value />
 				</property>
 			</result>
 		</results>
 		<results id="results002">
-			<uuid>108e2b88-2e35-4877-a031-99c3f1285372</uuid>
+			<uuid>a5aa6b75-0950-4dd8-a021-16220d085001</uuid>
 			<material id="sample001_instance3" ref="sample001">
-				<uuid>a1a63026-8253-44a8-8b9a-228f17edc68d</uuid>
+				<uuid>7d25be3e-f0cb-4b70-83f1-536816fac856</uuid>
 				<description>sample template</description>
 				<property xsi:type="stringType" key="name">
 					<value>lot 1-0002</value>
@@ -157,9 +225,19 @@
 					<value>Add comments.</value>
 				</property>
 			</material>
+			<material id="sample002_instance3" ref="sample002">
+				<uuid>c1b21fee-36fa-4dbf-bb26-24115a96a417</uuid>
+				<description>PRE result and SEM material template</description>
+				<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+					<value>0.12</value>
+				</property>
+				<property xsi:type="stringType" key="comments">
+					<value>Add comments.</value>
+				</property>
+			</material>
 			<condition id="condition001_instance3" ref="condition001">
-				<uuid>75e3072c-1ebb-4d4b-8cdb-4354427bd0b3</uuid>
-				<description>condition template</description>
+				<uuid>a88b7a10-d0aa-44b8-aa0e-e30c3b35c2a3</uuid>
+				<description>PRE condition template</description>
 				<property xsi:type="intType" key="temperature" formatString="0.0">
 					<value>20.5</value>
 				</property>
@@ -167,22 +245,35 @@
 					<value>310</value>
 				</property>
 			</condition>
+			<condition id="condition002_instance3" ref="condition002">
+				<uuid>1adbaec5-8760-4ee2-bf2e-e45adb2a7adb</uuid>
+				<description>SEM condition template</description>
+				<property xsi:type="stringType" key="SEMInputConditions">
+					<value>SEM Conditions</value>
+					<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+						<value>5.00</value>
+					</property>
+					<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+						<value>12.00</value>
+					</property>
+				</property>
+				<property xsi:type="stringType" key="note">
+					<value>Low dose condition for redusing electron damage</value>
+				</property>
+			</condition>
 			<result id="result001_instance3" ref="result001">
-				<uuid>e6e995bd-f983-4219-8ad8-c787a6bf8fc7</uuid>
+				<uuid>71e8fcc9-16d9-4d5a-b3f9-0d4744855608</uuid>
 				<name>Result_Template</name>
 				<description>Output Images</description>
-				<property xsi:type="stringType" key="key002">
+				<property xsi:type="stringType" key="comments">
 					<value>waiting time 310</value>
-				</property>
-				<property xsi:type="uriType" key="SEMImageUri">
-					<value />
 				</property>
 			</result>
 		</results>
 		<results id="results003">
-			<uuid>165f4eb0-0c39-4e10-ad60-bfe450f3e7e8</uuid>
+			<uuid>55295be5-d53f-4ec3-8fd1-eea0c4fd95b1</uuid>
 			<material id="sample001_instance4" ref="sample001">
-				<uuid>14e48e7d-b38b-4e03-8a43-fcc4ea023596</uuid>
+				<uuid>936477e2-220a-4d74-90ce-e24ff5024fa5</uuid>
 				<description>sample template</description>
 				<property xsi:type="stringType" key="name">
 					<value>lot 1-0002</value>
@@ -194,9 +285,19 @@
 					<value>Add comments.</value>
 				</property>
 			</material>
+			<material id="sample002_instance4" ref="sample002">
+				<uuid>a13dd6bc-3a1b-4997-b272-930360c4dfec</uuid>
+				<description>PRE result and SEM material template</description>
+				<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+					<value>0.11</value>
+				</property>
+				<property xsi:type="stringType" key="comments">
+					<value>Add comments.</value>
+				</property>
+			</material>
 			<condition id="condition001_instance4" ref="condition001">
-				<uuid>fd6f2705-354a-4a76-a6da-93b38ca6b0ef</uuid>
-				<description>condition template</description>
+				<uuid>96cf25b5-b8e8-43ac-a97d-c329e27667b0</uuid>
+				<description>PRE condition template</description>
 				<property xsi:type="intType" key="temperature" formatString="0.0">
 					<value>20.3</value>
 				</property>
@@ -204,22 +305,35 @@
 					<value>320</value>
 				</property>
 			</condition>
+			<condition id="condition002_instance4" ref="condition002">
+				<uuid>a4cb225e-48c3-4116-b140-0093f75a0ecb</uuid>
+				<description>SEM condition template</description>
+				<property xsi:type="stringType" key="SEMInputConditions">
+					<value>SEM Conditions</value>
+					<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+						<value>5.00</value>
+					</property>
+					<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+						<value>nan</value>
+					</property>
+				</property>
+				<property xsi:type="stringType" key="note">
+					<value>Low dose condition for redusing electron damage</value>
+				</property>
+			</condition>
 			<result id="result001_instance4" ref="result001">
-				<uuid>ed26ffb8-d05b-475b-a45b-e1764fb6104d</uuid>
+				<uuid>e2ff64c8-6f99-4795-91db-e7875bc1dfae</uuid>
 				<name>Result_Template</name>
 				<description>Output Images</description>
-				<property xsi:type="stringType" key="key002">
+				<property xsi:type="stringType" key="comments">
 					<value>waiting time 320</value>
-				</property>
-				<property xsi:type="uriType" key="SEMImageUri">
-					<value />
 				</property>
 			</result>
 		</results>
 		<results id="results004">
-			<uuid>f1b5b7a5-c4e5-498c-96b8-d8312a7fec1c</uuid>
+			<uuid>256faf6e-bc7e-4262-8286-d1ed68a44907</uuid>
 			<material id="sample001_instance5" ref="sample001">
-				<uuid>98768cc8-6db2-4d65-b061-6b5401ecef1d</uuid>
+				<uuid>50ae7041-0b0d-4ef1-b279-f2df3f408f9a</uuid>
 				<description>sample template</description>
 				<property xsi:type="stringType" key="name">
 					<value>lot 1-0002</value>
@@ -231,9 +345,19 @@
 					<value>Add comments.</value>
 				</property>
 			</material>
+			<material id="sample002_instance5" ref="sample002">
+				<uuid>6b2582ee-a869-4113-9ae1-09d727210405</uuid>
+				<description>PRE result and SEM material template</description>
+				<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+					<value>0.10</value>
+				</property>
+				<property xsi:type="stringType" key="comments">
+					<value>Add comments.</value>
+				</property>
+			</material>
 			<condition id="condition001_instance5" ref="condition001">
-				<uuid>0d252f6a-09d1-46ef-846a-3f6255fce98c</uuid>
-				<description>condition template</description>
+				<uuid>58db6b2b-1344-4616-8440-2a480cb34fdd</uuid>
+				<description>PRE condition template</description>
 				<property xsi:type="intType" key="temperature" formatString="0.0">
 					<value>19.8</value>
 				</property>
@@ -241,27 +365,40 @@
 					<value>330</value>
 				</property>
 			</condition>
+			<condition id="condition002_instance5" ref="condition002">
+				<uuid>e5faa358-ed60-408f-8895-02fcbf1ec548</uuid>
+				<description>SEM condition template</description>
+				<property xsi:type="stringType" key="SEMInputConditions">
+					<value>SEM Conditions</value>
+					<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+						<value>5.00</value>
+					</property>
+					<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+						<value>14.00</value>
+					</property>
+				</property>
+				<property xsi:type="stringType" key="note">
+					<value>Low dose condition for redusing electron damage</value>
+				</property>
+			</condition>
 			<result id="result001_instance5" ref="result001">
-				<uuid>277f070b-2e34-4dd9-b209-4b580514190d</uuid>
+				<uuid>30fe5ed7-a1a8-4155-aaae-1917e8c2d714</uuid>
 				<insertion>
 					<uri>./Axoneme-56.008.tif</uri>
-					<hash />
+					<hash>7233c81f3ae2bccd5955dd9e57a2f201dd3e58ca52e459071f1b3742712679fd</hash>
 					<format>image/tiff</format>
 				</insertion>
 				<name>Result_Template</name>
 				<description>Output Images</description>
-				<property xsi:type="stringType" key="key002">
+				<property xsi:type="stringType" key="comments">
 					<value>waiting time 330</value>
-				</property>
-				<property xsi:type="uriType" key="SEMImageUri">
-					<value />
 				</property>
 			</result>
 		</results>
 		<results id="results005">
-			<uuid>d811576b-7abc-4664-9122-ad7167289dea</uuid>
+			<uuid>328c93d6-960b-4231-af34-b0c1a122892f</uuid>
 			<material id="sample001_instance6" ref="sample001">
-				<uuid>78579b2d-845d-40b0-8c9f-5d915a5ecc15</uuid>
+				<uuid>c43575ab-71b8-4d45-8774-4b2cb4213028</uuid>
 				<description>sample template</description>
 				<property xsi:type="stringType" key="name">
 					<value>lot 1-0002</value>
@@ -273,9 +410,19 @@
 					<value>Add comments.</value>
 				</property>
 			</material>
+			<material id="sample002_instance6" ref="sample002">
+				<uuid>24ee6cfe-94f9-4ddf-83a9-1b24a54bd554</uuid>
+				<description>PRE result and SEM material template</description>
+				<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+					<value>0.12</value>
+				</property>
+				<property xsi:type="stringType" key="comments">
+					<value>Add comments.</value>
+				</property>
+			</material>
 			<condition id="condition001_instance6" ref="condition001">
-				<uuid>9e3c920d-bc3c-4d06-82a3-9a13e8b44d84</uuid>
-				<description>condition template</description>
+				<uuid>3a76f2eb-be4f-40fa-8abf-24de140ed47c</uuid>
+				<description>PRE condition template</description>
 				<property xsi:type="intType" key="temperature" formatString="0.0">
 					<value>19.5</value>
 				</property>
@@ -283,22 +430,35 @@
 					<value>340</value>
 				</property>
 			</condition>
+			<condition id="condition002_instance6" ref="condition002">
+				<uuid>26cbac80-1221-4355-b3ab-487bed4abbd6</uuid>
+				<description>SEM condition template</description>
+				<property xsi:type="stringType" key="SEMInputConditions">
+					<value>SEM Conditions</value>
+					<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+						<value>5.00</value>
+					</property>
+					<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+						<value>10.00</value>
+					</property>
+				</property>
+				<property xsi:type="stringType" key="note">
+					<value>Low dose condition for redusing electron damage</value>
+				</property>
+			</condition>
 			<result id="result001_instance6" ref="result001">
-				<uuid>e92ceb77-51d2-4b15-8509-a1d7dd795ac0</uuid>
+				<uuid>93944b56-33dd-4b9d-b1f9-9a9d93a390c9</uuid>
 				<name>Result_Template</name>
 				<description>Output Images</description>
-				<property xsi:type="stringType" key="key002">
+				<property xsi:type="stringType" key="comments">
 					<value>waiting time 340</value>
-				</property>
-				<property xsi:type="uriType" key="SEMImageUri">
-					<value />
 				</property>
 			</result>
 		</results>
 		<results id="results006">
-			<uuid>f0cd44d4-1e47-4b27-8426-3a869895fe02</uuid>
+			<uuid>4f44c84f-a109-4f37-a6fd-5ea98e801cd8</uuid>
 			<material id="sample001_instance7" ref="sample001">
-				<uuid>c6ecf6c0-e9d2-411b-ad9a-a4809c418503</uuid>
+				<uuid>0e420f14-0590-42a6-8e1a-fc5b69569ad6</uuid>
 				<description>sample template</description>
 				<property xsi:type="stringType" key="name">
 					<value>lot 1-0002</value>
@@ -310,9 +470,19 @@
 					<value>Add comments.</value>
 				</property>
 			</material>
+			<material id="sample002_instance7" ref="sample002">
+				<uuid>6c7755a3-aa67-44cd-a21e-28cfd1d43978</uuid>
+				<description>PRE result and SEM material template</description>
+				<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+					<value>0.10</value>
+				</property>
+				<property xsi:type="stringType" key="comments">
+					<value>Add comments.</value>
+				</property>
+			</material>
 			<condition id="condition001_instance7" ref="condition001">
-				<uuid>b5b32020-4691-4990-ad89-f84c29e6091a</uuid>
-				<description>condition template</description>
+				<uuid>290c3713-f1d5-48a8-bdd9-18e7f61816bf</uuid>
+				<description>PRE condition template</description>
 				<property xsi:type="intType" key="temperature" formatString="0.0">
 					<value>20.0</value>
 				</property>
@@ -320,22 +490,35 @@
 					<value>350</value>
 				</property>
 			</condition>
+			<condition id="condition002_instance7" ref="condition002">
+				<uuid>d38e9671-f681-48b7-a4a4-bf7f16c65313</uuid>
+				<description>SEM condition template</description>
+				<property xsi:type="stringType" key="SEMInputConditions">
+					<value>SEM Conditions</value>
+					<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+						<value>5.00</value>
+					</property>
+					<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+						<value>nan</value>
+					</property>
+				</property>
+				<property xsi:type="stringType" key="note">
+					<value>Low dose condition for redusing electron damage</value>
+				</property>
+			</condition>
 			<result id="result001_instance7" ref="result001">
-				<uuid>20d4e195-ae99-4bd8-9aec-dd2598612d96</uuid>
+				<uuid>70ab570b-2cf0-4d23-bec9-44c50e25dc87</uuid>
 				<name>Result_Template</name>
 				<description>Output Images</description>
-				<property xsi:type="stringType" key="key002">
+				<property xsi:type="stringType" key="comments">
 					<value>waiting time 350</value>
-				</property>
-				<property xsi:type="uriType" key="SEMImageUri">
-					<value />
 				</property>
 			</result>
 		</results>
 		<results id="results007">
-			<uuid>48a9957f-edb7-410d-bd9d-9e3b6a294ed5</uuid>
+			<uuid>9f49bfc6-ed38-4db4-9c34-bd83a1036c5b</uuid>
 			<material id="sample001_instance8" ref="sample001">
-				<uuid>08eb95a7-7591-4b57-ac90-ac6c91b3d450</uuid>
+				<uuid>0c3a1ff3-0302-4dd1-839e-7239e793d9bd</uuid>
 				<description>sample template</description>
 				<property xsi:type="stringType" key="name">
 					<value>lot 1-0002</value>
@@ -347,9 +530,19 @@
 					<value>Add comments.</value>
 				</property>
 			</material>
+			<material id="sample002_instance8" ref="sample002">
+				<uuid>7696dc98-f122-41f7-b4c7-429b50d30b64</uuid>
+				<description>PRE result and SEM material template</description>
+				<property xsi:type="doubleType" key="thickness" formatString="0.00" units="mm" scaleFactor="1.00">
+					<value>0.10</value>
+				</property>
+				<property xsi:type="stringType" key="comments">
+					<value>Add comments.</value>
+				</property>
+			</material>
 			<condition id="condition001_instance8" ref="condition001">
-				<uuid>d73a6961-f584-4524-98b4-15d50e7a0809</uuid>
-				<description>condition template</description>
+				<uuid>17babf81-d69f-445c-8ad4-1728d2343fa3</uuid>
+				<description>PRE condition template</description>
 				<property xsi:type="intType" key="temperature" formatString="0.0">
 					<value>20.2</value>
 				</property>
@@ -357,23 +550,148 @@
 					<value>360</value>
 				</property>
 			</condition>
+			<condition id="condition002_instance8" ref="condition002">
+				<uuid>4a93b238-80a7-4869-b21b-cdf2e733818d</uuid>
+				<description>SEM condition template</description>
+				<property xsi:type="stringType" key="SEMInputConditions">
+					<value>SEM Conditions</value>
+					<property xsi:type="doubleType" key="AcceleratingVoltage" formatString="0.00" units="kV" scaleFactor="1.0">
+						<value>5.00</value>
+					</property>
+					<property xsi:type="doubleType" key="scanningTime" formatString="0.00" units="s" scaleFactor="1.0">
+						<value>20.00</value>
+					</property>
+				</property>
+				<property xsi:type="stringType" key="note">
+					<value>Low dose condition for redusing electron damage</value>
+				</property>
+			</condition>
 			<result id="result001_instance8" ref="result001">
-				<uuid>c8339e52-e9d4-46c4-b987-539fac656123</uuid>
+				<uuid>5ff38890-f944-4351-a57e-94c11dfc8658</uuid>
 				<name>Result_Template</name>
 				<description>Output Images</description>
-				<property xsi:type="stringType" key="key002">
+				<property xsi:type="stringType" key="comments">
 					<value>waiting time 360</value>
-				</property>
-				<property xsi:type="uriType" key="SEMImageUri">
-					<value />
 				</property>
 			</result>
 		</results>
 	</data>
 	<eventLog id="eventLogID">
-		<uuid>911e86bb-449e-4e71-bdd3-7205a73d1578</uuid>
-		<log id="methodID_log" ref="methodID">
-			<uuid>85adf6f1-3eba-4e21-ba47-abaac418b081</uuid>
+		<uuid>961e5398-e7a5-458c-a01f-7ddb676f7a97</uuid>
+		<log id="methodID2_log" ref="methodID2">
+			<uuid>31a93677-b8c9-43bd-80fb-c526d6c7203c</uuid>
+			<trace id="programIDtest2_trace2" ref="programIDtest2">
+				<uuid>93c7bfc0-4b08-4061-a964-54cb72ac09b3</uuid>
+				<event id="instructionID2_event2" ref="instructionID2">
+					<uuid>e6d0ecb5-d310-4ce4-ba1b-e17dba0b891b</uuid>
+					<property xsi:type="uuidType" key="concept:instance">
+						<value>1da93770-c445-4b40-9845-5cfae56ec1b8</value>
+					</property>
+					<property xsi:type="stringType" key="lifecycle:transition">
+						<value>complete</value>
+					</property>
+					<property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+						<value>2024-03-05T09:03:00+09:00</value>
+					</property>
+					<resultsRef id="instructionID2_event2_resultref2" ref="results001" />
+				</event>
+			</trace>
+			<trace id="programIDtest2_trace3" ref="programIDtest2">
+				<uuid>4a017b5a-7ef7-4eed-984f-db610040a5f1</uuid>
+				<event id="instructionID2_event3" ref="instructionID2">
+					<uuid>f6449323-1cd1-4353-aeed-9b4e7f6a0b4d</uuid>
+					<property xsi:type="uuidType" key="concept:instance">
+						<value>1da93770-c445-4b40-9845-5cfae56ec1b8</value>
+					</property>
+					<property xsi:type="stringType" key="lifecycle:transition">
+						<value>complete</value>
+					</property>
+					<property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+						<value>2024-03-07T20:41:00+09:00</value>
+					</property>
+					<resultsRef id="instructionID2_event3_resultref3" ref="results002" />
+				</event>
+			</trace>
+			<trace id="programIDtest2_trace4" ref="programIDtest2">
+				<uuid>23e6ad62-94c2-4cbf-bab0-90e8a7a963e5</uuid>
+				<event id="instructionID2_event4" ref="instructionID2">
+					<uuid>5ae7d844-a918-4a0e-a835-536ebc1a53a6</uuid>
+					<property xsi:type="uuidType" key="concept:instance">
+						<value>1da93770-c445-4b40-9845-5cfae56ec1b8</value>
+					</property>
+					<property xsi:type="stringType" key="lifecycle:transition">
+						<value>complete</value>
+					</property>
+					<property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+						<value>2024-03-15T11:30:00+09:00</value>
+					</property>
+					<resultsRef id="instructionID2_event4_resultref4" ref="results003" />
+				</event>
+			</trace>
+			<trace id="programIDtest2_trace5" ref="programIDtest2">
+				<uuid>f73af900-3ec6-408b-b694-df2e704c1825</uuid>
+				<event id="instructionID2_event5" ref="instructionID2">
+					<uuid>8ee1fe69-9b31-4118-aa23-96b16df0c131</uuid>
+					<property xsi:type="uuidType" key="concept:instance">
+						<value>1da93770-c445-4b40-9845-5cfae56ec1b8</value>
+					</property>
+					<property xsi:type="stringType" key="lifecycle:transition">
+						<value>complete</value>
+					</property>
+					<property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+						<value>2024-03-16T15:40:00+09:00</value>
+					</property>
+					<resultsRef id="instructionID2_event5_resultref5" ref="results004" />
+				</event>
+			</trace>
+			<trace id="programIDtest2_trace6" ref="programIDtest2">
+				<uuid>7988a3f0-3d63-4122-a95a-1a88a241434f</uuid>
+				<event id="instructionID2_event6" ref="instructionID2">
+					<uuid>6a48b52c-0289-4db2-a0be-23cab8acb464</uuid>
+					<property xsi:type="uuidType" key="concept:instance">
+						<value>1da93770-c445-4b40-9845-5cfae56ec1b8</value>
+					</property>
+					<property xsi:type="stringType" key="lifecycle:transition">
+						<value>complete</value>
+					</property>
+					<property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+						<value>2024-03-18T15:25:00+09:00</value>
+					</property>
+					<resultsRef id="instructionID2_event6_resultref6" ref="results005" />
+				</event>
+			</trace>
+			<trace id="programIDtest2_trace7" ref="programIDtest2">
+				<uuid>de6c9cf2-0685-4292-9bd4-93cfe10c3d4b</uuid>
+				<event id="instructionID2_event7" ref="instructionID2">
+					<uuid>a9226d63-4419-4ac8-95dc-5531219b5941</uuid>
+					<property xsi:type="uuidType" key="concept:instance">
+						<value>1da93770-c445-4b40-9845-5cfae56ec1b8</value>
+					</property>
+					<property xsi:type="stringType" key="lifecycle:transition">
+						<value>complete</value>
+					</property>
+					<property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+						<value>2024-03-21T13:25:00+09:00</value>
+					</property>
+					<resultsRef id="instructionID2_event7_resultref7" ref="results006" />
+				</event>
+			</trace>
+			<trace id="programIDtest2_trace8" ref="programIDtest2">
+				<uuid>53b54384-72e8-403a-9804-b0dcc84d0ea0</uuid>
+				<event id="instructionID2_event8" ref="instructionID2">
+					<uuid>351aaae3-e9d4-4b75-812c-36cd2ede8da1</uuid>
+					<property xsi:type="uuidType" key="concept:instance">
+						<value>1da93770-c445-4b40-9845-5cfae56ec1b8</value>
+					</property>
+					<property xsi:type="stringType" key="lifecycle:transition">
+						<value>complete</value>
+					</property>
+					<property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+						<value>2024-03-25T17:09:00+09:00</value>
+					</property>
+					<resultsRef id="instructionID2_event8_resultref8" ref="results007" />
+				</event>
+			</trace>
 		</log>
 	</eventLog>
 </maiml>
