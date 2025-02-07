@@ -1,12 +1,17 @@
 <?xml version='1.0' encoding='utf-8'?>
-<maiml version="1.0" features="nested-attributes" xmlns="http://www.maiml.org/schemas" xmlns:concept="http://www.xes-standard.org/concept.xesext#" xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#" xmlns:maiml="http://www.maiml.org/schemas" xmlns:time="http://www.xes-standard.org/time.xesext#" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="maimlRootType">
+<maiml version="1.0" features="nested-attributes" xmlns="http://www.maiml.org/schemas"
+	xmlns:concept="http://www.xes-standard.org/concept.xesext#"
+	xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#"
+	xmlns:maiml="http://www.maiml.org/schemas" xmlns:time="http://www.xes-standard.org/time.xesext#"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="maimlRootType">
 	<document id="MaimlSampleDoctest">
-		<uuid>6d45663c-5aa2-4d21-a22a-0f33637d583b</uuid>
+		<uuid>f6fd3de3-a010-44cf-8ae6-ee26834a62d1</uuid>
 		<creator id="creatorSEM_B">
 			<uuid>7de44cb7-f020-3604-aed1-fcec4586525c</uuid>
 			<name>docNS:B</name>
 			<vendorRef id="vendorRef_VCompany" ref="VCompany" />
-			<instrumentRef id="instrumentRef_SEM" ref="instructionID" />
+			<instrumentRef id="instrumentRef_SEM" ref="instructionID2" />
 		</creator>
 		<vendor id="VCompany">
 			<uuid>6815f1a8-5d87-31a3-b8f2-576c8aa2f787</uuid>
@@ -21,47 +26,65 @@
 			<name>docNS:ScanningElectronMicroscope</name>
 			<description>SEM</description>
 		</instrument>
-		<date>2024-11-20T17:40:32+09:00</date>
+		<date>2024-11-21T09:43:11+09:00</date>
 	</document>
-	<protocol id="MaimlSampleProtocoltest">
-		<uuid>12225456-a7b2-463c-9a6f-d62889938461</uuid>
-		<name>SEMSampleProtocol</name>
-		<method id="methodID">
-			<uuid>00790ed6-f246-4b93-ac59-7bde3e2dac26</uuid>
+	<protocol id="MaimlSampleProtocoltest2">
+		<uuid>4da28bef-a5a4-4a52-a49e-6e5eb6bfd7c1</uuid>
+		<name>SEMSampleProtocol2</name>
+		<method id="methodID2">
+			<uuid>d99673f8-6c83-4a9c-8a1e-340cf0006bef</uuid>
 			<name>SEMSampleMethod</name>
 			<description>Juyo SEM Sample Protocol test</description>
-			<pnml id="pnmlIDtest">
-				<uuid>c88b8815-cde9-4d4e-8ffd-d462c36cb421</uuid>
+			<pnml id="pnmlIDtest2">
+				<uuid>2a6713d3-bf3e-4781-ab1f-9fef6130a33d</uuid>
 				<description>petri net</description>
 				<place id="MT1">
 					<name>X</name>
 				</place>
 				<place id="CT1">
-					<name>PreprocessingConditions</name>
+					<name>PreprocessingConditions1</name>
 				</place>
-				<place id="RT1">
+				<place id="MT2">
+					<name>OutputsandMaterial</name>
+				</place>
+				<place id="CT2">
+					<name>PreprocessingConditions2</name>
+				</place>
+				<place id="RT2">
 					<name>Outputs</name>
 				</place>
 				<transition id="TT-1">
-					<name>Preprocessing</name>
+					<name>Preprocessing1</name>
+				</transition>
+				<transition id="TT-2">
+					<name>Preprocessing2</name>
 				</transition>
 				<arc id="arcID-1" source="MT1" target="TT-1" />
 				<arc id="arcID-2" source="CT1" target="TT-1" />
-				<arc id="arcID-3" source="TT-1" target="RT1" />
+				<arc id="arcID-3" source="TT-1" target="MT2" />
+				<arc id="arcID-4" source="MT2" target="TT-2" />
+				<arc id="arcID-5" source="CT2" target="TT-2" />
+				<arc id="arcID-6" source="TT-2" target="RT2" />
 			</pnml>
-			<program id="programIDtest">
-				<uuid>013f70cb-e3d4-406d-935f-64e1969830fd</uuid>
-				<instruction id="instructionID">
-					<uuid>d7fb9dd3-3b22-4c61-9a8c-813885d0de4e</uuid>
+			<program id="programIDtest2">
+				<uuid>7ad93f9b-66db-414e-b438-c34de3099982</uuid>
+				<instruction id="instructionID1">
+					<uuid>a790bce4-d556-4a45-97dd-55d8f70d943d</uuid>
+					<name>PRE</name>
+					<description>PRE</description>
+					<transitionRef id="transition1" ref="TT-1" />
+				</instruction>
+				<instruction id="instructionID2">
+					<uuid>1da93770-c445-4b40-9845-5cfae56ec1b8</uuid>
 					<name>SEM</name>
 					<description>SEM</description>
 					<property xsi:type="stringType" key="TreatmentType">
 						<value>SEM</value>
 					</property>
-					<transitionRef id="transition1" ref="TT-1" />
+					<transitionRef id="transition2" ref="TT-2" />
 				</instruction>
 				<materialTemplate id="sample001">
-					<uuid>44c80bd6-210e-4bd4-939b-df7909b3dfc0</uuid>
+					<uuid>88bab86d-9066-4802-8f79-ac7ac754b637</uuid>
 					<description>sample template</description>
 					<property xsi:type="stringType" key="name">
 						<value></value>
@@ -74,25 +97,57 @@
 					</property>
 					<placeRef id="material" ref="MT1" />
 				</materialTemplate>
+				<materialTemplate id="sample002">
+					<uuid>50a8579b-828b-4886-ad9b-309ac116d925</uuid>
+					<description>PRE result and SEM material template</description>
+					<property xsi:type="doubleType" key="thickness" formatString="0.00"
+						scaleFactor="1.00" units="mm">
+						<value>0.10</value>
+					</property>
+					<property xsi:type="stringType" key="comments">
+						<value>Add comments.</value>
+					</property>
+					<placeRef id="material" ref="MT2" />
+				</materialTemplate>
 				<conditionTemplate id="condition001">
-					<uuid>149fc2bd-52bd-4573-8ab4-a4127067daa8</uuid>
-					<description>condition template</description>
-					<property xsi:type="intType" key="temperature" formatString="0.0" unit="°C">
+					<uuid>3d5dccab-99c6-4ae7-a596-70eea4881100</uuid>
+					<description>PRE condition template</description>
+					<property xsi:type="intType" key="temperature" formatString="0.0" unit="℃">
 						<value></value>
 					</property>
 					<property xsi:type="intType" key="waitingtime" formatString="0" unit="min">
-						<value></value>
+						<value>330</value>
 					</property>
 					<placeRef id="condition" ref="CT1" />
 				</conditionTemplate>
+				<conditionTemplate id="condition002">
+					<uuid>a86c5dac-b429-408e-9fd4-a2b1e24f03fc</uuid>
+					<description>SEM condition template</description>
+					<property xsi:type="stringType" key="SEMInputConditions">
+						<value>SEM Conditions</value>
+						<property xsi:type="doubleType" key="AcceleratingVoltage"
+							formatString="0.00"
+							units="kV" scaleFactor="1.0">
+							<value> 5.00 </value>
+						</property>
+						<property xsi:type="doubleType" key="scanningTime" formatString="0.00"
+							units="s"
+							scaleFactor="1.0">
+							<value> 15.00 </value>
+						</property>
+					</property>
+					<property xsi:type="stringType" key="note">
+						<value> Low dose condition for redusing electron damage </value>
+					</property>
+					<placeRef id="condition" ref="CT2" />
+				</conditionTemplate>
 				<resultTemplate id="result001">
-					<uuid>5e75cb5a-4f0e-4292-81b5-74d631793d80</uuid>
+					<uuid>4a39e7b3-d99d-47d7-aca6-d79768aa8819</uuid>
 					<name>Result_Template</name>
 					<description>Output Images</description>
-					<property xsi:type="stringType" key="key002">
+					<property xsi:type="stringType" key="comments">
 						<value></value>
 					</property>
-					<property xsi:type="uriType" key="SEMImageUri" />
 					<placeRef id="result" ref="RT1" />
 				</resultTemplate>
 			</program>
