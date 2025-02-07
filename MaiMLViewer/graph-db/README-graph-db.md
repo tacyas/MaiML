@@ -4,7 +4,7 @@
 
 技術要素としては下記の２機能を用いた構成である。
 1. DBサーバ : Neo4j (Dockerコンテナ)
-1. MaiMLデータからCypherへの変換 : Python および xml.etree.ElementTree
+1. MAiMLデータからCypherへの変換 : Python および xml.etree.ElementTree
 
 #### スクリプト構成
 

@@ -123,7 +123,7 @@ query_list = {
 			return nodes, collect(r) as edges;
 		`
 		*/
-		
+
 		// 2023/4/18 add
 		cypher_str: `
 			match (a:XMAIL)
@@ -356,50 +356,86 @@ return
 		],
 		cypher_str: `
 		match
-		(te)-[:XML_Child*0..]->(parent)-[:XML_Child]->(prop {__tag: 'property'})
-where
-		id(te)=$template_nid
-optional match
-		(prop)-[:XML_Child]->(v {__tag: 'value'})-[:XML_Data]->(vd)
-optional match
-		(prop)-[:XML_Child]->(d {__tag: 'description'})-[:XML_Data]->(dd)
-return
-		id(prop) as nid,
-		id(parent) as parent_nid,
-		dd.value as description,
-		vd.value as value,
-		properties(prop) as attrib
-union
-match
-		(te)-[:XML_Child*0..]->(parent)-[:XML_Child]->(prop {__tag: 'content'})
-where
-		id(te)=$template_nid
-optional match
-		(prop)-[:XML_Child]->(v {__tag: 'value'})-[:XML_Data]->(vd)
-optional match
-		(prop)-[:XML_Child]->(d {__tag: 'description'})-[:XML_Data]->(dd)
-return
-		id(prop) as nid,
-		id(parent) as parent_nid,
-		dd.value as description,
-		vd.value as value,
-		properties(prop) as attrib
-union
-match
-		(te)-[:XML_Child*0..]->(parent)-[:XML_Child]->(prop {__tag: 'uncertainty'})
-where
-		id(te)=$template_nid
-optional match
-		(prop)-[:XML_Child]->(v {__tag: 'value'})-[:XML_Data]->(vd)
-optional match
-		(prop)-[:XML_Child]->(d {__tag: 'description'})-[:XML_Data]->(dd)
-return
-		id(prop) as nid,
-		id(parent) as parent_nid,
-		dd.value as description,
-		vd.value as value,
-		properties(prop) as attrib;
-`
+				(te)-[:XML_Child*0..]->(parent)-[:XML_Child]->(prop {__tag: 'property'})
+		where
+				id(te)=$template_nid
+		optional match
+				(prop)-[:XML_Child]->(v {__tag: 'value'})-[:XML_Data]->(vd)
+		optional match
+				(prop)-[:XML_Child]->(d {__tag: 'description'})-[:XML_Data]->(dd)
+		return
+				id(prop) as nid,
+				id(parent) as parent_nid,
+				dd.value as description,
+				vd.value as value,
+				properties(prop) as attrib
+		union
+		match
+				(te)-[:XML_Child*0..]->(parent)-[:XML_Child]->(prop {__tag: 'content'})
+		where
+				id(te)=$template_nid
+		optional match
+				(prop)-[:XML_Child]->(v {__tag: 'value'})-[:XML_Data]->(vd)
+		optional match
+				(prop)-[:XML_Child]->(d {__tag: 'description'})-[:XML_Data]->(dd)
+		return
+				id(prop) as nid,
+				id(parent) as parent_nid,
+				dd.value as description,
+				vd.value as value,
+				properties(prop) as attrib
+		union
+		match
+				(te)-[:XML_Child*0..]->(parent)-[:XML_Child]->(prop {__tag: 'uncertainty'})
+		where
+				id(te)=$template_nid
+		optional match
+				(prop)-[:XML_Child]->(v {__tag: 'value'})-[:XML_Data]->(vd)
+		optional match
+				(prop)-[:XML_Child]->(d {__tag: 'description'})-[:XML_Data]->(dd)
+		return
+				id(prop) as nid,
+				id(parent) as parent_nid,
+				dd.value as description,
+				vd.value as value,
+				properties(prop) as attrib;
+		`
+	},
+	/* 20240906 add */
+	get_insertions: {
+		/*
+		* [UI-4] template,instance内のinsertion情報取得
+
+		Args:
+				template_nid    : node-ID of template and instance
+		Returns:
+				uri             : insertion要素のuri値
+				hash            : insertion要素のhash値
+				format          : insertion要素のformat値
+				uuid            : insertion要素のuuid値
+		*/
+		params: [
+			'template_nid'
+		],
+		cypher_str: `
+		match
+			(te)- [: XML_Child * 0..] -> (ins { __tag: 'insertion' })
+		where
+		id(te) = $template_nid
+		optional match
+			(ins) - [: XML_Child] -> (u { __tag: 'uri' }) -[: XML_Data] -> (ud)
+		optional match
+			(ins) - [: XML_Child] -> (h { __tag: 'hash' }) -[: XML_Data] -> (hd)
+		optional match
+			(ins) - [: XML_Child] -> (uu { __tag: 'uuid' }) -[: XML_Data] -> (uud)
+		optional match
+			(ins) - [: XML_Child] -> (f { __tag: 'format' }) -[: XML_Data] -> (fd)
+		return
+		ud.value as uri,
+			hd.value as hash,
+			fd.value as format,
+			uud.value as uuid
+		`
 	},
 	create_PNarc: {
 		/*
@@ -926,6 +962,28 @@ detach delete n, te, plR, uu, uud, na, nad, de, ded;
 				n:PN:Layer1,
 				n.__layer = 0,
 				n.__xmail_nid = $xmail_nid;
+		`
+	},
+	get_docuuid: {
+		/*
+		20240913 add
+		* document要素のuuid取得
+
+		Args:
+				xmail_nid   : node-ID of XMAIL
+		Returns:
+				uuid	: uuid of document element
+		*/
+		params: [
+			'xmail_nid'
+		],
+		cypher_str: `
+			match
+				(a:XMAIL)-[:XML_Root]->(d)-[:XML_Child]->(do {__tag: 'document'})-[:XML_Child]->(uu {__tag: 'uuid'})-[:XML_Data]->(uuid)
+			where
+				id(a)=$xmail_nid
+			return
+				uuid.value as uuid
 		`
 	},
 	/*

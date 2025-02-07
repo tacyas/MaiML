@@ -135,6 +135,7 @@ const C_MODEL = '[xmail]';
 	return graphJson;
 };
 
+
 /*
  * [UI-2] PN図出力 - nodes & edges
  *・GrpahDBへ接続
@@ -167,7 +168,7 @@ exports.pn_nodes = async function(id) {
 					]
 				}
 			},
-			function(error, response, body) {
+			async function(error, response, body) {
 				if (error) {
 					logger.app.error(C_MODEL + error.message);
 					reject(error);
@@ -185,8 +186,73 @@ exports.pn_nodes = async function(id) {
 					nodes = body.results[0].data[0].graph.nodes;
 					edges = body.results[0].data[0].graph.relationships;
 				}
+
+				// add 240912
+				// ステップ１　nodesから１つずつデータを取得、properties.__xmail_nidを取得ーー＞重複なしのリスト
+				var maimlnidlist = [];
+				var uuidlist = []; 
+				var maimlnid;
+				for (const record of nodes) {
+					maimlnid = record.properties.__xmail_nid;
+
+					if (!maimlnidlist.includes(maimlnid)) {
+						maimlnidlist.push(maimlnid);
+
+						const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+						const session = driver.session();
+						logger.app.debug(C_MODEL + 'Graph DB connected.');
+						let cypher2 = cypher_api.get_cypher('get_docuuid', maimlnid);
+						logger.app.debug(C_MODEL + 'Cypher : ' + cypher2.toString());
+
+						// ステップ２　uuidを取得ーー＞uuidとnidのリストを作る
+						var uuid;
+						await session
+							.run(cypher2)
+							.then(function (result) {
+								result.records.forEach(function (record) {
+									//logger.app.debug("getuuid record:"+JSON.stringify(record));
+									uuid = record.get('uuid');
+									session.close();
+								});
+							})
+							.catch(function (error) {
+								session.close();
+								logger.app.error(C_MODEL + error.message);
+								throw error;
+							});
+						uuidlist.push({ uuid: uuid, maimlnid: maimlnid });
+					}
+				}
+
+				// get position's file
+				var fdataList = {};
+				uuidlist.forEach(function (idobj) {
+					var uuid = idobj.uuid;
+					var maimlnid = idobj.maimlnid;
+					var filename = uuid + '.position';
+					var filepath = path.join(__dirname, '../exports/pnmlpositions', filename);
+					logger.app.debug('uuid , maimlNID =' + JSON.stringify(uuid) + ',' + JSON.stringify(maimlnid));
+					logger.app.debug('positions filepath=' + JSON.stringify(filepath));
+					const fs = require('fs');
+					var fdata;
+					if (fs.existsSync(filepath)) {
+						try {
+							fdata = fs.readFileSync(filepath, 'utf8');
+							if (fdata) {
+								fdata = JSON.parse(fdata)
+								.map(item => item ? JSON.parse(item) : null)
+								.filter(item => item !== null);
+								fdataList[maimlnid] = {uuid: uuid, fdata: fdata};
+							};
+						} catch (error) {
+							logger.app.error(C_MODEL + error.message);
+						}
+					}
+				});
+
 				graphJson = graphJson + '[';
-				nodes.forEach(function(record) {
+				nodes.forEach(function (record) {
+					logger.app.debug("record:" + JSON.stringify(record));
 					if (idx >= 1) {
 						graphJson = graphJson + ',';
 					}
@@ -203,7 +269,7 @@ exports.pn_nodes = async function(id) {
 						'"pid": "' +
 						record.properties.id +
 						'", ' +
-						'"name": "' +
+						'"elementID": "' +
 						record.properties.id +
 						'", ' +
 						' "nodeType": "' +
@@ -221,21 +287,49 @@ exports.pn_nodes = async function(id) {
 						'"ownNode": "' +
 						JSON.stringify(own_node) +
 						'"';
-						if (!own_node) {
-							graphJson = graphJson + ',"type": "otherNode"';
-							graphJson = graphJson + ',"readonly": "true"';
-						} else {
-							graphJson = graphJson + ',"type": "ownNode"';
-							graphJson = graphJson + ',"readonly": "false"';
-						}
-						if (idx == 1) {
-							graphJson = graphJson + ',"root": true';
-						}
-						if (!parents.includes(record.properties.__xmail_nid)) {
-							parents.push(record.properties.__xmail_nid);
-						}
+					if (!own_node) {
+						graphJson = graphJson + ',"type": "otherNode"';
+						graphJson = graphJson + ',"readonly": "true"';
+					} else {
+						graphJson = graphJson + ',"type": "ownNode"';
+						graphJson = graphJson + ',"readonly": "false"';
+					}
+					if (idx == 1) {
+						graphJson = graphJson + ',"root": true';
+					}
+					if (!parents.includes(record.properties.__xmail_nid)) {
+						parents.push(record.properties.__xmail_nid);
+					}
 
-						graphJson = graphJson + '},';
+					graphJson = graphJson + '},';
+
+
+					// add 240910 positionを追加する
+					//record.properties.__xmail_nid を用いてfdataを取得する
+					if (fdataList[maimlnid] && fdataList[maimlnid].fdata) {
+						var fdata = fdataList[maimlnid].fdata;
+						var pt = false;
+						var positions;
+						fdata.forEach(item => {
+							//logger.app.debug("jsonString:" + item);
+							try {
+								if (record.properties.id === item.data.pid) {	//pidの一致
+									pt = true;
+									positions = item.position;
+								};
+							} catch (error) {
+								logger.app.error(C_MODEL + error.message);
+							}
+						});
+
+						if (pt) {
+							graphJson = graphJson + '"position":';
+							graphJson = graphJson + JSON.stringify(positions);
+							graphJson = graphJson + ',';
+						}
+					} else {
+						logger.app.debug(C_MODEL + "fdata is null.");
+					}
 
 					graphJson = graphJson + 
 						'"classes": "' +
@@ -315,13 +409,93 @@ exports.pn_nodes = async function(id) {
 					idx = idx + 1;
 				});
 				graphJson = graphJson + '] ';
-				logger.app.debug(C_MODEL + 'GraphJson : ' + graphJson);
+				logger.app.debug(C_MODEL +'GraphJson : ' + graphJson);
 
 				resolve(graphJson);
 			}
 		);
 	});
 };
+
+
+// 20240912 add
+/*
+ * PN図の座標記録
+ *・GraphDBへ接続
+ *・Cypher生成
+ *・Cypher実行
+ *・結果を元に座標ファイルを保存
+ *
+ * @returns true
+ * @throws {cypher error}
+*/
+const path = require('path');
+const fs = require('fs');
+const { json } = require('body-parser');
+exports.pn_position = async function(id,position){
+	const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+	const session = driver.session();
+	logger.app.debug(C_MODEL + 'Graph DB connected.');
+
+	let cypher = cypher_api.get_cypher('get_docuuid',id);
+	logger.app.debug(C_MODEL + 'Cypher : ' + cypher.toString());
+
+	// document要素のuuidを取得
+	var uuid;
+	await session
+		.run(cypher)
+		.then(function (result) {
+			logger.app.debug(JSON.stringify(result.records));
+			result.records.forEach(function (record) {
+				logger.app.debug(JSON.stringify(record));
+				session.close();
+				uuid = record.get('uuid');
+			});
+		})
+		.catch(function (error) {
+			session.close();
+			logger.app.error(C_MODEL + error.message);
+			throw error;
+		});
+
+	const m_position = position.split('\n')
+		.filter(line => line.trim() !== '') // 空行を除去
+		.map(jsonString => {
+			try {
+				const obj = JSON.parse(jsonString);
+				const po = obj.position;
+				const parentid = obj.data.parent;
+				if (id === parentid) {
+					var pojson;
+					pojson = '{"data":{"id":"'+obj.data.id+'","pid":"'+obj.data.pid+'"},"position":'+JSON.stringify(po)+'}';
+					return pojson;
+				} else {
+					return null;
+				}
+			} catch (error) {
+				logger.app.error(C_MODEL + error.message);
+				return null; // パースエラーの場合はnull
+			}
+		})
+		.filter(item => item !== null);
+
+	//var filename = id + '_' + uuid + '.position'
+	var filename = uuid + '.position'
+	var filepath = path.join(__dirname, '../exports/pnmlpositions', filename)
+	// save file
+	fs.writeFile(filepath, JSON.stringify(m_position), 'utf8', (error) => {
+		if (error) {
+			logger.app.error(C_MODEL + error.message);
+			throw error;
+		}
+	});
+
+	driver.close();
+	var t = true;
+	return t;
+};
+
+
 
 /*
  * [UI-3] node詳細情報取得（個別）
@@ -568,18 +742,18 @@ exports.node_material = async function(node_id) {
 	*/
 	logger.app.debug(C_MODEL + 'Cypher : ' + cypher.toString());
 
-	var graphJson = '[';
+	//var graphJson = '[';
+	
+	// property,content
+	//var graphJson1 = '[';
+	var graphJson1;
 	var idx = 0;
-
 	await session
 		.run(cypher)
 		.then(function(result) {
 			result.records.forEach(function(record) {
 				session.close();
 
-				if (idx >= 1) {
-					graphJson = graphJson + ',';
-				}
 
 				var attrib = record.get('attrib');
 				delete attrib.__tag;
@@ -591,20 +765,75 @@ exports.node_material = async function(node_id) {
 					'value': record.get('value') ? record.get('value').substring(0, 96): "",  /* 20240523 edit */
 					'attrib': jsonPrettier(attrib)
 				};
-				graphJson =
-					graphJson + JSON.stringify(arrayTmp);
+
+				if (idx >= 1) {
+					graphJson1 = graphJson1 + ',' + JSON.stringify(arrayTmp);
+					//graphJson1 = graphJson1 + ',';
+				}else {
+					//graphJson1 = graphJson1 + JSON.stringify(arrayTmp);
+					graphJson1 = JSON.stringify(arrayTmp);
+				};
+				//graphJson1 = graphJson1 + JSON.stringify(arrayTmp);
 				idx = idx + 1;
 			});
-
-			graphJson = graphJson + ']';
 		})
 		.catch(function(error) {
 			session.close();
 			logger.app.error(C_MODEL + error.message);
 			throw error;
 		});
+	//graphJson.graphJson1 = graphJson1;
+	//graphJson = graphJson + graphJson;
+	logger.app.debug('graphJson1のデータ');
+	logger.app.debug(C_MODEL + 'GraphJson1 : ' + graphJson1);
 
+	
+	// 20240906 add
+	// get insertion contents
+	const session2 = driver.session();
+	let cypher2 = cypher_api.get_cypher('get_insertions', node_id);
+	
+	//var graphJson2 = '[';
+	var graphJson2;
+	var idx = 0;
+	await session2
+		.run(cypher2)
+		.then(function (result2) {
+			result2.records.forEach(function (record) {
+				session2.close();
+
+				var arrayTmp2 = {
+					'uri': record.get('uri'),
+					'hash': record.get('hash'),
+					'format': record.get('format'),
+					'uuid': record.get('uuid')
+				};
+
+				if (idx >= 1) {
+					graphJson2 = graphJson2 + ',' + JSON.stringify(arrayTmp2);
+				}else {
+					//graphJson2 = graphJson2 + JSON.stringify(arrayTmp2);
+					graphJson2 = JSON.stringify(arrayTmp2);
+				};
+				idx = idx + 1;
+			});
+		})
+		.catch(function (error) {
+			session2.close();
+			logger.app.error(C_MODEL + error.message);
+			throw error;
+		});
+	
+	logger.app.debug('graphJson２のデータ');
+	logger.app.debug(C_MODEL + 'GraphJson2 : ' + graphJson2);
+
+	var graphJson = [{
+		graphJson1 : graphJson1,
+		graphJson2 : graphJson2
+	}];
+	//graphJson = graphJson + ']';
 	logger.app.debug(C_MODEL + 'GraphJson : ' + graphJson);
+
 	driver.close();
 	return graphJson;
 };

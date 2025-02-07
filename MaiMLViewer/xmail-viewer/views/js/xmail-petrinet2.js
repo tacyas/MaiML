@@ -60,10 +60,14 @@ const layoutConfig_breadthfirst = {
 		e.cy.center()
 	}
 };
+const layputConfigD = {
+	name: 'preset'
+};
 //230425 add
+const layoutConfig = layputConfigD;
 //const layoutConfig = layoutConfig_grid;
 //const layoutConfig = layoutConfig_cose;
-const layoutConfig = layoutConfig_cola;
+//const layoutConfig = layoutConfig_cola;
 //const layoutConfig = layoutConfig_circle;
 //const layoutConfig = layoutConfig_breadthfirst;
 
@@ -97,6 +101,26 @@ $(document).ready(function() {
 		order: [[0, 'asc']]
 	});
 
+	// 20240912 add
+	var table2 = $('#insertiondatagrid').DataTable({
+		paging: false,
+		searching: false,
+		select: true,
+		columns: [
+			{ data: 'uri' },
+			{ data: 'hash' },
+			{ data: 'format' },
+			{ data: 'uuid' }
+		],
+		columnDefs: [
+			{
+				//targets: [2, 4],
+				className: 'left-aligned-cell'
+			}
+		],
+		order: [[0, 'asc']]
+	});
+
 	loadPetrinet();
 });
 
@@ -120,13 +144,16 @@ $(document).ready(function() {
 			id: getParam('id')
 		},
 		success: function(data) {   //通信成功時の処理(dataは返り値でjson型)
+			//console.log(data);
+
 			cy = cytoscape({
 				container: $('#cy'),
 				style: [
 					{
 						selector: 'node',
 						style: {
-							'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
+							'label': function (ele) { return ele.data('elementID') },
+							//'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
 							'color': 'black',
 							'text-outline-color': 'white',
 							'text-outline-width': 1,
@@ -343,14 +370,28 @@ $(document).ready(function() {
 					},
 				],
 				//wheelSensitivity: 1,
-				//layout: layoutConfig,
+				
+				layout: layoutConfig,
 				//独自で作成したlayoutを適用する場合↓
 				layout: {
 					name: 'preset'
 				},
 				elements: data,
 			})
-	
+			
+			// add 20240930 layoutの定義がなければcolaで表示
+			var layout_out = layoutConfig_cola;
+			for (var i = 0; i < data.length; i++) {
+				var keys = Object.keys(data[i]);
+				for (var j = 0; j < keys.length; j++) {
+					if (keys[j] == 'position') {
+						layout_out = layoutConfig;
+					};
+				};
+			};
+			const layout = cy.makeLayout(layout_out);
+			layout.run();
+
 			var tappedBefore;
 			var tappedTimeout;
 
@@ -504,6 +545,7 @@ $(document).ready(function() {
 }
 
 /**
+ * 
  * ノード詳細情報取得（対象ノードリスト指定）
  * ・ノードリストで列挙したノードの詳細情報を取得する。
  * ・ここで取得した内容はメモリ上に保持され、ペトリネット図のノード選択時に参照される。
@@ -589,7 +631,6 @@ function getNodeDetails(node_id) {
  */
 function getNodeMaterial(node_id) {
 	// eslint-disable-line
-
 	$.ajax({
 		url: '/node/node-material',
 		type: 'post',
@@ -598,13 +639,28 @@ function getNodeMaterial(node_id) {
 			node_id: node_id
 		},
 		success: function(data) {
+			// dataからgeneralを取得
+			var generaldata = data[0].graphJson1;
+
 			$('#datagrid')
 				.dataTable()
 				.fnClearTable();
-			if (data.length > 0) {
+			if (generaldata != undefined) {
 				$('#datagrid')
 					.dataTable()
-					.fnAddData(data);
+					.fnAddData(JSON.parse('[' + generaldata + ']'));	//generalを追加
+			}
+
+			// dataからinsertionを取得
+			var insdata = data[0].graphJson2;
+			
+			$('#insertiondatagrid')
+				.dataTable()
+				.fnClearTable();
+			if (insdata != undefined) {
+				$('#insertiondatagrid')
+					.dataTable()
+					.fnAddData(JSON.parse('[' + insdata + ']'));	//insertionを追加
 			}
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
@@ -612,9 +668,45 @@ function getNodeMaterial(node_id) {
 			formatErrorMessage(jqXHR, textStatus, errorThrown, msg);
 		}
 	});
-
 	return;
 }
+
+
+// 20240912 add
+/**
+* ペトリネット図座標記憶ボタンイベントハンドラ
+*/
+$('#pnml_position_btn').click(function () {
+	//positionデータを保存するためにメモリ上のペトリネットデータを取得
+	var cy = window.cy;
+	var s = "";
+	var nodes = cy.nodes();
+	nodes.forEach(function (node) {
+		s += JSON.stringify(node.json());
+		s += "\n";
+	});
+	//console.log(s);
+	//サーバーへ送る
+	$.ajax({
+		url: '/petrinet/xmail-position',
+		type: 'post',
+		dataType: 'json',
+		data: {
+			nid: getParam('id'),
+			pnml_data: s
+		},
+		success: function (data) {   //通信成功時の処理(dataは返り値でjson型)
+			//特になし
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			var msg = 'ペトリネット位置情報の保存に失敗しました。';
+			formatErrorMessage(jqXHR, textStatus, errorThrown, msg);
+		}
+	});
+});
+
+
+
 
 /**
 * ノード選択エリアのクリアボタンイベントハンドラ

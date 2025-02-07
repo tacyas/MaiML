@@ -1,17 +1,5 @@
 ﻿## XMAILデータ照会ツール
 ### xmail-viewer
-
-#### 改訂履歴
-|Author|Version|Last updated|Description|
-|:-----:|:-----:|:-----:|:-----|
-|usk|1.0|2019/1/24|Initial|
-|usk|1.0.1|2019/2/21|アップロード機能追加|
-|usk|1.0.2|2019/2/25|一覧UIを変更、XMAILデータ削除追加|
-|usk|1.1|2021/2/9|Petri-Net編集機能追加|
-|Hanazuka|1.2|2022/2/9|グラフ描画エンジン変更、グラフ要素グループ化対応|
-
-### TODO
--ペトリネット図のモバイル対応（小さい画面だと表示できない）
  
 ***
 ### Development Prerequisites
@@ -54,24 +42,25 @@ GraphDBに登録されているMaiMLデータを一覧で照会し、さらに�
 
 ### アプリケーション起動方法
 ＜開発モード＞
-1) 前提条件として開発環境にnodejs及び、npmがインストールされていること </br>
-　　　　`\xmail-viewer> node -v` </br>
-　　　　`v10.5.0` </br>
-　　　　`\xmail-viewer> npm -v` </br>
-　　　　`6.1.0` </br>
+１）前提条件として開発環境にnodejs及び、npmがインストールされていること
+　　　　`\xmail-viewer> node -v`
+　　　　`v10.5.0`
+　　　　`\xmail-viewer> npm -v`
+　　　　`6.1.0`
 
-2) 当リポジトリ(xmail-viewer)をクローン
-3) package.jsonが存在するディレクトリにて`npm install`を実行 </br>
+２）当リポジトリ(xmail-viewer)をクローン
+３）package.jsonが存在するディレクトリにて`npm install`を実行
+
 	※ クライアントセキュリティソフトウェアが有効になっている場合、npm installが失敗する場合があるので、その場合は一旦セキュリティソフトウェアを停止して実行し、後で必ずセキュリティソフトウェアを有効にしてください。
-4) 同ディレクトリにおいて下記コマンドを実行 </br>
+　　
+４）同ディレクトリにおいて下記コマンドを実行
   　　　　`node ./bin/www`
-5) Chromeブラウザから下記URLへアクセス </br>
+５）Chromeブラウザから下記URLへアクセス
 　　　　`http://localhost:3000`
-6) XMAILデータ一覧照会画面が表示される
- </br>
- 
-＜プロダクションモード＞ </br>
-       `TBD`
+６）MaiMLデータ一覧照会画面が表示される
+
+＜プロダクションモード＞
+　　　　`TBD`
 
 ### ディレクトリ構成
 	./xmail-viewer
@@ -95,11 +84,11 @@ GraphDBに登録されているMaiMLデータを一覧で照会し、さらに�
 ## Docker
 ### Prerequisites
 githubからソースをクローン
-git clone [https://github.com/tacyas/MaiML.git](https://github.com/tacyas/MaiML.git)
+git clone [https://mntUsk@github.com/Micronet-Techno/kyutech.git](https://mntUsk@github.com/Micronet-Techno/kyutech.git)
 
 	cd ~
 	cd kyutech
-	git clone https://github.com/tacyas/MaiML.git
+	git clone https://mntUsk@github.com/Micronet-Techno/kyutech.git
 	(password)
 	cd kyutech
 	sudo cp -r xmail-viewer/ /usr/kyutech/
@@ -186,7 +175,7 @@ docker hubからnode image を取得（10.5.0で開発だが、とりあえずla
 ||||
 
 #### Development Memo
-登録したXMAILファイルをNID指定で登録されているデータをすべて削除
+登録したMaiMLファイルをNID指定で登録されているデータをすべて削除
 
 	match p=(a:XMAIL)
 	-[:XML_Root]->(r)
@@ -196,8 +185,8 @@ docker hubからnode image を取得（10.5.0で開発だが、とりあえずla
 
 ペトリネット図を直接表示
 
-	http://localhost:3000/petrinet/view?id=0
-	http://localhost:3000/petrinet/view?id=30862
+	http://localhost:3000/petronet/view?id=0
+	http://localhost:3000/petronet/view?id=30862
 	など
 
 > Written with [StackEdit](https://stackedit.io/).
