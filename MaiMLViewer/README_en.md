@@ -77,17 +77,11 @@ Simultaneously displays all elements of the Petri net belonging to the selected 
 * Double-clicking a MaiML group will transition you to the Petri net element information screen for that MaiML.
 (You can switch the MaiML being edited.)
 
-##### 4.3.2. Edit + Element Information Display (Middle Column)
-* Remove Connection Between Nodes：
-Select the connection in the left column and press `Delete connection`.
-* Add Connection Between Nodes：
-Select a place and transition in the left column in sequence, then press `Create connection`.
-* Add a place and transition：
-`Add node` &rarr; Enter `ID`, Select `Node type` &rarr; `Execute`
-* Export the edited results to a MaiML file.：
-`Export MaiML` &rarr; Enter `Filename` &rarr; `Execute`
-* Node Details：
-Display the information contained in the selected node.
+##### 4.3.2. Element Information Display (Middle Column) + Insertion Element Information Display
+
+* Register PNML Position Button: Saves the coordinates of each node in the Petri net diagram to the server.
+* Node Details: Displays the information contained in the selected node.
+* Insertion Contents: Displays the information of the insertion elements associated with the selected node.
 
 ##### 4.3.3. Properties(Right Column)
 
