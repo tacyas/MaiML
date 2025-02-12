@@ -16,3 +16,4 @@
 4. Misc 　　: `MaiMLデータフォーマットを作成、解析するためのサンプルプログラム`
 5. MaiMLFileSamples　　: `MaiMLファイルのサンプル集`
 6. Excel2MaiML　　:　`計測フローを定義したMaiMLファイルと計測結果を記載したExcelファイルをマージするプログラム`
+7. VAMAS2MaiML　　:　`計測フローを記載したMaiMLファイルと計測結果を記載したvamas形式のファイルをマージするプログラム`
