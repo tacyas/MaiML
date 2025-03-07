@@ -2,7 +2,7 @@
 <maiml version="1.0" feature="nested-attributes" xmlns="http://www.maiml.org/schemas" 
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="maimlRootType">
     <document></document>
-    <pprotocol></pprotocol>
+    <protocol></protocol>
     <data id="dataID">
         <uuid></uuid>
         <results id="resultsID">
@@ -47,7 +47,7 @@
                     <property xsi:type="stringType" key="lifecycle:transition">
                         <value>complete</value> 
                     </property>
-                    <property xsi:type="dateType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ss.sssTZD">
+                    <property xsi:type="dateTimeType" key="time:timestamp" formatString="YYYY-MM-DDThh:mm:ssTZD">
                         <value></value>
                     </property>
                     <!--

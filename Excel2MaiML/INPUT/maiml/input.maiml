@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<maiml version="1.0" features="nested-attributes" xmlns="http://www.maiml.org/schemas"
+<maiml version="1.0" features="nested-attributes"
 	xmlns:concept="http://www.xes-standard.org/concept.xesext#"
 	xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#"
 	xmlns:maiml="http://www.maiml.org/schemas" xmlns:time="http://www.xes-standard.org/time.xesext#"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="maimlRootType">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="maimlRootType" xmlns:docNS="maimlDocumentNS">
 	<document id="MaimlSampleDoctest">
 		<uuid>f6fd3de3-a010-44cf-8ae6-ee26834a62d1</uuid>
 		<creator id="creatorSEM_B">
@@ -87,10 +87,8 @@
 					<uuid>88bab86d-9066-4802-8f79-ac7ac754b637</uuid>
 					<description>sample template</description>
 					<property xsi:type="stringType" key="name">
-						<value></value>
 					</property>
-					<property xsi:type="doubleType" key="molarity" formatString="0.00" unit="ppm">
-						<value></value>
+					<property xsi:type="doubleType" key="molarity" formatString="0.00" units="ppm">
 					</property>
 					<property xsi:type="stringType" key="Comment">
 						<value>Add comments.</value>
@@ -107,15 +105,14 @@
 					<property xsi:type="stringType" key="comments">
 						<value>Add comments.</value>
 					</property>
-					<placeRef id="material" ref="MT2" />
+					<placeRef id="material2" ref="MT2" />
 				</materialTemplate>
 				<conditionTemplate id="condition001">
 					<uuid>3d5dccab-99c6-4ae7-a596-70eea4881100</uuid>
 					<description>PRE condition template</description>
-					<property xsi:type="intType" key="temperature" formatString="0.0" unit="℃">
-						<value></value>
+					<property xsi:type="floatType" key="temperature" formatString="0.0" units="℃">
 					</property>
-					<property xsi:type="intType" key="waitingtime" formatString="0" unit="min">
+					<property xsi:type="intType" key="waitingtime" formatString="0" units="min">
 						<value>330</value>
 					</property>
 					<placeRef id="condition" ref="CT1" />
@@ -139,7 +136,7 @@
 					<property xsi:type="stringType" key="note">
 						<value> Low dose condition for redusing electron damage </value>
 					</property>
-					<placeRef id="condition" ref="CT2" />
+					<placeRef id="condition2" ref="CT2" />
 				</conditionTemplate>
 				<resultTemplate id="result001">
 					<uuid>4a39e7b3-d99d-47d7-aca6-d79768aa8819</uuid>
@@ -148,7 +145,7 @@
 					<property xsi:type="stringType" key="comments">
 						<value></value>
 					</property>
-					<placeRef id="result" ref="RT1" />
+					<placeRef id="result" ref="RT2" />
 				</resultTemplate>
 			</program>
 		</method>

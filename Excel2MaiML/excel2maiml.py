@@ -3,7 +3,7 @@ import copy,hashlib,mimetypes
 import uuid as UUID
 import pandas as pd
 from pathlib import Path
-from Utils.staticClass import maimlelement
+from Utils.staticClass import maimlelement, settings
 from Utils.createMaiMLFile import  ReadWriteMaiML, UpdateMaiML
 
 
@@ -16,7 +16,6 @@ class filepath:
     rootdir = os.path.abspath(os.path.join(codedir, os.pardir)) + '/'
     input_dir = codedir + 'INPUT/'
     output_dir = codedir + 'OUTPUT/'
-
     
 ### excelの日付データのフォーマットを変換 ###################################
 ## YYYY-MM-DDTHH:MM:SS-xx:xx #########
@@ -24,7 +23,8 @@ def changeTimeFormat(e_datetime):
     #print(e_datetime) #2024/3/5 9:03
     e_datetime = pd.to_datetime(e_datetime)
     #print(e_datetime) # 2024-03-05 09:03:00
-    TIME_ZONE = 'Asia/Tokyo'
+    #TIME_ZONE = 'Asia/Tokyo'
+    TIME_ZONE = settings.TIME_ZONE
     e_datetime = e_datetime.tz_localize(TIME_ZONE)
     # 日時を 'YYYY-MM-DDTHH:MM:SS' フォーマットに変換
     datetime_str = e_datetime.strftime('%Y-%m-%dT%H:%M:%S')
@@ -39,11 +39,15 @@ def changeTimeFormat(e_datetime):
 
 ### エクセルの文字列指定'をフォーマット #################################################
 def formatter_dash(value):
+    if value == 'nan': ## エクセルの値が空白の場合（エラーとはしない）
+        return ''
     return value.lstrip("'")
 
 
 ### valueの数値をフォーマット #################################################
 def formatter_num(format_string, number):
+    if number == '':
+        return number
     if '.' in format_string:
         decimal_places = len(format_string.split('.')[1])  # 小数点以下の桁数
     else:
