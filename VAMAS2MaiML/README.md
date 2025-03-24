@@ -41,8 +41,8 @@
   ・templateがもつ汎用データコンテナのkeyとVAMASファイルのkeyが一致した場合のみ、valueをVAMASデータで更新 <br/>
   　　（一致しなければ、VAMASデータは無視される） <br/>
   ・eventLogを１つ作成 <br/>
-　・複数回の計測データをもつ場合はtraceを複数作成 <br/>
-　・VAMASフォーマットにおいてLISTやオプションとしてデータをもつ以下のキーが存在した場合は、 <br/>
+  ・複数回の計測データをもつ場合はtraceを複数作成 <br/>
+  ・VAMASフォーマットにおいてLISTやオプションとしてデータをもつ以下のキーが存在した場合は、 <br/>
  　　propertyListTypeで包括した汎用データコンテナを作成 <br/>
 　　　1. corresponding_variables
 　　　2. AdditionalNumericalParam
