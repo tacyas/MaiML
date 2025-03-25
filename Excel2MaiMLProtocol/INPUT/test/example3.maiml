@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='utf-8'?>
+<maiml version="1.0" features="nested-attributes" xsi:type="protocolFileRootType" xmlns="http://www.maiml.org/schemas" xmlns:maiml="http://www.maiml.org/schemas" xmlns:time="http://www.xes-standard.org/time.xesext#" xmlns:concept="http://www.xes-standard.org/concept.xesext#" xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:BBBB="http://BBBB.corp/index.jp" xmlns:BBBBHPLC="http://BBBB.corp/ontology/hplc" xmlns:CDF="http://BBBB.corp/ontology/cdf">
+    <document id="documentID001">
+        <uuid>b5322418-e415-4e1f-be10-352235e49464</uuid>
+        <name />
+        <description />
+        <annotation />
+        <creator id="creatorID001">
+            <uuid>06a2eb4f-a957-46be-b6b2-076ba2c7592d</uuid>
+            <name>AAAA:HPLCsystem</name>
+            <description />
+            <annotation>高速液体クロマトグラフ機器</annotation>
+            <vendorRef id="defVENDORREF1" ref="vendorID001" />
+            <instrumentRef id="defINSTRUMENTREF1" ref="instrumentID001" />
+        </creator>
+        <vendor id="vendorID001">
+            <uuid>0a62be35-5245-4f8b-9385-3fa0d1ad9ebc</uuid>
+            <name>AAAACorporation</name>
+            <description />
+            <annotation>AAAA株式会社</annotation>
+        </vendor>
+        <owner id="ownerID001">
+            <uuid>3d3d1564-11fc-44ac-9d78-89749bb26f0e</uuid>
+            <name>BBBB:TANAKA</name>
+            <description />
+            <annotation />
+        </owner>
+        <instrument id="instrumentID001">
+            <uuid>6e8c295c-f05f-4d2d-9c2b-c75918820141</uuid>
+            <name>HPLC</name>
+            <description />
+            <annotation />
+        </instrument>
+        <date>2025-02-26T10:40:33.526719+09:00</date>
+    </document>
+    <protocol id="HPLCprotocolID001">
+        <uuid>b25ccb41-0cf6-4757-b0ef-74da5bbd9d40</uuid>
+        <name />
+        <description />
+        <annotation />
+        <method id="HPLCmethodID001">
+            <uuid>ea2387e3-8f57-4068-ae1f-a439390be91b</uuid>
+            <name />
+            <description />
+            <annotation />
+            <pnml id="HPLCpnmlID001">
+                <uuid>5059cfb0-42e5-4129-aa3e-fb4914a265d7</uuid>
+                <name />
+                <description />
+                <annotation />
+                <place id="HPLCM_P001" />
+                <place id="HPLCC_P001" />
+                <place id="HPLCR_P001" />
+                <place id="HPLCR_P002" />
+                <transition id="HPLCtransition001" />
+                <arc id="HPLCarc001" source="HPLCM_P001" target="HPLCtransition001" />
+                <arc id="HPLCarc002" source="HPLCC_P001" target="HPLCtransition001" />
+                <arc id="HPLCarc003" source="HPLCtransition001" target="HPLCR_P001" />
+                <arc id="HPLCarc004" source="HPLCtransition001" target="HPLCR_P002" />
+            </pnml>
+            <program id="HPLCprogramID001">
+                <uuid>38b53934-37fa-4d5d-b432-44a28257b637</uuid>
+                <name />
+                <description />
+                <annotation />
+                <instruction id="HPLCinstructionID001">
+                    <uuid>a6abb6f9-4ef3-418c-bd0b-b2c331d9ea4f</uuid>
+                    <name />
+                    <description />
+                    <annotation />
+                    <transitionRef id="defTRANSITIONREF4" ref="HPLCtransition001" />
+                </instruction>
+                <resulttemplate id="HPLCresultTemplateID001">
+                    <uuid>5a49fcbc-1308-4325-8db2-db4b3fcaf628</uuid>
+                    <name />
+                    <description />
+                    <annotation>HPLC出力結果</annotation>
+                    <property key="CDF:detector_maximum_value" xsi:type="floatType">
+                        <name />
+                        <description>Y軸最大値</description>
+                        <value />
+                    </property>
+                    <property key="CDF:detector_minimum_value" xsi:type="floatType">
+                        <name />
+                        <description>Y軸最小値</description>
+                        <value />
+                    </property>
+                    <property key="CDF:actual_run_time_length" xsi:type="floatType" units="sec">
+                        <name />
+                        <description>X軸最大値</description>
+                        <value />
+                    </property>
+                    <property key="CDF:actual_sampling_interval" xsi:type="floatType" units="sec">
+                        <name />
+                        <description>X軸間隔</description>
+                        <value />
+                    </property>
+                    <property key="CDF:actual_delay_time" xsi:type="floatType" units="sec">
+                        <name />
+                        <description>測定開始前の遅延時間</description>
+                        <value />
+                    </property>
+                    <content key="BBBBHPLC:plot_run_time" xsi:type="contentFloatListType" units="sec" axis="測定時間">
+                        <name />
+                        <description>X軸データ</description>
+                        <value />
+                    </content>
+                    <content key="CDF:ordinate_values" xsi:type="contentFloatListType" axis="信号強度">
+                        <name />
+                        <description>Y軸データ</description>
+                        <value />
+                    </content>
+                    <placeRef id="defPLACEREFHPLCresultTemplateID0010" ref="HPLCR_P001" />
+                </resulttemplate>
+                <resulttemplate id="HPLCresultTemplateID002">
+                    <uuid>e7650873-d8c8-427d-ae6d-427b250156cf</uuid>
+                    <name />
+                    <description />
+                    <annotation>HPLC出力結果</annotation>
+                    <property key="BBBBHPLC:peak_data" xsi:type="propertyListType">
+                        <name />
+                        <description />
+                        <content key="CDF:peak_retention_time" xsi:type="contentFloatListType" units="sec">
+                            <name />
+                            <description />
+                            <value />
+                            <content key="CDF:peak_end_time" xsi:type="contentFloatListType" units="sec">
+                                <name />
+                                <description />
+                                <value />
+                            </content>
+                            <content key="CDF:peak_area" xsi:type="contentFloatListType">
+                                <name />
+                                <description />
+                                <value />
+                            </content>
+                        </content>
+                        <content key="CDF:peak_start_time" xsi:type="contentFloatListType" units="sec">
+                            <name />
+                            <description />
+                            <value />
+                        </content>
+                        <content key="CDF:peak_height" xsi:type="contentFloatListType">
+                            <name />
+                            <description />
+                            <value />
+                        </content>
+                        <content key="CDF:peak_start_detection_code" xsi:type="contentStringListType">
+                            <name />
+                            <description />
+                            <value />
+                        </content>
+                        <content key="CDF:peak_stop_detection_code" xsi:type="contentStringListType">
+                            <name />
+                            <description />
+                            <value />
+                        </content>
+                    </property>
+                    <placeRef id="defPLACEREFHPLCresultTemplateID0021" ref="HPLCR_P002" />
+                </resulttemplate>
+            </program>
+            <materialtemplate id="HPLCmaterialTemplateID001">
+                <uuid>51f0c46f-a9cb-4e91-a19e-23868c772155</uuid>
+                <name />
+                <description />
+                <annotation>HPLC対象試料</annotation>
+                <property key="BBBBHPLC:materialinfo" xsi:type="propertyListType">
+                    <name />
+                    <description />
+                    <property key="BBBBHPLC:samplename" xsi:type="qualifiedNameType">
+                        <name />
+                        <description />
+                        <value>sample_name</value>
+                    </property>
+                    <property key="BBBBHPLC:sampleID" xsi:type="uuidType">
+                        <name />
+                        <description />
+                        <value>3dc882f8-b1b1-421d-8fb7-b4dce87cb298</value>
+                    </property>
+                </property>
+                <placeRef id="defPLACEREFHPLCmaterialTemplateID0010" ref="HPLCM_P001" />
+            </materialtemplate>
+            <conditiontemplate id="HPLCconditionTemplateID001">
+                <uuid>49084a20-e4c5-41a2-b924-5cf22f6da4c1</uuid>
+                <name />
+                <description />
+                <annotation>HPLC実行時の入力条件</annotation>
+                <property key="BBBBHPLC:column" xsi:type="propertyListType">
+                    <name />
+                    <description />
+                    <property key="BBBBHPLC:specifications" xsi:type="stringType">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                </property>
+                <property key="BBBBHPLC:solvent" xsi:type="propertyListType">
+                    <name />
+                    <description />
+                    <property key="BBBBHPLC:composition" xsi:type="stringType">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                    <property key="BBBBHPLC:ph" xsi:type="floatType">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                    <property key="BBBBHPLC:flowRate" xsi:type="floatType" units="mL/min">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                </property>
+                <property key="BBBBHPLC:detector" xsi:type="propertyListType">
+                    <name />
+                    <description />
+                    <property key="BBBBHPLC:detectorTypes" xsi:type="stringType">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                </property>
+                <property key="BBBBHPLC:samplePreparation" xsi:type="propertyListType">
+                    <name />
+                    <description />
+                    <property key="BBBBHPLC:sampleSolvent" xsi:type="stringType">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                    <property key="BBBBHPLC:column" xsi:type="floatType" units="mg/mL">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                </property>
+                <property key="BBBBHPLC:temperature" xsi:type="propertyListType">
+                    <name />
+                    <description />
+                    <property key="BBBBHPLC:columnTemperature" xsi:type="floatType" units="°C">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                    <property key="BBBBHPLC:sampleTemperature" xsi:type="floatType" units="°C">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                </property>
+                <property key="BBBBHPLC:pressure" xsi:type="propertyListType">
+                    <name />
+                    <description />
+                    <property key="BBBBHPLC:systemPressure" xsi:type="intType" units="bar">
+                        <name />
+                        <description />
+                        <value />
+                    </property>
+                </property>
+                <property key="BBBBHPLC:separationMode" xsi:type="stringType">
+                    <name />
+                    <description />
+                    <value />
+                </property>
+                <placeRef id="defPLACEREFHPLCconditionTemplateID0011" ref="HPLCC_P001" />
+            </conditiontemplate>
+        </method>
+    </protocol>
+</maiml>
