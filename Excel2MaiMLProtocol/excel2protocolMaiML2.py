@@ -75,11 +75,13 @@ class BaseElement:
     
     def add_common_subelements(self, element, row):
         try:
-            try: ## 汎用データコンテナはname要素を持たないための処理
-                ET.SubElement(element, "name").text = nan_to_empty_string(row["NAME"])
+            try:
+                if pd.notna(row["NAME"]):
+                    ET.SubElement(element, "name").text = nan_to_empty_string(row["NAME"])
             except KeyError:
                 pass
-            ET.SubElement(element, "description").text = nan_to_empty_string(row["DESCRIPTION"])
+            if pd.notna(row["DESCRIPTION"]):
+                ET.SubElement(element, "description").text = nan_to_empty_string(row["DESCRIPTION"])
         except KeyError:
             pass
         return element
@@ -103,7 +105,8 @@ class GlobalElement(BaseElement):
         ET.SubElement(element, "uuid").text = uuid_value
         element = super().add_common_subelements(element, row)
         try:
-            ET.SubElement(element, "annotation").text = nan_to_empty_string(row["ANNOTATION"])
+            if pd.notna(row["ANNOTATION"]):
+                ET.SubElement(element, "annotation").text = nan_to_empty_string(row["ANNOTATION"])
         except KeyError:
             pass
         return element
@@ -121,7 +124,8 @@ class GenElement(BaseElement):
                     value = nan_to_empty_string(row["VALUE"])
                     if pd.notna(row["#FORMATSTRING"]):
                         value = formatter_num(row["#FORMATSTRING"], value)
-                    ET.SubElement(element, "value").text = value
+                    if pd.notna(row["VALUE"]):
+                        ET.SubElement(element, "value").text = value
                     flag += 1
         return element
 
