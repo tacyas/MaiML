@@ -60,9 +60,8 @@ def create_uuid():
 def get_current_datetime():
     # 現在のローカル時刻を取得
     local_time = datetime.now().astimezone()
-    # xs:dateTime形式にフォーマット
-    formatted_time = local_time.strftime('%Y-%m-%dT%H:%M:%S') + f"{local_time.strftime('%z')[:3]}:{local_time.strftime('%z')[3:]}" 
-    return formatted_time
+    return local_time.strftime("%Y-%m-%dT%H:%M:%S%z")[:22] + ':' + local_time.strftime('%z')[3:]
+
 
 ## ID属性の値がnanの場合、デフォルト値を設定
 def setID(value, tag, prefix=""):
@@ -85,7 +84,10 @@ class BaseElement:
     
     def add_common_subelements(self, element, row):
         try:
-            ET.SubElement(element, "name").text = nan_to_empty_string(row["NAME"])
+            try: ## 汎用データコンテナはname要素を持たないための処理
+                ET.SubElement(element, "name").text = nan_to_empty_string(row["NAME"])
+            except KeyError:
+                pass
             ET.SubElement(element, "description").text = nan_to_empty_string(row["DESCRIPTION"])
         except KeyError:
             pass
