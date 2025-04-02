@@ -6,17 +6,36 @@ This program takes an Excel file containing planning information for measurement
 # B: Execution Method
 ## Input and Output Data
 ### Input Data
-1. **Excel File**  
+#### 1. **Excel File**  
    Refer to `INPUT/excel/ExcelDescription.xlsx`.  
    The input Excel file path depends on the presence of execution arguments.
-   - Without execution arguments, the program runs for the single Excel file path specified in `USERS/usersettings.py`.
-   - With execution arguments, the program runs for all Excel files in the specified directory.
+   | Execution Condition | The input Excel file path |
+   |---------|-------|
+   | **No arguments** | The program runs for the single Excel file path specified in `USERS/usersettings.py` |
+   | **With arguments** | The program runs for all Excel files in the specified directory |
 
 ### Output Data
-1. **MaiML file converted from input data**  
-   The output MaiML file path depends on the presence of execution arguments.
-   - Without execution arguments: `OUTPUT/output.maiml`
-   - With execution arguments: The specified directory will contain files where the input filename's extension is changed to `.maiml`.
+   Outputs a MaiML file that converts input excel data into the MaiML data format.
+   The output content for elements that are not mandatory in Excel and are not automatically set by the program varies　depending on the executed Python script.
+#### 1. Output Specifications for Each Script
+| Script | Handling of Unfilled Items in Excel |
+|-------------|----------------|
+| `excel2protocolMaiML.py` | Outputs only the tags (with no values) |
+| `excel2protocolMaiML2.py` | Does not include the tags themselves|
+
+#### 2. Output File Save Location
+The location where the output MaiML file is saved is determined by the presence or absence of execution arguments.
+| Execution Condition | Output Directory |
+|---------|-------|
+| **No arguments** | Saved as OUTPUT/output.maiml |
+| **With arguments** | Saved in the specified directory with the input file name changed to .maiml extension |
+
+##### **Example**
+- Running 'python excel2protocolMaiML.py'
+  → Saved as `OUTPUT/output.maiml`  
+
+- Running `python excel2protocolMaiML2.py XXXXX`
+  → Saved as `/INPUT/XXXXX/入力ファイル名.maiml`
 
 ## Execution Method
 ### Case 1: Execution Without Arguments
@@ -51,20 +70,20 @@ This program takes an Excel file containing planning information for measurement
 
 
 # D: Running the Sample File
-## ① Verify that the input file exists in the `/INPUT/test/` directory.
+### ① Verify that the input file exists in the `/INPUT/test/` directory.
 - exampleX.xlsx
 
-## ② Check that the namespace definitions have been added to `/USERS/usersettings.py`.
+### ② Check that the namespace definitions have been added to `/USERS/usersettings.py`.
    ```sh
       'xmlns:BBBB="http://BBBB.corp/index.jp"'
       'xmlns:BBBBHPLC="http://BBBB.corp/ontology/hplc"'
       'xmlns:CDF="http://BBBB.corp/ontology/cdf"'
    ```
 
-## ③ Execute the command:
+### ③ Execute the command:
    ```sh
       python excel2protocolMaiML2.py test
    ```
 
-## ④ Verify the generated MaiML file in the /INPUT/test/ directory.
+### ④ Verify the generated MaiML file in the /INPUT/test/ directory.
 - exampleX.maiml
