@@ -21,7 +21,7 @@
 ### 出力データ
 入力データをMaiMLデータフォーマットへ変換したMaiMLファイルを出力する。
 実行するpythonプログラムによって、エクセルで必須入力ではなく、かつ、プログラムで自動設定しない要素に対する出力内容が異なる。
-#### 1. 各スクリプトの出力仕様
+#### 1. 実行pythonプログラムの出力仕様
 | 実行pythonファイル名 | エクセルで未入力の項目の処理 |
 |-------------|----------------|
 | `excel2protocolMaiML.py` | タグのみを記載（値なしのタグを出力） |
@@ -79,17 +79,17 @@
 <br/>
 
 # D: sampleファイルの実行
-## ①`/INPUT/test/`ディレクトリに入力ファイルが存在していることを確認
+### ①`/INPUT/test/`ディレクトリに入力ファイルが存在していることを確認
 - exampleX.xlsx
-## ②`/USERS/usersettings.py`に名前空間の定義が追加されていることを確認
+### ②`/USERS/usersettings.py`に名前空間の定義が追加されていることを確認
    ```sh
       'xmlns:BBBB="http://BBBB.corp/index.jp"'
       'xmlns:BBBBHPLC="http://BBBB.corp/ontology/hplc"'
       'xmlns:CDF="http://BBBB.corp/ontology/cdf"'
    ```
-## ③コマンド実行
+### ③コマンド実行
    ```sh
    python excel2protocolMaiML2.py test
    ```
-## ④`/INPUT/test`ディレクトリに出力されたMaiMLファイルを確認
+### ④`/INPUT/test`ディレクトリに出力されたMaiMLファイルを確認
 - exampleX.maiml
