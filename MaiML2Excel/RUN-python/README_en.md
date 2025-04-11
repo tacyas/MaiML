@@ -4,12 +4,13 @@
 　　`./maimltoxl.py`
 
 ## (b) Input and output data
-    　The input data consists of the MaiML file, the required value of the id attribute of the \<result> element, 
-     and the value of the key attribute in the general purpose data container held by the \<result> element.
-     If the id attribute of the \<result> element and the key attribute in the general purpose data are not specified, 
+    　The input data consists of the MaiML file, the required value of the id attribute of the instance(<result>,
+     <material> and <condition>) element, and the value of the key attribute in the general purpose data container 
+     held by the instance element.
+     If the id attribute of the instance element and the key attribute in the general purpose data are not specified, 
      all contents of that element within the MaiML file will be included.
-      The output data will be in an Excel file, with the id attribute value of the \<result> element used as the sheet name. 
-     A list of contents from the general purpose data container for that \<result> element will be output. 
+      The output data will be in an Excel file, with the id attribute value of the instance element used as the sheet name. 
+     A list of contents from the general purpose data container for that instance element will be output. 
      If a key attribute value is specified at runtime, only the contents of the general purpose data container 
      with that key attribute value will be output.
       There are two ways to specify input data when executing the program: using a JSON file or command-line arguments. 
