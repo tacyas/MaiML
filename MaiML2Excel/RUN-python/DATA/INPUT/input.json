@@ -1,6 +1,7 @@
 {
-     "maiml_file_name" : "test.maiml",
-     "xl_file_name" : "test.xlsx",
+     "maiml_file_name" : "input.maiml",
+     "xl_file_name" : "instances.xlsx",
+     "xl_file_name_temp": "templates.xlsx",
      "resultId" : [],
      "selectkey" : []
 }
