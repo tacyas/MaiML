@@ -107,3 +107,21 @@
     lxml
     argparse
     ```
+
+# [Options]
+## templateの情報をエクセルファイルに出力する場合の実行コマンド
+　　`python maimltoxlwithtemplate.py -j`
+
+## エクセルファイルは２つ出力される
+- results要素のinstance情報をもつエクセルファイル
+- protocol要素のtemplate情報をもつエクセルファイル
+
+## input.jsonの記述例
+    ex-1) xl_file_nameにinstance情報を出力するエクセルファイル名、xl_file_name_tempにtemplate情報を出力するファイル名を記述
+    ```
+    {
+     "maiml_file_name" : "input.maiml",
+     "xl_file_name" : "instances.xlsx",
+     "xl_file_name_temp": "templates.xlsx"
+    }
+    ```
