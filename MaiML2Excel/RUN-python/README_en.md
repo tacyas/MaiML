@@ -113,3 +113,22 @@
     lxml
     argparse
     ```
+
+
+# [Options]
+## Command to export template information to an Excel file:
+　　`python maimltoxlwithtemplate.py -j`
+
+## Two Excel files will be generated:
+- One containing the instance data from the results element
+- One containing the template data from the protocol element
+
+## input.jsonの記述例
+    ex-1) Specify the file name for instance data with xl_file_name, and for template data with xl_file_name_temp
+    ```
+    {
+     "maiml_file_name" : "input.maiml",
+     "xl_file_name" : "instances.xlsx",
+     "xl_file_name_temp": "templates.xlsx"
+    }
+    ```
