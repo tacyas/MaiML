@@ -1,6 +1,6 @@
 et_xmlfile==2.0.0
-numpy==2.2.3
-openpyxl==3.1.5
+numpy
+openpyxl
 pandas==2.2.3
 python-dateutil==2.9.0.post0
 pytz==2025.1
