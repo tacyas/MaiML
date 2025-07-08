@@ -20,9 +20,11 @@ class defaultNS():
     	'xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#"',
     	'xmlns:xsd="http://www.w3.org/2001/XMLSchema"',
     	'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"', 
-    	'xmlns:BBBB="http://BBBB.corp/index.jp"', 
-    	'xmlns:BBBBHPLC="http://BBBB.corp/ontology/hplc"', 
-    	'xmlns:CDF="http://BBBB.corp/ontology/cdf"', 
+    	'xmlns:KY="https://www.iizuka.kyutech.ac.jp/"', 
+    	'xmlns:KYL="https://www.yasunaga-lab.bio.kyutech.ac.jp/"', 
+    	#'xmlns:AAAA="http://AAAA.co.jp/"', 
+    	#'xmlns:BBBBHPLC="http://BBBB.corp/ontology/hplc"', 
+    	#'xmlns:CDF="http://BBBB.corp/ontology/cdf"', 
         ##　ここまで編集可
     ]
 
@@ -63,6 +65,7 @@ class filePath():
     # 入出力ファイルパス
     _IN_EXCEL_FILEPATH = _INPUT_DIR + 'excel/' + _IN_EXCEL_FILENAME
     _MaiML_FILEPATH = _OUTPUT_DIR + _MaiML_FILENAME
+    _IN_OTHER_FILEPATH = _INPUT_DIR + 'others/'
 
     @property
     def INPUT_FILE_PATH(self):
@@ -70,6 +73,9 @@ class filePath():
             print("入力ファイルが存在しません。 ", self._IN_EXCEL_FILEPATH)
             exit(1)
         return self._IN_EXCEL_FILEPATH
+    @property
+    def INPUT_OTHER_PATH(self):
+        return self._IN_OTHER_FILEPATH
     @property
     def OUTPUT_FILE_PATH(self):
         return self._MaiML_FILEPATH

@@ -1,4 +1,4 @@
-# Excel2DocandProtocolofMaiML
+# Excel2MaiMLProtocol
 
 # A: 概要
 計測分析の手順や条件等の計画情報を記載したエクセルファイルを入力ファイルとし、
@@ -9,7 +9,7 @@
 ## 入出力データ
 ### 入力データ
 #### 1. **エクセルファイル**  
-   `INPUT/excel/エクセル説明.xlsx` を参照。  
+   記載方法は、`settings/ExcelFormat.xlsx` を参照。  
    入力するエクセルのファイルパスは、実行引数の有無によって決まる。
    | 実行条件 | 入力するエクセルファイルのファイルパス |
    |---------|-------|
@@ -74,7 +74,7 @@
 - 実行パスが通っていること
 
 ## 実行に必要なPythonパッケージ
-- `requirements.txt` に記載
+- `settings/requirements.txt` に記載
 
 <br/>
 

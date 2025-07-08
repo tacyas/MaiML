@@ -7,7 +7,7 @@ This program takes an Excel file containing planning information for measurement
 ## Input and Output Data
 ### Input Data
 #### 1. **Excel File**  
-   Refer to `INPUT/excel/ExcelDescription.xlsx`.  
+   Refer to `settings/ExcelFormat.xlsx`.  
    The input Excel file path depends on the presence of execution arguments.
    | Execution Condition | The input Excel file path |
    |---------|-------|
@@ -35,7 +35,7 @@ The location where the output MaiML file is saved is determined by the presence 
   → Saved as `OUTPUT/output.maiml`  
 
 - Running `python excel2protocolMaiML2.py XXXXX`
-  → Saved as `/INPUT/XXXXX/入力ファイル名.maiml`
+  → Saved as `/INPUT/XXXXX/INPUTFILENAME.maiml`
 
 ## Execution Method
 ### Case 1: Execution Without Arguments
@@ -66,7 +66,7 @@ The location where the output MaiML file is saved is determined by the presence 
 - Ensure the execution path is set.
 
 ## Required Python Packages
-- Listed in `requirements.txt`
+- Listed in `settings/requirements.txt`
 
 
 # D: Running the Sample File
