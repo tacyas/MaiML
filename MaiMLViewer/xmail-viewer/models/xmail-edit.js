@@ -41,8 +41,8 @@ exports.upload = async function(filename, xmail) {
 	var idNx = '';
 	var graphJson = '[0]';
 	var uploadResult = false;
-	const pythonapp = path.join(path_to_scripts, 'xmail_import.py');
-
+	//const pythonapp = path.join(path_to_scripts, 'xmail_import.py');
+	
 	// 引数に指定されたファイルを一時ファイルとして保存する
 	let tmpfile = path.join(__dirname, 'tmp', filename);
 	logger.app.debug(C_MODEL + 'filename:' + tmpfile);
@@ -51,6 +51,7 @@ exports.upload = async function(filename, xmail) {
 	var targetStr = String.raw`\\`
 	var regExp = new RegExp(targetStr, 'g') 
 	tmpfile = tmpfile.replace(regExp, '/')
+	logger.app.debug(C_MODEL + 'filename:' + tmpfile);
 
 	try {
 		fs.writeFileSync(tmpfile, xmail);
@@ -62,11 +63,30 @@ exports.upload = async function(filename, xmail) {
 		throw err;
 	}
 
-	// xml2cypher.pyを実行する
+	// 2025/7/8 edit パスに空白文字を含む場合、windows環境でエラーになるバグの修正
+	// ファイルパスやオプションはすべてクォート（"）で囲む
+	const pythonScript = path.join(path_to_scripts, 'xmail_import.py');
+	const pythonScriptPath = path.join(__dirname, 'python', pythonScript);
+	const quotedPython = `"${pythonScriptPath}"`;
+	const quotedTmpfile = `"${tmpfile}"`;
+	const quotedHost = `"${graphDb}"`;
+
+	// xmail_importを実行する
+	try {
+		let cmd = `${quotedPython} --host ${quotedHost} ${quotedTmpfile}`;
+
+		cypher1 = cmdExecute(cmd);
+	} catch (err) {
+		logger.app.error(C_MODEL + err.name + ':' + err.message);
+		throw err;
+	}
+
+	/*
+	// xmail_importを実行する
 	try {
 		var cmd = '';
 		cmd =
-			'PYTHONIOENCODING=utf-8 ' +
+			//'PYTHONIOENCODING=utf-8 ' +
 			//'python ' +
 			path.join(__dirname, 'python', pythonapp) +
 			' ' +
@@ -77,124 +97,12 @@ exports.upload = async function(filename, xmail) {
 			tmpfile +
 			'"';
 		cypher1 = cmdExecute(cmd);
-		//logger.app.debug(C_MODEL + 'xml2cypher.py executed : ' + cypher1.toString());
 	} catch (err) {
 		logger.app.error(C_MODEL + err.name + ':' + err.message);
 		throw err;
 	}
-
-	/*
-	const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
-	logger.app.debug(C_MODEL + 'Graph DB connected');
-
-	var session = driver.session();
-	var tx = session.beginTransaction();
-	logger.app.debug(C_MODEL + 'tx created.');
-
-	// cypher実行：(1) XMAILファイル内のXML構造を作成する
-	try {
-		await tx
-			.run(cypher1.toString())
-			.then(function(result) {
-				result.records.forEach(function(record) {
-					idNx = record.get('xmail_nid');
-					logger.app.debug(
-						C_MODEL + 'Cypher1 Record:' + idx + ' xmail_nid: ' + idNx
-					);
-					logger.app.debug(
-						C_MODEL + 'Cypher1 Counter:' + result.summary.counters
-					);
-					logger.app.debug(
-						C_MODEL +
-							'Cypher1 Notification:' +
-							result.summary.notifications
-					);
-					idx = idx + 1;
-				});
-			})
-			.catch(function(err) {
-				tx.rollback();
-				session.close();
-				logger.app.error(
-					C_MODEL +
-						'Cypher1 error rollbacked. Session closed:' +
-						err.message
-				);
-				throw err;
-			});
-	} catch (err) {
-		await tx.rollback();
-		await session.close();
-		logger.app.error(
-			C_MODEL + 'Error rollbacked. Session closed : ' + err.message
-		);
-		throw err;
-	}
-
-	// (1) で登録できたcypherのreturn = IDを取得する
-	// (2) XMAIL内のペトリネット構造作成用のCypherを生成する
-	var cypher2 =
-		`match (a:XMAIL)
-					-[:XML_Root]->(d)
-					-[:XML_Child]->(pr {__tag: 'protocol'})
-					-[:XML_Child]->(me {__tag: 'method'})
-					-[:XML_Child]->(pg {__tag: 'program'})
-					-[:XML_Child]->(pn {__tag: 'pnml'}),
-					(pn)-[:XML_Child]->(ar {__tag: 'arc'}),
-					(pn)-[:XML_Child]->(s),
-					(pn)-[:XML_Child]->(t)
-				where
-					id(a)=` +
-		idNx +
-		`
-					and ar.source=s.id
-					and ar.target=t.id
-				merge (s)-[:PNarc]->(t);
-				`;
-	logger.app.debug(C_MODEL + 'Cypher2 : ' + cypher2);
-
-	// cypher実行：(2) XMAIL内のペトリネット構造を作成する
-	try {
-		await tx
-			.run(cypher2)
-			.then(function(result) {
-				logger.app.debug(
-					C_MODEL + 'Cypher2 Counter:' + result.summary.counters
-				);
-				logger.app.debug(
-					C_MODEL +
-						'Cypher2 Notification:' +
-						result.summary.notifications
-				);
-				uploadResult = true;
-			})
-			.catch(function(err) {
-				if (err.message === undefined) {
-					logger.app.debug(C_MODEL + 'Cypher2 Not affected.');
-				} else {
-					logger.app.error(
-						C_MODEL + 'Cypher2 error rollbacked : ' + err.message
-					);
-					tx.rollback();
-					throw err;
-				}
-			});
-	} catch (err) {
-		await tx.rollback();
-		logger.app.error(C_MODEL + 'Error rollbacked : ' + err.message);
-		throw err;
-	} finally {
-		if (uploadResult == true) {
-			// (1), (2)共に正常終了した場合のみcommit、以外の場合はrollbackしてエラーを表示
-			await tx.commit();
-			logger.app.debug(C_MODEL + 'Commit completed.');
-		}
-		await session.close();
-		logger.app.debug(C_MODEL + 'Finally session closed.');
-	}
-
-	driver.close();
 	*/
+
 	
 	return graphJson;
 };
@@ -232,7 +140,7 @@ exports.export = async function(nodeid, infile, outfile) {
 		var ret = '';
 
 		cmd =
-			'PYTHONIOENCODING=utf-8 ' +
+			//'PYTHONIOENCODING=utf-8 ' +
 			//'python ' +
 			path.join(__dirname, 'python', pythonapp) +
 			' ' +
@@ -269,6 +177,13 @@ exports.export = async function(nodeid, infile, outfile) {
  * @throws {error}
  */
 function cmdExecute(cmd) {
+	const isWindows = process.platform === 'win32';
+	if (isWindows) {
+		cmd = 'set PYTHONIOENCODING=utf-8 && python ' + cmd;
+	} else {
+		cmd = 'PYTHONIOENCODING=utf-8 ' + cmd;
+	}
+
 	try {
 		logger.app.debug('[cmdExecute]' + cmd);
 		//var result = exec('python -c "import sys; print("hoge"); sys.exit(-1)"');
