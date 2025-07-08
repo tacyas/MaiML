@@ -16,5 +16,7 @@
 4. Misc 　　: `A sample program for creating and analyzing the MaiML data format.`
 5. MaiMLFileSamples　　: `A collection of sample MaiML files.`
 6. Excel2MaiML　　: `The program that merges a MaiML file describing the measurement flow with an Excel file containing the measurement results.`
-7. VAMAS2MaiML　　: `The program that merges a MaiML file describing the measurement flow with a VAMAS-format file containing the measurement results.`
+7. Excel2MaiMLData　　: `The program that merges a MaiML file describing the measurement flow with an Excel file containing the measurement results.`
 8. Excel2MaiMLProtocol　　: `A program that converts Excel data containing measurement flow data into MaiML data.`
+9. VAMAS2MaiML　　: `The program that merges a MaiML file describing the measurement flow with a VAMAS-format file containing the measurement results.`
+
