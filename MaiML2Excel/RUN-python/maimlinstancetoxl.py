@@ -23,7 +23,7 @@ loggerD = getLogger('maimltoxlD')
 
 ### lxmlを使用しXML解析 #################################################
 def readmaiml(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r', encoding='utf-8') as f:
         xml = f.read().encode('utf-8')
     root = ET.fromstring(re.sub(rb'xmlns=".*?"', b'', xml, count=1))
     return root
@@ -345,8 +345,6 @@ if __name__ == '__main__':
                 resultID = args.selectid 
             if args.selectkey != '':
                 selectkey = args.selectkey
-            if args.doc: ## document要素の情報をエクセルへ書き出す
-                pass
         else:
             loggerI.error('Arguments is incorrect.')
             sys.exit()

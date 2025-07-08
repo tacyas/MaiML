@@ -125,6 +125,7 @@ class filepath:
     output_dir = codedir + 'DATA/OUTPUT/'
     tmp_dir = codedir + 'DATA/TMP/'
 
+
 ## コマンド引数定義  #################################################################
 import argparse
 class commandargs():
@@ -135,7 +136,6 @@ class commandargs():
     parser.add_argument('-o', '--xl', default='') # output file name
     parser.add_argument('-si', '--selectid',  nargs="*", default='') # result ID
     parser.add_argument('-sk', '--selectkey',  nargs="*", default='') # general container key
-    #parser.add_argument('-d', '--doc', action='store_true') # get document contents Flag
     parser.add_argument('-t', '--test', action='store_true') # tests run Flag
 
 
