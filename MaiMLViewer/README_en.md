@@ -69,19 +69,20 @@ Press the DEL button for the MaiML you want to display
 Screen displaying the Petri net and detailed information of each element stored in the MaiML.
 
 ##### 4.3.1. Petri Net Diagram (Left Column)
-Simultaneously displays all elements of the Petri net belonging to the selected MaiML, as well as elements from other MaiML files that are associated with those elements.
+Simultaneously displays all Petri Net elements belonging to the selected MaiML file, along with elements from related MaiML files (up to two generations before and after) that are associated with those elements.
 
-* Group classification display based on the MaiML to which each element belongs.
-* The labels for the MaiML groups indicate the corresponding MaiML NID.
-* Select and edit each element of the Petri net.
-* Double-clicking a MaiML group will transition you to the Petri net element information screen for that MaiML.
-(You can switch the MaiML being edited.)
+- Elements are grouped visually based on the MaiML file they belong to.
+- Users can select individual Petri Net elements to perform editing operations.
+- Double-clicking a MaiML group transitions to the Petri Net element detail view for that MaiML, allowing the editing target to be switched.
 
 ##### 4.3.2. Element Information Display (Middle Column) + Insertion Element Information Display
 
-* Register PNML Position Button: Saves the coordinates of each node in the Petri net diagram to the server.
-* Node Details: Displays the information contained in the selected node.
-* Insertion Contents: Displays the information of the insertion elements associated with the selected node.
+* Register PNML Position Button: </br>
+  Saves the coordinates of each node in the Petri Net diagram for the MaiML file selected in the MaiML list Display Screen to the server.
+* Node Details: </br>
+  Displays the information contained in the selected node.
+* Insertion Contents: </br>
+  Displays the information of the insertion elements associated with the selected node.
 
 ##### 4.3.3. Properties(Right Column)
 
