@@ -123,7 +123,8 @@ query_list = {
 			return nodes, collect(r) as edges;
 		`
 		*/
-		
+
+		/*
 		// 2023/4/18 add
 		cypher_str: `
 			match (a:XMAIL)
@@ -132,6 +133,25 @@ query_list = {
 			where
 				id(a)=$xmail_nid
 				and not (n.__tag='uuid' or n.__tag='name' or n.__tag='description')
+			optional match
+				(n)-[:SAME*0..1]-()
+				-[:PN*0..]-(m)
+			with collect(distinct m) as nodes
+			unwind nodes as nn
+			optional match
+				(nn)-[r:PN|SAME]->()
+			return nodes, collect(r) as edges;
+		`
+		*/
+		// 2025/7/17 add
+		// annotation、insertion、property、content、uncertaintyについても除外
+		cypher_str: `
+			match (a:XMAIL)
+				-[:XML_Root]->()
+				-[:XML_Child*]->(n:PN)
+			where
+				id(a)=$xmail_nid
+				and not (n.__tag='uuid' or n.__tag='name' or n.__tag='description' or n.__tag='annotation' or n.__tag='insertion' or n.__tag='property' or n.__tag='content' or n.__tag='uncertainty')
 			optional match
 				(n)-[:SAME*0..1]-()
 				-[:PN*0..]-(m)
