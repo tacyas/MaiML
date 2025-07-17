@@ -155,6 +155,8 @@ exports.pn_nodes = async function(id) {
 	var idx = 0;
 
 	return new Promise(function(resolve, reject) {
+		//var graphJson = '';
+		//var idx = 0;
 		request.post(
 			{
 				uri: url,
@@ -177,7 +179,7 @@ exports.pn_nodes = async function(id) {
 				/*
 				 * nodes json
 				 */
-				logger.app.debug(C_MODEL + 'results: ' + JSON.stringify(body.results));
+				//logger.app.debug(C_MODEL + 'results: ' + JSON.stringify(body.results));
 				let nodes = [];
 				let edges = [];
 				let parents = [];
@@ -194,7 +196,6 @@ exports.pn_nodes = async function(id) {
 				var maimlnid;
 				for (const record of nodes) {
 					maimlnid = record.properties.__xmail_nid;
-
 					if (!maimlnidlist.includes(maimlnid)) {
 						maimlnidlist.push(maimlnid);
 
@@ -226,33 +227,45 @@ exports.pn_nodes = async function(id) {
 
 				// get position's file
 				var fdataList = {};
+				//var maimlnid;
 				uuidlist.forEach(function (idobj) {
+					//logger.app.debug(C_MODEL + 'idobj: ' + JSON.stringify(idobj));
 					var uuid = idobj.uuid;
-					var maimlnid = idobj.maimlnid;
+					//var maimlnid = idobj.maimlnid;
 					var filename = uuid + '.position';
 					var filepath = path.join(__dirname, '../exports/pnmlpositions', filename);
-					logger.app.debug('uuid , maimlNID =' + JSON.stringify(uuid) + ',' + JSON.stringify(maimlnid));
-					logger.app.debug('positions filepath=' + JSON.stringify(filepath));
+					logger.app.debug(C_MODEL + 'uuid , maimlNID =' + JSON.stringify(uuid) + ',' + JSON.stringify(maimlnid));
+					logger.app.debug(C_MODEL + 'positions filepath=' + JSON.stringify(filepath));
 					const fs = require('fs');
 					var fdata;
 					if (fs.existsSync(filepath)) {
 						try {
 							fdata = fs.readFileSync(filepath, 'utf8');
 							if (fdata) {
-								fdata = JSON.parse(fdata)
-								.map(item => item ? JSON.parse(item) : null)
-								.filter(item => item !== null);
-								fdataList[maimlnid] = {uuid: uuid, fdata: fdata};
+								fdata = JSON.parse(fdata);
+								fdata = fdata.map(item => {
+									if (typeof item.position === 'string') {
+										try {
+											item.position = JSON.parse(item.position);
+										} catch (e) {
+											logger.app.warn('Invalid position JSON string in file: ' + e.message);
+											return null;
+										}
+									}
+									return item;
+								}).filter(item => item !== null);
+								fdataList[idobj.maimlnid] = {uuid: uuid, fdata: fdata};
 							};
 						} catch (error) {
 							logger.app.error(C_MODEL + error.message);
 						}
 					}
 				});
+				//logger.app.debug(C_MODEL + "fdataList: " + JSON.stringify(fdataList));
 
 				graphJson = graphJson + '[';
 				nodes.forEach(function (record) {
-					logger.app.debug("record:" + JSON.stringify(record));
+					//logger.app.debug(C_MODEL +"record:" + JSON.stringify(record));
 					if (idx >= 1) {
 						graphJson = graphJson + ',';
 					}
@@ -306,14 +319,14 @@ exports.pn_nodes = async function(id) {
 
 					// add 240910 positionを追加する
 					//record.properties.__xmail_nid を用いてfdataを取得する
-					if (fdataList[maimlnid] && fdataList[maimlnid].fdata) {
-						var fdata = fdataList[maimlnid].fdata;
+					if (fdataList[record.properties.__xmail_nid] && fdataList[record.properties.__xmail_nid].fdata) {
+						var fdata = fdataList[record.properties.__xmail_nid].fdata;
 						var pt = false;
 						var positions;
 						fdata.forEach(item => {
-							//logger.app.debug("jsonString:" + item);
 							try {
-								if (record.properties.id === item.data.pid) {	//pidの一致
+								//if (record.properties.id === item.data.pid) {	//pidの一致
+								if (record.id === item.data.id && record.properties.id === item.data.pid) {	//idとpidの一致
 									pt = true;
 									positions = item.position;
 								};
@@ -326,6 +339,7 @@ exports.pn_nodes = async function(id) {
 							graphJson = graphJson + '"position":';
 							graphJson = graphJson + JSON.stringify(positions);
 							graphJson = graphJson + ',';
+							//logger.app.debug(C_MODEL + record.properties.id + ": positions contain.  " + JSON.stringify(positions));
 						}
 					} else {
 						logger.app.debug(C_MODEL + "fdata is null.");
@@ -373,9 +387,9 @@ exports.pn_nodes = async function(id) {
 					record
 				) {
 					let own_node = (record.properties.__xmail_nid == id);
-					logger.app.debug("record.__xmail_nid:" + record.properties.__xmail_nid);
-					logger.app.debug("id:"+id);
-					logger.app.debug("own_node:"+own_node);
+					//logger.app.debug("record.__xmail_nid:" + record.properties.__xmail_nid);
+					//logger.app.debug("id:"+id);
+					//logger.app.debug("own_node:"+own_node);
 
 					if (idx >= 1) {
 						graphJson = graphJson + ',';
@@ -465,13 +479,34 @@ exports.pn_position = async function(id,position){
 				const obj = JSON.parse(jsonString);
 				const po = obj.position;
 				const parentid = obj.data.parent;
+				/*
+				var pojson = {
+					data: {
+						id: obj.data.id,
+						pid: obj.data.pid,
+						//parent: parentid
+					},
+					//position: JSON.stringify(po)
+					position: po
+				};
+				return pojson;
+				*/
+				
 				if (id === parentid) {
 					var pojson;
-					pojson = '{"data":{"id":"'+obj.data.id+'","pid":"'+obj.data.pid+'"},"position":'+JSON.stringify(po)+'}';
+					//pojson = '{"data":{"id":"'+obj.data.id+'","pid":"'+obj.data.pid+'"},"position":'+JSON.stringify(po)+'}';
+					pojson = {
+						data: {
+							id: obj.data.id,
+							pid: obj.data.pid
+						},
+						position: po
+					};
 					return pojson;
 				} else {
 					return null;
 				}
+				
 			} catch (error) {
 				logger.app.error(C_MODEL + error.message);
 				return null; // パースエラーの場合はnull

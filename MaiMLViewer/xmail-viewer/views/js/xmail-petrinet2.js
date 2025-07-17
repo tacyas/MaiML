@@ -1,7 +1,11 @@
 'use strict';
 
 var gdata = ''; // eslint-disable-line
-var cy;
+//var cy;
+let cy;
+var layout_out;
+var toggleisActive = false; // NID toggle
+
 // layout settings
 const layoutConfig_grid = {
 	name: 'grid',
@@ -143,397 +147,8 @@ $(document).ready(function() {
 		data: {
 			id: getParam('id')
 		},
-		success: function(data) {   //通信成功時の処理(dataは返り値でjson型)
-			//console.log(data);
-
-			cy = cytoscape({
-				container: $('#cy'),
-				style: [
-					{
-						selector: 'node',
-						style: {
-							'label': function (ele) { return ele.data('elementID') },
-							//'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
-							'color': 'black',
-							'text-outline-color': 'white',
-							'text-outline-width': 1,
-							'background-color': 'lightblue',
-							'background-opacity': 0.5,
-							'border-color': 'black',
-							'border-width': 1
-						}
-					},
-					{
-						// place node
-						selector: 'node',
-						style: {
-							'shape': 'ellipse',
-							'width': 24,
-							'height': 24,
-						}
-					},
-					//nodeStyle
-					//layer
-					{
-						selector: 'node[layer = "0"]',
-						style: {
-							'width': 24,
-							'height': 24,
-						}
-					},
-					{
-						selector: 'node[layer = "1"]',
-						style: {
-							'width': 12,
-							'height': 12,
-							//'border-style' : 'dashed',
-							'background-opacity': 0,
-						}
-					},
-					{
-						selector: 'node[layer = "2"]',
-						style: {
-							'width': 12,
-							'height': 12,
-							'background-color': 'black',
-						}
-					},
-					//_maiml_type
-					{
-						selector: 'node[maiml_type = "M"]',
-						style: {
-							'shape': 'ellipse',
-						}
-					},
-					{
-						selector: 'node[maiml_type = "C"]',
-						style: {
-							'shape': 'pentagon',
-						}
-					},
-					{
-						selector: 'node[maiml_type = "R"]',
-						style: {
-							'shape': 'rectangle',
-						}
-					},
-					{
-						selector: 'node[maiml_type = "undefined"]',
-						style: {
-							'shape': 'ellipse',
-							'border-style' : 'dashed',
-						}
-					},
-					// transition node
-					{
-						selector: 'node[nodeType = "transition"]',
-						style: {
-							'shape': 'rectangle',
-							'width': 6,
-							'height': 48,
-							'border-style' : 'solid',
-						}
-					},
-					{
-						//otherNode 
-						selector : 'node[type = "otherNode"]',
-						style: {
-							'background-color': 'gray',
-						}
-					},
-					{
-						//ownnode Group
-						selector : 'node[type = "ownParent"]',
-						style: {
-							'background-color': 'aliceblue',
-						}
-					},
-					{
-						//othernode Group
-						selector : 'node[type = "otherParent"]',
-						style: {
-							'background-color': 'lightgray',
-						}
-					},
-					{
-						//otherNode 
-						selector : '.class',
-						style: {
-							'background-color': 'red',
-						}
-					},
-					{
-						//otherNode 
-						selector : '.instance',
-						style: {
-							'background-color': 'yellow',
-						}
-					},
-					//edgeStyle
-					{
-						selector: 'edge',
-						style: {
-							'width': 1,
-							'curve-style': 'bezier',
-							'line-color': 'steelblue',
-							'target-arrow-color': 'steelblue',
-							'target-arrow-shape': 'triangle',
-							'target-arrow-fill': 'filled',
-							'arrow-scale': 1,
-							'label': '',
-						}
-					},
-					//edge-arrow
-					{
-						selector : 'edge[arrow = "none"]',
-						style: {
-							'width': 1,
-							'target-arrow-shape' : 'data(arrow)',
-						}
-					},
-					//edge-edgetype
-					{
-						selector : 'edge[edgetype = "SAME"]',
-						style: {
-							//'line-style': 'dashed',
-							'line-style': 'dotted',
-							'line-color': 'lightgreen',
-						}
-					},
-					{
-						selector : 'edge[edgetype = "arc"]',
-						style: {
-							'width':4,
-						}
-					},
-					{
-						selector : 'edge[edgetype = "placeRef"]',
-						style: {
-						}
-					},
-					{
-						selector : 'edge[edgetype = "templateRef"]',
-						style: {
-							'line-style': 'dashed',
-						}
-					},
-					{
-						selector : 'edge[edgetype = "ref"]',
-						style: {
-						}
-					},
-					{
-						selector : 'edge[edgetype = "instanceRef"]',
-						style: {
-							'line-style': 'dashed',
-						}
-					},
-					//edge-ownNode
-					{
-						selector : 'edge[ownNode = "true"]',
-						style: {
-							'line-color': 'steelblue',
-							'target-arrow-color': 'steelblue',
-						}
-					},
-					{
-						selector : 'edge[ownNode =  "false"]',
-						style: {
-							'line-color': 'gray',
-							'target-arrow-color': 'gray',
-						}
-					},
-					{
-						selector: ':selected',
-						style: {
-							'background-color': 'magenta',
-							'background-opacity': 1.0,
-							'border-width': 2,
-							'line-color': 'magenta',
-							'target-arrow-color': 'magenta',
-							'z-index': 1,
-						}
-					},
-					{
-						selector: 'edge:selected',
-						style: {
-							'label': function(ele) { return ele.data('edgetype') },
-							'color': 'blue',
-							'text-outline-opacity': 0,
-							'text-background-color': 'white',
-							'text-background-opacity': 1,
-							'text-border-opacity': 1,
-							'text-border-color': 'blue',
-							'text-border-width': 1,
-							'text-background-padding': 2,
-						}
-					},
-				],
-				//wheelSensitivity: 1,
-				
-				layout: layoutConfig,
-				//独自で作成したlayoutを適用する場合↓
-				layout: {
-					name: 'preset'
-				},
-				elements: data,
-			})
-			
-			// add 20240930 layoutの定義がなければcolaで表示
-			var layout_out = layoutConfig_cola;
-			for (var i = 0; i < data.length; i++) {
-				var keys = Object.keys(data[i]);
-				for (var j = 0; j < keys.length; j++) {
-					if (keys[j] == 'position') {
-						layout_out = layoutConfig;
-					};
-				};
-			};
-			const layout = cy.makeLayout(layout_out);
-			layout.run();
-
-			var tappedBefore;
-			var tappedTimeout;
-
-			//Node click event
-			cy.on('tap', 'node', function(evt) {
-				var target = evt.target;    //イベントが送られたnodeオブジェクト
-				var data = target.json().data;
-				var id = data["id"];
-				var nodeType = data["nodeType"];
-				var pid = data["pid"];
-				var parentGroup = data["parent"];
-				var ownNode = data["ownNode"];
-				var maiml_type = data["maiml_type"];
-				var layer = '';
-				
-				if (data["layer"] == '0') {
-					layer = 'Petri net';
-				} else if (data["layer"] == '1') {
-					layer = 'Class';
-				} else if (data["layer"] == '2') {
-					layer = 'Instance';
-				}
-
-				if (nodeType=="parent"){
-					evt.target.nodes().unselectify();
-				}
-
-				if (nodeType!="parent"){
-					if (ownNode=="true"){
-						if ($('#txtNewDestinationNode').val() != '') {
-							$('#txtNewSourceNode').val(id);
-							$('#txtNewDestinationNode').val('');
-						} else if($('#txtNewSourceNode').val() =='') {
-							$('#txtNewSourceNode').val(id);
-						} else {
-							if ($('#txtNewSourceNode').val() == id) {
-								$('#txtNewSourceNode').val(id);
-								$('#txtNewDestinationNode').val('');
-							}else {
-								$('#txtNewDestinationNode').val(id);
-							}
-						}
-					} else {
-						$('#txtNewSourceNode').val('');
-						$('#txtNewDestinationNode').val('');
-					}
-
-					//Node Detailsセット
-					$('#txtNode').val(''); 
-					$('#txtId').val('');
-					$('#txtPlaceId').val('');
-					$('#txtNode').val(id); 
-					$('#txtId').val(maiml_type);
-					$('#txtPlaceId').val(pid);
-					$('#txtXmailNid').val(parentGroup);
-					$('#txtLayer').val(layer);
-
-					//Templatesセット
-					for (var ii = 1; ii < 4; ii++) {
-						$('#txtPlaceRefId' + ii).val('');
-						$('#txtTemplateTag' + ii).val('');
-						$('#txtTemplateId' + ii).val('');
-						$('#txtTemplateUuId' + ii).val('');
-						$('#txtTemplateName' + ii).val('');
-						$('#txtTemplateDescription' + ii).val(''); 
-					}
-					var icnt = 1;
-					for (var ii = 0; ii < gdata.length; ii++) {
-						if (gdata[ii].place_nid == id) {
-							$('#txtPlaceId').val(gdata[ii].place_id);
-							$('#txtPlaceRefId' + icnt).val(gdata[ii].placeRef_id);
-							$('#txtTemplateTag' + icnt).val(gdata[ii].template_tag);
-							$('#txtTemplateId' + icnt).val(gdata[ii].template_id);
-							$('#txtTemplateUuId' + icnt).val(gdata[ii].template_uuid);
-							$('#txtTemplateName' + icnt).val(gdata[ii].template_name);
-							$('#txtTemplateDescription' + icnt).val(gdata[ii].template_description); 
-							icnt = icnt + 1;
-						}
-					}
-					getNodeMaterial(id);	
-				}
-
-			})
-
-			//Edge click event
-			cy.on('select', 'edge', function(evt) {
-				var tgt = evt.target;      //イベントが送られたegdeオブジェクト
-				var data = tgt.json().data;
-				var source = data["source"];
-				var target = data["target"];
-				var arrow = data["arrow"];
-				var ownNode = data["ownNode"];
-				
-				if (ownNode=="true"){
-					if(arrow!="none"){
-						$('#txtSourceNode').val(source);
-						$('#txtDestinationNode').val(target);
-					}
-				}
-			})
-
-			//Edge unselect event
-			cy.on('unselect', 'edge', function(evt) {
-				$('#txtSourceNode').val('');
-				$('#txtDestinationNode').val('');
-			});
-
-			//Double tap implementation event
-			cy.on('tap', function(event) {
-				var tappedNow = event.target;
-				if (tappedTimeout && tappedBefore) {
-					clearTimeout(tappedTimeout);
-				}
-				if(tappedBefore === tappedNow) {
-					tappedNow.trigger('doubleTap');
-					tappedBefore = null;
-				} else {
-					tappedTimeout = setTimeout(function(){ tappedBefore = null; }, 300);
-					tappedBefore = tappedNow;
-				}
-				});
-
-			//Double tap event
-			cy.on('doubleTap', 'node', function(event) { 
-				var url = new URL(window.location.href);
-				var params = url.searchParams;
-
-				if (event.target.json().data["readonly"] == "false"){
-					if (event.target.json().data["nodeType"] == "parent"){
-						params.set('id',event.target.json().data["id"]);
-						window.location.href = url;
-						//window.location.replace(url);
-						loadPetrinet();
-					}
-				}
-			});
-
-			//getNodeDetails(getParam('id'));
-			getTemplatesByList(
-				data.filter(x => (x.group === 'nodes') && (x.data.nodeType !== 'parent'))
-				.map(x => Number(x.data.id))
-			);
+		success: function(data){
+			initializeCytoscape(data);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			var msg = 'ペトリネット図の取得に失敗しました。';
@@ -542,6 +157,411 @@ $(document).ready(function() {
 	});
 
 	return;
+}
+
+function initializeCytoscape(data) {   //通信成功時の処理(dataは返り値でjson型)
+	//console.log(data);
+
+	cy = cytoscape({
+		container: $('#cy'),
+		style: [
+			{
+				selector: 'node',
+				style: {
+					'label': function (ele) { return ele.data('pid') },
+					//'label': function (ele) { return ele.data('elementID') },
+					//'label': function(ele) { return '[' + ele.data('id') + '] ' + ele.data('name') },
+					'color': 'black',
+					'text-outline-color': 'white',
+					'text-outline-width': 1,
+					'background-color': 'lightblue',
+					'background-opacity': 0.5,
+					'border-color': 'black',
+					'border-width': 1,
+					'font-size': '10px'
+				}
+			},
+			{
+				// place node
+				selector: 'node',
+				style: {
+					'shape': 'ellipse',
+					'width': 24,
+					'height': 24,
+				}
+			},
+			//nodeStyle
+			//layer
+			{
+				selector: 'node[layer = "0"]',
+				style: {
+					'width': 24,
+					'height': 24,
+				}
+			},
+			{
+				selector: 'node[layer = "1"]',
+				style: {
+					'width': 12,
+					'height': 12,
+					//'border-style' : 'dashed',
+					'background-opacity': 0,
+				}
+			},
+			{
+				selector: 'node[layer = "2"]',
+				style: {
+					'width': 12,
+					'height': 12,
+					'background-color': 'black',
+				}
+			},
+			//_maiml_type
+			{
+				selector: 'node[maiml_type = "M"]',
+				style: {
+					'shape': 'ellipse',
+				}
+			},
+			{
+				selector: 'node[maiml_type = "C"]',
+				style: {
+					'shape': 'pentagon',
+				}
+			},
+			{
+				selector: 'node[maiml_type = "R"]',
+				style: {
+					'shape': 'rectangle',
+				}
+			},
+			{
+				selector: 'node[maiml_type = "undefined"]',
+				style: {
+					'shape': 'ellipse',
+					'border-style': 'dashed',
+				}
+			},
+			// transition node
+			{
+				selector: 'node[nodeType = "transition"]',
+				style: {
+					'shape': 'rectangle',
+					'width': 6,
+					'height': 48,
+					'border-style': 'solid',
+				}
+			},
+			{
+				//otherNode 
+				selector: 'node[type = "otherNode"]',
+				style: {
+					'background-color': 'gray',
+				}
+			},
+			{
+				//ownnode Group
+				selector: 'node[type = "ownParent"]',
+				style: {
+					'background-color': 'aliceblue',
+				}
+			},
+			{
+				//othernode Group
+				selector: 'node[type = "otherParent"]',
+				style: {
+					'background-color': 'lightgray',
+				}
+			},
+			{
+				//otherNode 
+				selector: '.class',
+				style: {
+					'background-color': 'red',
+				}
+			},
+			{
+				//otherNode 
+				selector: '.instance',
+				style: {
+					'background-color': 'yellow',
+				}
+			},
+			//edgeStyle
+			{
+				selector: 'edge',
+				style: {
+					'width': 1,
+					'curve-style': 'bezier',
+					'line-color': 'steelblue',
+					'target-arrow-color': 'steelblue',
+					'target-arrow-shape': 'triangle',
+					'target-arrow-fill': 'filled',
+					'arrow-scale': 1,
+					'label': '',
+				}
+			},
+			//edge-arrow
+			{
+				selector: 'edge[arrow = "none"]',
+				style: {
+					'width': 1,
+					'target-arrow-shape': 'data(arrow)',
+				}
+			},
+			//edge-edgetype
+			{
+				selector: 'edge[edgetype = "SAME"]',
+				style: {
+					//'line-style': 'dashed',
+					'line-style': 'dotted',
+					'line-color': 'lightgreen',
+				}
+			},
+			{
+				selector: 'edge[edgetype = "arc"]',
+				style: {
+					'width': 4,
+				}
+			},
+			{
+				selector: 'edge[edgetype = "placeRef"]',
+				style: {
+				}
+			},
+			{
+				selector: 'edge[edgetype = "templateRef"]',
+				style: {
+					'line-style': 'dashed',
+				}
+			},
+			{
+				selector: 'edge[edgetype = "ref"]',
+				style: {
+				}
+			},
+			{
+				selector: 'edge[edgetype = "instanceRef"]',
+				style: {
+					'line-style': 'dashed',
+				}
+			},
+			//edge-ownNode
+			{
+				selector: 'edge[ownNode = "true"]',
+				style: {
+					'line-color': 'steelblue',
+					'target-arrow-color': 'steelblue',
+				}
+			},
+			{
+				selector: 'edge[ownNode =  "false"]',
+				style: {
+					'line-color': 'gray',
+					'target-arrow-color': 'gray',
+				}
+			},
+			{
+				selector: ':selected',
+				style: {
+					'background-color': 'magenta',
+					'background-opacity': 1.0,
+					'border-width': 2,
+					'line-color': 'magenta',
+					'target-arrow-color': 'magenta',
+					'z-index': 1,
+				}
+			},
+			{
+				selector: 'edge:selected',
+				style: {
+					'label': function (ele) { return ele.data('edgetype') },
+					'color': 'blue',
+					'text-outline-opacity': 0,
+					'text-background-color': 'white',
+					'text-background-opacity': 1,
+					'text-border-opacity': 1,
+					'text-border-color': 'blue',
+					'text-border-width': 1,
+					'text-background-padding': 2,
+				}
+			},
+		],
+		//wheelSensitivity: 1,
+
+		layout: layoutConfig,
+		elements: data,
+	})
+	window.cy = cy;
+
+	// add 20240930 layoutの定義がなければcolaで表示
+	layout_out = layoutConfig_cola;
+	for (var i = 0; i < data.length; i++) {
+		var keys = Object.keys(data[i]);
+		for (var j = 0; j < keys.length; j++) {
+			if (keys[j] == 'position') {
+				layout_out = layoutConfig;
+			};
+		};
+		//labelの値をスイッチする？
+		console.log(data[i]);
+		if (data[i]["group"] == "nodes") {
+			var datai = data[i]["data"];
+			console.log(datai);
+			if (toggleisActive) {
+				datai["pid"] = '[' + datai["id"] + ']' + datai["elementID"];
+			} else {
+				datai["pid"] = datai["elementID"];
+			};
+			console.log(toggleisActive + ':' + JSON.stringify(datai["pid"]));
+		};
+	};
+	const layout = cy.makeLayout(layout_out);
+	layout.run();
+
+	var tappedBefore;
+	var tappedTimeout;
+
+	//Node click event
+	cy.on('tap', 'node', function (evt) {
+		var target = evt.target;    //イベントが送られたnodeオブジェクト
+		var data = target.json().data;
+		var id = data["id"];
+		var nodeType = data["nodeType"];
+		var pid = data["pid"];
+		var parentGroup = data["parent"];
+		var ownNode = data["ownNode"];
+		var maiml_type = data["maiml_type"];
+		var layer = '';
+
+		if (data["layer"] == '0') {
+			layer = 'Petri net';
+		} else if (data["layer"] == '1') {
+			layer = 'Class';
+		} else if (data["layer"] == '2') {
+			layer = 'Instance';
+		}
+
+		if (nodeType == "parent") {
+			evt.target.nodes().unselectify();
+		}
+
+		if (nodeType != "parent") {
+			if (ownNode == "true") {
+				if ($('#txtNewDestinationNode').val() != '') {
+					$('#txtNewSourceNode').val(id);
+					$('#txtNewDestinationNode').val('');
+				} else if ($('#txtNewSourceNode').val() == '') {
+					$('#txtNewSourceNode').val(id);
+				} else {
+					if ($('#txtNewSourceNode').val() == id) {
+						$('#txtNewSourceNode').val(id);
+						$('#txtNewDestinationNode').val('');
+					} else {
+						$('#txtNewDestinationNode').val(id);
+					}
+				}
+			} else {
+				$('#txtNewSourceNode').val('');
+				$('#txtNewDestinationNode').val('');
+			}
+
+			//Node Detailsセット
+			$('#txtNode').val('');
+			$('#txtId').val('');
+			$('#txtPlaceId').val('');
+			$('#txtNode').val(id);
+			$('#txtId').val(maiml_type);
+			$('#txtPlaceId').val(pid);
+			$('#txtXmailNid').val(parentGroup);
+			$('#txtLayer').val(layer);
+
+			//Templatesセット
+			for (var ii = 1; ii < 4; ii++) {
+				$('#txtPlaceRefId' + ii).val('');
+				$('#txtTemplateTag' + ii).val('');
+				$('#txtTemplateId' + ii).val('');
+				$('#txtTemplateUuId' + ii).val('');
+				$('#txtTemplateName' + ii).val('');
+				$('#txtTemplateDescription' + ii).val('');
+			}
+			var icnt = 1;
+			for (var ii = 0; ii < gdata.length; ii++) {
+				if (gdata[ii].place_nid == id) {
+					$('#txtPlaceId').val(gdata[ii].place_id);
+					$('#txtPlaceRefId' + icnt).val(gdata[ii].placeRef_id);
+					$('#txtTemplateTag' + icnt).val(gdata[ii].template_tag);
+					$('#txtTemplateId' + icnt).val(gdata[ii].template_id);
+					$('#txtTemplateUuId' + icnt).val(gdata[ii].template_uuid);
+					$('#txtTemplateName' + icnt).val(gdata[ii].template_name);
+					$('#txtTemplateDescription' + icnt).val(gdata[ii].template_description);
+					icnt = icnt + 1;
+				}
+			}
+			getNodeMaterial(id);
+		}
+
+	})
+
+	//Edge click event
+	cy.on('select', 'edge', function (evt) {
+		var tgt = evt.target;      //イベントが送られたegdeオブジェクト
+		var data = tgt.json().data;
+		var source = data["source"];
+		var target = data["target"];
+		var arrow = data["arrow"];
+		var ownNode = data["ownNode"];
+
+		if (ownNode == "true") {
+			if (arrow != "none") {
+				$('#txtSourceNode').val(source);
+				$('#txtDestinationNode').val(target);
+			}
+		}
+	})
+
+	//Edge unselect event
+	cy.on('unselect', 'edge', function (evt) {
+		$('#txtSourceNode').val('');
+		$('#txtDestinationNode').val('');
+	});
+
+	//Double tap implementation event
+	cy.on('tap', function (event) {
+		var tappedNow = event.target;
+		if (tappedTimeout && tappedBefore) {
+			clearTimeout(tappedTimeout);
+		}
+		if (tappedBefore === tappedNow) {
+			tappedNow.trigger('doubleTap');
+			tappedBefore = null;
+		} else {
+			tappedTimeout = setTimeout(function () { tappedBefore = null; }, 300);
+			tappedBefore = tappedNow;
+		}
+	});
+
+	//Double tap event
+	cy.on('doubleTap', 'node', function (event) {
+		var url = new URL(window.location.href);
+		var params = url.searchParams;
+
+		if (event.target.json().data["readonly"] == "false") {
+			if (event.target.json().data["nodeType"] == "parent") {
+				params.set('id', event.target.json().data["id"]);
+				window.location.href = url;
+				//window.location.replace(url);
+				loadPetrinet();
+			}
+		}
+	});
+
+	//getNodeDetails(getParam('id'));
+	getTemplatesByList(
+		data.filter(x => (x.group === 'nodes') && (x.data.nodeType !== 'parent'))
+			.map(x => Number(x.data.id))
+	);
+
 }
 
 /**
@@ -679,6 +699,7 @@ function getNodeMaterial(node_id) {
 $('#pnml_position_btn').click(function () {
 	//positionデータを保存するためにメモリ上のペトリネットデータを取得
 	var cy = window.cy;
+
 	var s = "";
 	var nodes = cy.nodes();
 	nodes.forEach(function (node) {
@@ -704,6 +725,7 @@ $('#pnml_position_btn').click(function () {
 		}
 	});
 });
+
 
 
 

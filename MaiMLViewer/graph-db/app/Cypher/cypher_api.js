@@ -123,7 +123,7 @@ query_list = {
 			return nodes, collect(r) as edges;
 		`
 		*/
-
+		
 		// 2023/4/18 add
 		cypher_str: `
 			match (a:XMAIL)

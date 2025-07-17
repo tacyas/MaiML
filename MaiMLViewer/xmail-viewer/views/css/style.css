@@ -164,3 +164,31 @@ footer {
 .one-cell {
   width: 1.3rem; 
 }
+
+/* For toggle button add 2024/10/2 */
+.switch_outer {
+  margin-left: 85%;
+  width: 90px;
+  height: 30px;
+  background-color: lightgray;
+  border-radius: 30px;
+  position: relative;
+}
+.switch_outer.active {
+  background-color: #212723;
+}
+.toggle_switch {
+  margin-left: 85%;
+  width: 25px;
+  height: 20px;
+  border-radius: 50%;
+  position: absolute;
+  background-color: white;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  margin: auto;
+}
+.toggle_switch.active {
+  left: 60px;
+}

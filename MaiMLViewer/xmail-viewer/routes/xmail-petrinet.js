@@ -62,6 +62,7 @@ router.post('/xmail-petrinet', async (req, res, next) => {
 	return next;
 });
 
+
 // 20240912 add
 /**
  * ルートサービス  XMAILペトリネット図の位置情報を保存
