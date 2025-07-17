@@ -70,7 +70,7 @@ MaiMLデータをGraphDBに登録し、そのデータをnodeJS WEBアプリケ�
 MaiMLに格納されているPetri-Netと各要素の詳細情報の表示画面。
 
 ##### 4.3.1. Petri-Net図(左カラム)
-選択したMaiMLに属するPetri-Netの全要素と、それらの要素と関連付けのある他MaiMLに属する要素を含んだPetri-Netを同時に表示する。
+MaiML一覧表示画面で選択したMaiMLに属するPetri-Netの要素と、それらの要素と関連付けのある他MaiML（２代前後）に属する要素を含んだPetri-Netを同時に表示する。
 
 * 各要素が属するMaiMLによりグループ分類表示
 * Petri-Net の各要素を選択し、次項に示す編集操作が可能
@@ -78,11 +78,11 @@ MaiMLに格納されているPetri-Netと各要素の詳細情報の表示画面
 （編集対象のMaiMLを切り替えることができる）
 
 ##### 4.3.2. ~~編集 +~~ 要素情報表示(中カラム) + insertion要素情報表示
-* `Register PNML position`ボタン：
-  ペトリネット図の各ノードの座標をサーバーに保存
-* Node Details：
+* `Register PNML position`ボタン：</br>
+    MaiML一覧表示画面で選択したMaiMLファイルのペトリネット図の各ノードの座標をサーバーに保存
+* Node Details：</br>
 選択したノードに含まれる情報を表示
-* Insertion contents：
+* Insertion contents：</br>
 選択したノードが持つinsertion要素の情報を表示
   
 ##### 4.3.3. Properties(右カラム)
