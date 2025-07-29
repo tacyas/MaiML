@@ -9,33 +9,41 @@ from USERS.usersettings import defaultNS, filePath
 
 ## エクセルの文字列をフォーマット
 def clean_numeric(value):
+    if pd.isna(value):
+        return value 
     if isinstance(value, str):  
         value_num = value.strip("'\"")  # 先頭・末尾の ' や " を削除
         if value_num.replace(".", "", 1).isdigit():  # 数値なら変換
             return value_num
+    elif isinstance(value, float) or isinstance(value, int):
+        return str(value)
     return value 
 
 ## valueの数値をフォーマット
 def formatter_num(format_string, number):
-    format_string = str(format_string)
+    #format_string = str(format_string)
+    #print("formatter_num: ", format_string, number)
     if '.' in format_string:
         decimal_places = len(format_string.split('.')[1])  # 小数点以下の桁数
     else:
         decimal_places = 0
-    
-    # 小数点以下の桁数に基づいて数値をフォーマット
-    if decimal_places == 0:
-        formatted = "{:.0f}".format(int(number))  # 整数としてフォーマット
-    elif decimal_places == 1:
-        formatted = "{:.1f}".format(float(number))  # 小数点以下1桁
-    elif decimal_places == 2:
-        formatted = "{:.2f}".format(float(number))  # 小数点以下2桁
-    elif decimal_places == 3:
-        formatted = "{:.3f}".format(float(number))  # 小数点以下3桁
-    elif decimal_places == 4:
-        formatted = "{:.4f}".format(float(number))  # 小数点以下4桁
-    else:
-        formatted = number  # それ以外の場合
+    try:
+        # 小数点以下の桁数に基づいて数値をフォーマット
+        if decimal_places == 0:
+            formatted = "{:.0f}".format(int(number))  # 整数としてフォーマット
+        elif decimal_places == 1:
+            formatted = "{:.1f}".format(float(number))  # 小数点以下1桁
+        elif decimal_places == 2:
+            formatted = "{:.2f}".format(float(number))  # 小数点以下2桁
+        elif decimal_places == 3:
+            formatted = "{:.3f}".format(float(number))  # 小数点以下3桁
+        elif decimal_places == 4:
+            formatted = "{:.4f}".format(float(number))  # 小数点以下4桁
+        else:
+            formatted = number  # それ以外の場合
+    except (ValueError, TypeError):
+        #print("Error formatting number:", number, "with format string:", format_string)
+        formatted = number
     return formatted
 
 ## nanを空文字に変換
@@ -173,6 +181,7 @@ class GenElement(BaseElement):
                     pass
                 else:
                     value = nan_to_empty_string(row["VALUE"])
+                    #print(row["#FORMATSTRING"])
                     if pd.notna(row["#FORMATSTRING"]):
                         value = formatter_num(row["#FORMATSTRING"], value)
                     if pd.notna(row["VALUE"]):
@@ -380,7 +389,8 @@ def process_protocol(xls, sheet_name, others_path=None):
     
     # TEMPLATEシートの処理
     #print("TEMPLATE")
-    df_template = xls.parse("TEMPLATE")
+    #df_template = xls.parse("TEMPLATE")
+    df_template = xls.parse("TEMPLATE", converters={"#FORMATSTRING": str, "#SCALEFACTOR": str, "#SIZE": str})
     #df_template = df_template.map(clean_string)
     df_template = df_template.map(clean_numeric)
     parentgenerallist = {}
@@ -411,6 +421,7 @@ def process_protocol(xls, sheet_name, others_path=None):
         }
         for attr, col_name in attributes.items():
             if col_name in df_template.columns and not pd.isna(row_TEMPLATE[col_name]):
+                #print(str(row_TEMPLATE[col_name]))
                 general.set(attr, str(row_TEMPLATE[col_name]))  ## 特殊文字を削除
                 
         # 子要素を追加

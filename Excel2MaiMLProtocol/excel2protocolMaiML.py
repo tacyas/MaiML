@@ -1,9 +1,10 @@
+import os, mimetypes, hashlib
 import pandas as pd
 import xml.etree.ElementTree as ET
 import uuid
 from datetime import datetime
 from USERS.usersettings import defaultNS, filePath
-
+from pathlib import Path
 
 # Excelファイルの読み込み
 xls = ''
@@ -14,36 +15,47 @@ except Exception as e:
     print("入力ファイル読み込み中にエラーが発生しました: "+ filePath().INPUT_FILE_PATH)
     #print(e)
     exit(1)
+# 外部ファイルのパス
+others_path = Path(filePath().INPUT_OTHER_PATH)
     
 
 ## エクセルの文字列をフォーマット
 def clean_numeric(value):
+    if pd.isna(value):
+        return value 
     if isinstance(value, str):  
         value_num = value.strip("'\"")  # 先頭・末尾の ' や " を削除
         if value_num.replace(".", "", 1).isdigit():  # 数値なら変換
             return value_num
+    elif isinstance(value, float) or isinstance(value, int):
+        return str(value)
     return value 
 
 ## valueの数値をフォーマット
 def formatter_num(format_string, number):
+    #format_string = str(format_string)
+    #print("formatter_num: ", format_string, number)
     if '.' in format_string:
         decimal_places = len(format_string.split('.')[1])  # 小数点以下の桁数
     else:
         decimal_places = 0
-    
-    # 小数点以下の桁数に基づいて数値をフォーマット
-    if decimal_places == 0:
-        formatted = "{:.0f}".format(int(number))  # 整数としてフォーマット
-    elif decimal_places == 1:
-        formatted = "{:.1f}".format(float(number))  # 小数点以下1桁
-    elif decimal_places == 2:
-        formatted = "{:.2f}".format(float(number))  # 小数点以下2桁
-    elif decimal_places == 3:
-        formatted = "{:.3f}".format(float(number))  # 小数点以下3桁
-    elif decimal_places == 4:
-        formatted = "{:.4f}".format(float(number))  # 小数点以下4桁
-    else:
-        formatted = number  # それ以外の場合
+    try:
+        # 小数点以下の桁数に基づいて数値をフォーマット
+        if decimal_places == 0:
+            formatted = "{:.0f}".format(int(number))  # 整数としてフォーマット
+        elif decimal_places == 1:
+            formatted = "{:.1f}".format(float(number))  # 小数点以下1桁
+        elif decimal_places == 2:
+            formatted = "{:.2f}".format(float(number))  # 小数点以下2桁
+        elif decimal_places == 3:
+            formatted = "{:.3f}".format(float(number))  # 小数点以下3桁
+        elif decimal_places == 4:
+            formatted = "{:.4f}".format(float(number))  # 小数点以下4桁
+        else:
+            formatted = number  # それ以外の場合
+    except (ValueError, TypeError):
+        #print("Error formatting number:", number, "with format string:", format_string)
+        formatted = number
     return formatted
 
 ## nanを空文字に変換
@@ -99,6 +111,48 @@ class SimElement(BaseElement):
         element = super().add_element(parent, tag, row, prefix)
         return element
 
+### insertion要素のコンテンツを作成 ###
+def make_insertion(value, global_element):
+    if pd.isna(value) or value == "":
+        return global_element
+    filename = str(value)
+    if others_path is not None:
+        file_path = others_path / filename
+    else:
+        file_path =  filePath().INPUT_OTHER_PATH + filename
+
+    # formatの取得
+    extension = os.path.splitext(filename)[1]
+    mime_type=''
+    hash_sha256 = ''
+    mimetypes.init()
+    try:
+        mime_type = mimetypes.types_map[extension]
+    except Exception as e:
+        print("[INFO]insertion file's mime_type is not exist.: ", filename)
+        mime_type = 'none'
+    try:
+        with open(file_path, 'rb') as f:
+            hash_sha256 = hashlib.sha256()
+            while chunk := f.read(8192):  # 8KBごとにファイルを読み込む
+                hash_sha256.update(chunk) 
+            hash_sha256 = hash_sha256.hexdigest()
+        print("insertion file is loaded.: ", file_path)
+    except FileNotFoundError as e:
+        print("Skip hash value generation because the input file does not exist in the directory. ", filename)
+    except Exception as e:
+        print(e)
+        exit(1)
+    ## insertion要素を追加
+    insertion_element = ET.SubElement(global_element, "insertion")
+    insertion_uri_element = ET.SubElement(insertion_element, "uri")
+    insertion_uri_element.text = './'+ filename   # MaiMLと同じフォルダを設定
+    insertion_hash_element = ET.SubElement(insertion_element, "hash")
+    insertion_hash_element.text = str(hash_sha256)
+    insertion_format_element = ET.SubElement(insertion_element, "format")
+    insertion_format_element.text = mime_type
+    return global_element
+
 ## グローバル要素
 class GlobalElement(BaseElement):
     def add_element(self, parent, tag, row, prefix=""):
@@ -110,6 +164,13 @@ class GlobalElement(BaseElement):
         except KeyError:
             pass
         ET.SubElement(element, "uuid").text = uuid_value
+        # Insertion要素の処理
+        for key in row.keys():
+            try:
+                if key.startswith("INSERTION") and pd.notna(row[key]):
+                    element = make_insertion(row[key], element)
+            except KeyError:
+                pass
         element = super().add_common_subelements(element, row)
         try:
             ET.SubElement(element, "annotation").text = nan_to_empty_string(row["ANNOTATION"])
@@ -128,6 +189,7 @@ class GenElement(BaseElement):
                     pass
                 else:
                     value = nan_to_empty_string(row["VALUE"])
+                    #print(row["#FORMATSTRING"])
                     if pd.notna(row["#FORMATSTRING"]):
                         value = formatter_num(row["#FORMATSTRING"], value)
                     ET.SubElement(element, "value").text = value
@@ -163,6 +225,15 @@ def create_arc(arc, row, df, rownum):
             arc.set("source", nan_to_empty_string(row[col]))
         if "TARGET" in col and pd.notna(row[col]):
             arc.set("target", nan_to_empty_string(row[col]))
+
+## materialTemplate/conditionTemplate/resultTemplate要素のplaceRef/templateRef要素
+def create_template_ref(template, row, df, rownum):
+    #for col in df.columns:
+    for col_index, col in enumerate(df.columns):
+        if "PLACEREF" in col and pd.notna(row[col]):
+            place_ref = ET.SubElement(template, "placeRef", id=f"defPLACEREF{nan_to_empty_string(row['#ID'])}{col_index}", ref=nan_to_empty_string(row[col]))
+        if "TEMPLATEREF" in col and pd.notna(row[col]):
+            template_ref = ET.SubElement(template, "templateRef", id=f"defTEMPLATEREF{nan_to_empty_string(row['#ID'])}{col_index}", ref=nan_to_empty_string(row[col]))
 
 ## materialTemplate/conditionTemplate/resultTemplate要素のplaceRef/templateRef要素
 def create_template_ref(template, row, df, rownum):
@@ -332,7 +403,7 @@ def process_protocol(sheet_name):
                 create_template_ref(resultTemplate, row_element, df_element, num_element)  
     
     # TEMPLATEシートの処理
-    df_template = xls.parse("TEMPLATE")
+    df_template = xls.parse("TEMPLATE", converters={"#FORMATSTRING": str, "#SCALEFACTOR": str, "#SIZE": str})
     #df_template = df_template.map(clean_string)
     df_template = df_template.map(clean_numeric)
     parentgenerallist = {}
