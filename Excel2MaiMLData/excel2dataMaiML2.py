@@ -334,7 +334,8 @@ def merge_data(root, xls, others_path=None):
                             property_element1.set("xsi:type", "uuidType")
                             property_element1.set("key", "concept:instance")
                             value_element1 = ET.SubElement(property_element1, "value")
-                            value_element1.text = instruction_uuid
+                            #value_element1.text = instruction_uuid
+                            value_element1.text = results_uuid_element.text  # instructionのuuidではなく、resultsのuuidを設定
                             property_element2 = ET.SubElement(event_element, "property")
                             property_element2.set("xsi:type", "stringType")
                             property_element2.set("key", "lifecycle:transition")
@@ -347,9 +348,9 @@ def merge_data(root, xls, others_path=None):
                             value_element3 = ET.SubElement(property_element3, "value")
                             value_element3.text = change_time_format(col)   # 日付のフォーマットを変換してから追加
                             ## resultsRef要素を追加
-                            resultsRef_element = ET.SubElement(event_element, "resultsRef")
-                            resultsRef_element.set("id", f"{instruction_id}_{event_element.get('id')}_resultref")
-                            resultsRef_element.set("ref", results_id)
+                            #resultsRef_element = ET.SubElement(event_element, "resultsRef")
+                            #resultsRef_element.set("id", f"{instruction_id}_{event_element.get('id')}_resultref")
+                            #resultsRef_element.set("ref", results_id)
     
     root.append(data_element)
     root.append(eventLog_element)
