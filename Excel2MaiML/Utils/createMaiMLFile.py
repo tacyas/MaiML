@@ -1,7 +1,7 @@
 import os,copy,re
 
 import xml.etree.ElementTree as ET
-import glob, xmltodict
+import glob, xmltodict, chardet
 
 import uuid as UUID
 from datetime import datetime as DT
@@ -9,6 +9,29 @@ from zoneinfo import ZoneInfo
 
 from .staticClass import maimlelement, staticVal, settings
 from .namespace import defaultNS
+
+
+## XML読み込み（自動エンコーディング判定）####################################
+def load_xml_with_auto_encoding(path, namespaces=defaultNS.namespaces):
+    with open(path, "rb") as f:
+        raw = f.read()
+
+    # chardetで推定
+    result = chardet.detect(raw)
+    enc = result["encoding"] or "utf-8"
+    print(f"[INFO] Detected encoding: {enc} ({path})")
+
+    try:
+        text = raw.decode(enc)
+    except UnicodeDecodeError:
+        # 推定失敗時はUTF-8で再挑戦
+        text = raw.decode("utf-8", errors="replace")
+        print("[WARN] Fallback to UTF-8 with replacement")
+
+    # XML → dict変換
+    data_dic = xmltodict.parse(text, process_namespaces=True, namespaces=namespaces)
+    return data_dic
+
 
 ## FILE DIR PATH #################################################
 class filepath:
@@ -75,9 +98,9 @@ class UpdateMaiML():
         ## デフォルトMaiMLファイルからdata要素とeventLog要素のDictを作成
         data_dic = []
         defo_filepath = filepath.codedir + staticVal.default_data_filepath
-        with open(defo_filepath, 'r') as inF:
-            data_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
-
+        #with open(defo_filepath, 'r', encoding='utf-8') as inF:
+            #data_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
+        data_dic = load_xml_with_auto_encoding(defo_filepath, namespaces=defaultNS.namespaces)
         ## data要素を作成( Template-->instance )
         full_dict[maimlelement.maiml][maimlelement.data] = copy.deepcopy(data_dic[maimlelement.maiml][maimlelement.data])
         ## 要素と属性値の追加と編集
@@ -313,6 +336,7 @@ class ReadWriteMaiML:
     def writeGenericdataContainer(self, mydic, parentET, mytag):
         #print('writeGenericdataContainer')
         # set attrib
+        #print(mydic[maimlelement.typed])
         my_Elem = ET.SubElement(parentET, mytag, attrib={maimlelement.type:mydic[maimlelement.typed], maimlelement.key:mydic[maimlelement.keyd]})    # =1
         # set values  
         if maimlelement.formatStringd in mydic.keys() and mydic[maimlelement.formatStringd] != '':    # 0/1
@@ -767,9 +791,10 @@ class ReadWriteMaiML:
         for i in range(fileNum):
             maiml = maimlfiles[index]
             index += 1
-            with open(maiml, 'r') as inF:
-                maiml_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
-                return maiml_dic
+            #with open(maiml, 'r', encoding='utf-8') as inF:
+            #    maiml_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
+            maiml_dic = load_xml_with_auto_encoding(maiml)
+            return maiml_dic
 
     ''' １ファイル読み込み '''
     def readFile(self, filepath):
@@ -777,9 +802,10 @@ class ReadWriteMaiML:
             maimlfile = '/test/input_data/SEMDataSample.maiml'
         else:
             maimlfile = filepath
-        with open(maimlfile, 'r') as inF:
-            maiml_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
-            return maiml_dic
+        #with open(maimlfile, 'r', encoding='utf-8') as inF:
+        #    maiml_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
+        maiml_dic = load_xml_with_auto_encoding(maimlfile)
+        return maiml_dic
 
 
     ''' Document Contents の作成 '''

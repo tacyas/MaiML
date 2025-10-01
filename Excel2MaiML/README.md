@@ -17,13 +17,13 @@
 　　/INPUT/excel/ ディレクトリにエクセルファイル <br/>
 　　/INPUT/others/ ディレクトリに外部ファイル <br/>
 　1. コマンド実行 <br/>
-　　python3 excel2maiml.py <br/>
+　　python excel2maiml.py <br/>
 - その２.
   1. 入力ファイルを準備 <br/>
 　　/INPUT/XXXXX/　ディレクトリにMaiMLファイル、エクセルファイル、外部ファイル　 <br/>
 　　　※'XXXXX'は任意の名前 <br/>
 　1. コマンド実行 <br/>
-　　python3 excel2maiml.py XXXXX <br/>
+　　python excel2maiml.py XXXXX <br/>
 <br/>
 
 

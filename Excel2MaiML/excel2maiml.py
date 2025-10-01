@@ -333,6 +333,7 @@ def main(maimlpath, exfilepath, otherspath):
         path, duuid = readWriteMaiML.writecontents(fullmaimldict, outmaimlpath)
     except Exception as e:
         print('Error while writing to the file.',e) 
+        raise e
 
 
 
