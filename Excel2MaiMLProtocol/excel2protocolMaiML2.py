@@ -565,14 +565,29 @@ if __name__ == '__main__':
                     # ファイル名と拡張子を分けて取得
                     file_extension = file.suffix  # 拡張子を取得
                     if file_extension == '.xlsx':
-                        exfilename = file
-                        inputExfilepath = rootdir / exfilename
-                        outputMaimlpath = rootdir / f"{os.path.splitext(os.path.basename(exfilename))[0]}.maiml"
+                        # 中身チェックを入れる
                         try:
-                            main(str(inputExfilepath), str(outputMaimlpath), rootdir=rootdir)
-                            print("Successfully created the MaiML data file. ", outputMaimlpath)
+                            xls = pd.ExcelFile(file)
+                            print("Excel file is loaded.: "+ str(file))
+                            # シート名のリストを取得
+                            sheet_names = xls.sheet_names
+                            if "DOCUMENT" not in sheet_names or "PROTOCOL" not in sheet_names or "TEMPLATE" not in sheet_names:
+                                print("Skipped due to unexpected format.: "+ str(file))
+                                continue
+                            else:
+                                exfilename = file
+                                inputExfilepath = rootdir / exfilename
+                                outputMaimlpath = rootdir / f"{os.path.splitext(os.path.basename(exfilename))[0]}.maiml"
+                                try:
+                                    main(str(inputExfilepath), str(outputMaimlpath), rootdir=rootdir)
+                                    print("Successfully created the MaiML data file. ", outputMaimlpath)
+                                except Exception as e:
+                                    print('Error : ',e)
                         except Exception as e:
-                            print('Error : ',e)
+                            print("An error occurred while reading the input file.: "+ str(file))
+                            print(e)
+                            continue
+                        
     else:
         inputExfilepath = filePath().INPUT_FILE_PATH
         outputMaimlpath = filePath().OUTPUT_FILE_PATH
