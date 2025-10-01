@@ -15,22 +15,13 @@ def nan_to_empty_string(value):
     return str(value)
 
 ### uuid要素をバージョン４で生成 ###
-def create_uuid(value=None):
-    if value is None or pd.isna(value):
-        return str(uuid.uuid4())
-    else:
-        return str(value)
+def create_uuid():
+    return str(uuid.uuid4())
 
 ### id属性の値がnanの場合、デフォルト値を設定 ###
 def setID(value, tag, prefix=""):
     if pd.isna(value) or value == "":
         return f"def{tag}{prefix}ID"
-    return str(value)
-
-### id属性の値がnanの場合、デフォルト値を設定 ###
-def setSimpleID(value, tag, prefix=""):
-    if pd.isna(value) or value == "":
-        return f"{tag}{prefix}ID"
     return str(value)
 
 ## valueの数値をフォーマット
@@ -89,9 +80,9 @@ def make_insertion(value, instance_element, others_path=None):
             while chunk := f.read(8192):  # 8KBごとにファイルを読み込む
                 hash_sha256.update(chunk) 
             hash_sha256 = hash_sha256.hexdigest()
-        print("insertion file is loaded.: ", file_path)
+        print("[INFO]insertion file is loaded.: ", file_path)
     except FileNotFoundError as e:
-        print("Skip hash value generation because the input file does not exist in the directory. ", filename)
+        print("[INFO]Skip hash value generation because the input file does not exist in the directory. ", filename)
     except Exception as e:
         print(e)
         exit(1)
@@ -213,7 +204,7 @@ def merge_data(root, xls, others_path=None):
         try:
             df_method = xls.parse(f"@{method_id}", header=None) # ヘッダー無し
         except Exception as e:
-            print("Error while reading the sheet: ", e)
+            print("[Error]Error while reading the sheet: ", e)
             exit(1)
         if not df_method.empty:
             sheet_num += 1
@@ -239,7 +230,7 @@ def merge_data(root, xls, others_path=None):
                 if col in instruction_ids:
                     if col in instruction_list.keys():
                         ## エラー処理
-                        print("Instruction ID is duplicated.")
+                        print("[Error]Instruction ID is duplicated.")
                         exit(1)
                     else:
                         instruction_list[col] = col_num  # 新しいリストを作成
@@ -256,8 +247,6 @@ def merge_data(root, xls, others_path=None):
                 results_uuid_element.text = create_uuid()
                 ## MaiMLデータの全てのtemplateを取得し、<results>要素にインスタンス（material/condition/result）として追加
                 for template in templates:
-                    #print("template: ", template)
-
                     # results要素にinstance要素を追加
                     template_id = template.get("id")
                     element_name = template.tag
@@ -268,12 +257,8 @@ def merge_data(root, xls, others_path=None):
                         instance_element = ET.SubElement(results_element, "condition")
                     elif element_name == "resultTemplate": # resultTemplate->result
                         instance_element = ET.SubElement(results_element, "result")
-                    #instance_element.set("id", setID("",element_name,_rownum))
-                    #instance_element.set("id", setID("",element_name[:-8]+'_'+template_id,_rownum))
-                    instance_element.set("id", setSimpleID("",template_id,_rownum))
+                    instance_element.set("id", setID("",element_name[:-8]+'_'+template_id,_rownum))
                     instance_element.set("ref", template_id)
-                    
-                    # instance要素にuuid要素を追加（エクセルファイルにUUIDがある場合は後で上書き）
                     instance_uuid_element = ET.SubElement(instance_element, "uuid")
                     instance_uuid_element.text = create_uuid()
                     
@@ -292,11 +277,7 @@ def merge_data(root, xls, others_path=None):
                                 if key == "INSERTION":
                                     instance_element = make_insertion(row[template_col_num], instance_element, others_path)
                                     continue
-                                elif key == "@UUID":
-                                    # @UUIDの場合、instance要素のuuid要素を上書き
-                                    uuid_element = instance_element.find("./uuid")
-                                    uuid_element.text = create_uuid(row[template_col_num])
-                                    continue
+                                
                                 for general_element in instance_properties:
                                     # key一致する要素を再起的に探す
                                     matched_elements = find_general_elements_by_key(general_element, key)
@@ -322,7 +303,7 @@ def merge_data(root, xls, others_path=None):
                     
                     ## <event>要素を追加(idに自動生成した値、refに<instruction>要素のid値を設定)
                     event_element = ET.SubElement(trace_element, "event")
-                    event_element.set("id", setID("","event_"+instruction_id, _rownum))
+                    event_element.set("id", setID("","event", _rownum))
                     event_element.set("ref", instruction_id) # <event>要素のref属性値は<instruction>要素のid属性値
                     event_uuid_element = ET.SubElement(event_element, "uuid")
                     event_uuid_element.text = create_uuid()
@@ -334,8 +315,7 @@ def merge_data(root, xls, others_path=None):
                             property_element1.set("xsi:type", "uuidType")
                             property_element1.set("key", "concept:instance")
                             value_element1 = ET.SubElement(property_element1, "value")
-                            #value_element1.text = instruction_uuid
-                            value_element1.text = results_uuid_element.text  # instructionのuuidではなく、resultsのuuidを設定
+                            value_element1.text = instruction_uuid
                             property_element2 = ET.SubElement(event_element, "property")
                             property_element2.set("xsi:type", "stringType")
                             property_element2.set("key", "lifecycle:transition")
@@ -348,9 +328,9 @@ def merge_data(root, xls, others_path=None):
                             value_element3 = ET.SubElement(property_element3, "value")
                             value_element3.text = change_time_format(col)   # 日付のフォーマットを変換してから追加
                             ## resultsRef要素を追加
-                            #resultsRef_element = ET.SubElement(event_element, "resultsRef")
-                            #resultsRef_element.set("id", f"{instruction_id}_{event_element.get('id')}_resultref")
-                            #resultsRef_element.set("ref", results_id)
+                            resultsRef_element = ET.SubElement(event_element, "resultsRef")
+                            resultsRef_element.set("id", f"{instruction_id}_{event_element.get('id')}_resultref")
+                            resultsRef_element.set("ref", results_id)
     
     root.append(data_element)
     root.append(eventLog_element)
@@ -385,7 +365,7 @@ def write_maiml(root, output_file, namespaces):
         ET.indent(tree, space="    ", level=0)
         tree.write(output_file, encoding="utf-8", xml_declaration=True)
     except Exception as e:
-        print('Error while writing to the file.',e)
+        print('[Error]Error while writing to the file.',e)
         exit(1)
 
 ## main処理 ##
@@ -395,9 +375,9 @@ def main(maiml_input, excel_input, maiml_output, rootdir=None):
     root = ''
     try:
         tree, root, namespaces = read_maiml(maiml_input)
-        print("MaiML file is loaded.: "+ maiml_input)
+        print("[INFO]MaiML file is loaded.: "+ maiml_input)
     except Exception as e:
-        print("An error occurred while reading the input file.: "+ maiml_input)
+        print("[Error]An error occurred while reading the input file.: "+ maiml_input)
         print(e)
         exit(1)
     
@@ -405,9 +385,9 @@ def main(maiml_input, excel_input, maiml_output, rootdir=None):
     xls = ''
     try:
         xls = pd.ExcelFile(excel_input)
-        print("Excel file is loaded.: "+ excel_input)
+        print("[INFO]Excel file is loaded.: "+ excel_input)
     except Exception as e:
-        print("An error occurred while reading the input file.: "+ excel_input)
+        print("[Error]An error occurred while reading the input file.: "+ excel_input)
         print(e)
         exit(1)
         
@@ -417,14 +397,7 @@ def main(maiml_input, excel_input, maiml_output, rootdir=None):
     ## ファイルへ書き出し
     write_maiml(root, maiml_output, namespaces)
 
-# ファイル読み込み時除外条件
-def is_valid_file(filename):
-    return not (
-        filename.startswith('.') or  # 隠しファイル
-        filename.startswith('~') or  # 一時ファイル（エディタによる）
-        filename.startswith('._') or # macOSのメタファイル
-        filename.startswith('.~lock')  # LibreOffice編集中ファイルなど
-    )
+
 
 ## python実行関数 ##
 if __name__ == "__main__":
@@ -435,28 +408,65 @@ if __name__ == "__main__":
             inputMaimlpath = ''
             inputExfilepath = ''
             outputMaimlpath = ''
+            maimlfilenames = []
+            exfilenames = []
             for file in rootdir.rglob('*'):  # rglob('*') で再帰的にすべてのファイルを取得
-                if file.is_file() and is_valid_file(file.name):  # ファイルかどうかを確認
-                    # ファイル名と拡張子を分けて取得
-                    file_extension = file.suffix  # 拡張子を取得
-                    if file_extension == '.xlsx':
-                        exfilename = file
-                        inputExfilepath = rootdir / exfilename
-                        outputMaimlpath = rootdir / f"{os.path.splitext(os.path.basename(exfilename))[0]}_output.maiml"
-                    elif file_extension == '.maiml':
-                        maimlefilename = file
-                        inputMaimlpath = rootdir / maimlefilename
-            try:
-                main(str(inputMaimlpath), str(inputExfilepath), str(outputMaimlpath), rootdir=rootdir)
-                print("Successfully created the MaiML data file. ", outputMaimlpath)
-            except Exception as e:
-                        print('Error : ',e)
+                # 拡張子が.maimlのファイルを取得
+                if file.suffix in ['.maiml', '.mai']:
+                    if file.is_file():  # ファイルかどうかを確認
+                        if isinstance(maimlfilenames, list): # すでにリストが存在する場合
+                            maimlfilenames.append(file) # リストに追加
+                        else:
+                            maimlfilenames = [file]
+                # 拡張子が.xlsxのファイルを取得
+                elif file.suffix == '.xlsx':
+                    if file.is_file():  # ファイルかどうかを確認
+                        if isinstance(exfilenames, list): # すでにリストが存在する場合
+                            exfilenames.append(file)
+                        else:
+                            exfilenames = [file]
+                            
+            valid_job = False  # フラグを用意
+            # maimlファイルからmethod要素のid属性値を取得し、エクセルファイルのシート名と照合
+            for maimlfile in maimlfilenames:    
+                inputMaimlpath = rootdir / maimlfile
+                tree, root, namespaces = read_maiml(inputMaimlpath)
+
+                protocol = root.find("./protocol")
+                methods = protocol.findall(".//method")
+                method_ids = [method.get("id") for method in methods]
+
+                for exfile in exfilenames:
+                    exfilename = exfile
+                    inputExfilepath = rootdir / exfilename
+                    try:
+                        xls = pd.ExcelFile(inputExfilepath)
+                        sheet_names = xls.sheet_names
+                        # method要素のid属性値とシート名を照合
+                        for method_id in method_ids:
+                            if f"@{method_id}" in sheet_names:
+                                outputMaimlpath = rootdir / f"{os.path.splitext(os.path.basename(exfilename))[0]}_output.maiml"
+                                valid_job = True
+                                break
+                    except Exception as e:
+                        print("[Error]An error occurred while reading the input file.: "+ str(inputExfilepath))
+                        print(e)
+
+            if valid_job:
+                try:
+                    main(str(inputMaimlpath), str(inputExfilepath), str(outputMaimlpath), rootdir=rootdir)
+                    print("[INFO]Successfully created the MaiML data file. ", outputMaimlpath)
+                except Exception as e:
+                    print("[Error]Error: ", e)
+            else:
+                print("[Error]No valid MaiML/Excel pair found. Skipping execution.")
+
     else: ## 引数なしで実行
         inputMaimlpath = filePath().INPUT_MaiML_PATH
         inputExfilepath = filePath().INPUT_EXCEL_PATH
         outputMaimlpath = filePath().OUTPUT_FILE_PATH
         try:
             main(inputMaimlpath, inputExfilepath, outputMaimlpath)
-            print("Successfully created the MaiML data file. "+ outputMaimlpath)
+            print("[INFO]Successfully created the MaiML data file. "+ outputMaimlpath)
         except Exception as e:
-            print('Error : ',e)
+            print("[Error]Error : ",e)
