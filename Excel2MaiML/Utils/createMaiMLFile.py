@@ -12,7 +12,7 @@ from .namespace import defaultNS
 
 
 ## XML読み込み（自動エンコーディング判定）####################################
-def load_xml_with_auto_encoding(path, namespaces=defaultNS.namespaces):
+def load_xml_with_auto_encoding(path, namespaces=None):
     with open(path, "rb") as f:
         raw = f.read()
 
@@ -793,7 +793,7 @@ class ReadWriteMaiML:
             index += 1
             #with open(maiml, 'r', encoding='utf-8') as inF:
             #    maiml_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
-            maiml_dic = load_xml_with_auto_encoding(maiml)
+            maiml_dic = load_xml_with_auto_encoding(maiml, namespaces=defaultNS.namespaces)
             return maiml_dic
 
     ''' １ファイル読み込み '''
@@ -804,7 +804,7 @@ class ReadWriteMaiML:
             maimlfile = filepath
         #with open(maimlfile, 'r', encoding='utf-8') as inF:
         #    maiml_dic = xmltodict.parse(inF.read(), process_namespaces=True, namespaces=defaultNS.namespaces)
-        maiml_dic = load_xml_with_auto_encoding(maimlfile)
+        maiml_dic = load_xml_with_auto_encoding(maimlfile, namespaces=defaultNS.namespaces)
         return maiml_dic
 
 
