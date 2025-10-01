@@ -38,7 +38,7 @@
    - MaiMLファイル、エクセルファイル、挿入する外部ファイルをそれぞれ配置。
 2. **コマンド実行**
    ```sh
-   python excel2dataMaiML2.py
+   python excel2dataMaiML.py
    ```
    または
    ```sh
