@@ -315,7 +315,8 @@ def merge_data(root, xls, others_path=None):
                             property_element1.set("xsi:type", "uuidType")
                             property_element1.set("key", "concept:instance")
                             value_element1 = ET.SubElement(property_element1, "value")
-                            value_element1.text = instruction_uuid
+                            # value_element1.text = instruction_uuid
+                            value_element1.text = results_uuid_element.text
                             property_element2 = ET.SubElement(event_element, "property")
                             property_element2.set("xsi:type", "stringType")
                             property_element2.set("key", "lifecycle:transition")
