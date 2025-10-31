@@ -49,4 +49,6 @@ MaiML一覧表示画面で選択したMaiMLに属するPetri-Netの要素と、�
 * `Parent NID` : その情報を持つ親を示す `NID`
 
 
+### 3. アプリケーションの環境構築方法
+SETUP_AND_RUN.md、もしくは、SETUP_AND_RUN_ForWindows.mdを参照してください。
 
