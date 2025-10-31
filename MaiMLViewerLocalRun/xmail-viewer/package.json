@@ -1,0 +1,26 @@
+{
+	"name": "xmail-viewer",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"start": "node ./bin/www"
+	},
+	"dependencies": {
+		"body-parser": "^1.20.3",
+		"bootstrap": "^5.3.3",
+		"cookie-parser": "~1.4.3",
+		"cytoscape": "^3.30.4",
+		"debug": "~2.6.9",
+		"eslint": "^5.12.1",
+		"express": "^4.21.2",
+		"feather-icons": ">=4.5.x",
+		"hbs": "^4.2.0",
+		"jquery": "^3.7.1",
+		"log4js": "^6.9.1",
+		"neo4j-driver": "^4.4.10",
+		"popper.js": "^1.12.5",
+		"request": "^2.88.0",
+		"serve-favicon": "~2.4.5",
+		"tough-cookie": "^5.0.0"
+	}
+}

@@ -1,0 +1,280 @@
+<style type="text/css">
+    .alchemy text {
+        display: block !important;
+    }
+	#datagrid td, th {
+		padding:0.5rem 0.1rem;
+	}
+
+	table {
+		display:block;
+		height:700p;
+		overflow-y:scroll;
+		width:100%;
+	}
+
+	.divscroll {
+		height:700px;
+		scroll-hidden: scrollNow;
+	}
+	
+	#outer {
+		border-style: none;
+		border-width: 3em;
+	}
+
+	#cy {
+		width: 100%;  /* MUST */
+		height: 100%;  /* MUST */
+		border-style: solid;
+		border-width: 0px;
+		/*background-color: white;*/
+	}
+</style>
+
+<section>
+    <div class="container-fluid">
+        <div class="row my-flex-card">
+            <div class="col-lg-5">
+                <div class="card">
+                    {{!-- <div class="alchemy" id="alchemy"></div> --}}
+					<div class="cy" id="cy"></div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card-body divscroll" >
+                        <!-- add button 2024/9/12 -->
+                        <div>
+                            <button type="button" id="pnml_position_btn" class="btn btn-dark btn-block">Register PNML position</button>
+                        </div>
+                        <br/><br />
+
+                        <h6 class="card-title" style="font-size: 0.9rem;">Node Details:</h6>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">NID</span>
+                            </div>
+                            <input type="text" id="txtNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping" readonly>
+                        </div>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">MaiML NID</span>
+                            </div>
+                            <input type="text" id="txtXmailNid" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+                        </div>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">Node type</span>
+                            </div>
+                            <input type="text" id="txtId" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">Layer</span>
+                            </div>
+                            <input type="text" id="txtLayer" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+                        </div>
+						<div class="input-group input-group-sm mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">tag</span>
+							</div>
+							<input type="text" id="txtTemplateTag1" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+						</div>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">id</span>
+                            </div>
+                            <input type="text" id="txtPlaceId" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+                        </div>
+						<div class="input-group input-group-sm mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">uuid</span>
+							</div>
+							<input type="text" id="txtTemplateUuId1" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+						</div>
+						<div class="input-group input-group-sm mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">name</span>
+							</div>
+							<input type="text" id="txtTemplateName1" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+						</div>
+						<div class="input-group input-group-sm mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">description</span>
+							</div>
+							<input type="text" id="txtTemplateDescription1" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+						</div>
+
+                        <!-- 20240906 add -->
+                        <h6 class="card-title" style="font-size: 0.9rem;">Insertion contents:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover" style="font-size:0.7rem; text-align:center;"
+                                id="insertiondatagrid">
+                                <thead>
+                                    <th style="width:8.0rem;">uri</th>
+                                    <th style="width:10.0rem;">hash</th>
+                                    <th style="width:6.0rem;">format</th>
+                                    <th style="width:10.0rem;">uuid</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!--
+                        <h6 class="card-title" style="font-size: 0.9rem;">Edit Petrinet:</h6>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Source</span>
+                            </div>
+                            <input type="text" id="txtSourceNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq"
+                                aria-describedby="addon-wrapping" readonly>
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Target</span>
+                            </div>
+                            <input type="text" id="txtDestinationNode" class="form-control" style="font-size: 0.7rem;" aria-label="seq"
+                                aria-describedby="addon-wrapping" readonly>
+                        </div>
+                        <button type="button" id="btnDeleteConn" class="btn btn-danger btn-sm">Delete connection</button>&nbsp;
+                        <button type="button" id="btnClearDelSelect" class="btn btn-outline-secondary btn-sm">Clear</button>
+                        <br><br>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Source</span>
+                            </div>
+                            <input type="number" min="0" step="1" id="txtNewSourceNode" class="form-control" style="font-size: 0.7rem;"
+                                aria-label="seq" aria-describedby="addon-wrapping">
+                            <div class="input-group-prepend">\
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:4.6rem;">Target</span>
+                            </div>
+                            <input type="number" min="0" step="1" id="txtNewDestinationNode" class="form-control" style="font-size: 0.7rem;"
+                                aria-label="seq" aria-describedby="addon-wrapping">
+                        </div>
+                        <button type="button" id="btnCreateConn" class="btn btn-primary btn-sm">Create connection</button>&nbsp;
+                        <button type="button" id="btnClearNewSelect" class="btn btn-outline-secondary btn-sm">Clear</button>&nbsp;
+                        <br><br>
+                        <div class="input-group input-group-sm mb-3">
+                            <button type="button" id="btnAddNode" class="btn btn-primary btn-sm" data-toggle="modal"
+                                data-target="#modalNodeCreation">Add node</button>&nbsp;&nbsp;
+                            <button type="button" id="btnExportXmail" class="btn btn-primary btn-sm" data-toggle="modal"
+                                data-target="#modalExportXmail">Export MaiML</button>
+                        </div>
+                        -->
+                    </div>
+                </div>
+            </div>
+			<div class="col-lg-4">
+				<br>
+				<h6 style="font-size: 0.9rem;">Properties:</h6>
+				<div class="table-responsive">
+					<table class="table table-striped table-bordered table-hover" style="font-size:0.7rem; text-align:center;" id="datagrid">
+						<thead >
+							<th style="width:1.5rem;">NID</th>
+							<th style="width:1.5rem;">Parent<br>NID</th>
+							<th style="width:8.0rem;">Description</th>
+							<th style="width:6.0rem;">Value</th>
+							<th style="width:13.0rem;">Attributes</th>
+						</thead>
+						<tbody> 
+						</tbody>
+					</table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- place modal -->
+<!--
+<div class="modal fade" id="modalNodeCreation" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="font-size: 0.8rem;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="label1">新しく作成するNodeの情報を入力してください。</h6>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+		<div class="input-group input-group-sm mb-3">
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">Node ID</span>
+			</div>
+			<input type="text" id="txtNodeId" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping" readonly>
+		</div>
+		<div class="input-group input-group-sm mb-3">
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">ID</span>
+			</div>
+			<input type="text" min="0" step="1" id="txtNewId" class="form-control" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+		</div>
+		<div class="input-group input-group-sm mb-3">
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">Node type</span>
+			</div>
+			<select class="form-select" aria-label="Default select example" id="lstNodeType" >
+				<option value="place">Place</option>
+				<option value="transition">Transition</option>
+			</select>
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="execAddNode" class="btn btn-primary">実行</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+-->
+<!-- export xmail -->
+<!--
+<div class="modal fade" id="modalExportXmail" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="font-size: 0.8rem;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="label1">MaiMLを出力するファイル名を指定してください。</h6>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="input-group input-group-sm mb-3">
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="addon-wrapping" style="font-size: 0.7rem; width:5rem;">Filename</span>
+			</div>
+			<input type="text" id="txtFileName" class="form-control" placeholder="filname.xmail" style="font-size: 0.7rem;" aria-label="seq" aria-describedby="addon-wrapping">
+			<br>※ ファイルはexportフォルダに指定されたファイル名で出力されます。
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="execExportXmail" class="btn btn-primary">実行</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+-->
+
+    <script src="/views/js/vendor-util/jquery.min.js"></script>
+    <script src="/views/js/vendor-util/bootstrap.min.js"></script>
+    	
+	<script src="/views/js/vendor.js"></script>
+    {{!-- <script src="/views/js/alchemy.js"></script>  --}}
+    <!-- <script src="http://cdn.graphalchemist.com/alchemy.min.js"></script> -->
+
+    
+	<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script> 
+
+    <script src="/views/js/xmail-petrinet2.js"></script>
+    <!--<script src="/views/js/xmail-petrinet.js"></script>-->
+    <script src="/views/js/utils.js"></script>
+
+	<script src="/views/js/cytoscape.min.js"></script>
+	<script src="/views/js/cola.js"></script>
+	<script src="/views/js/cytoscape-cola.min.js"></script>
+
+<script>
+
+
+</script>
+

@@ -1,0 +1,194 @@
+header {
+  background-image: linear-gradient(#04519b, #044687 60%, #033769);
+  color: white;
+  padding: 1rem 0; }
+  header .form-group {
+    display: flex; }
+    @media (max-width: 575px) {
+      header .form-group {
+        margin-bottom: .25rem; } }
+  header .btn-light {
+    height: 2.375rem; }
+
+.form-group {
+  padding: 0 .125rem; }
+
+.checkbox {
+  float: left;
+  width: 100%; }
+  .checkbox label {
+    justify-content: left; }
+
+.navbar {
+  margin-bottom: 1rem; }
+
+.navbar-nav li:hover > ul.dropdown-menu {
+  display: block; }
+
+.dropdown-submenu {
+  position: relative; }
+
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px; }
+
+/* rotate caret on hover */
+.dropdown-menu > li > a:hover:after {
+  text-decoration: underline;
+  transform: rotate(-90deg); }
+
+.row-eq-height {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .row-eq-height .panel {
+    height: 100%; }
+
+.my-flex-card > div > div.card {
+  height: calc(100% - 15px);
+  margin-bottom: 15px; }
+
+.card {
+  margin-bottom: 1rem; }
+
+.card-heading {
+  background-image: linear-gradient(#04519b, #044687 60%, #033769);
+  color: white;
+  padding: .75rem 1rem; }
+  .card-heading .card-title {
+    margin-bottom: 0; }
+
+.bubble {
+  position: relative;
+  min-height: 4rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: .75rem;
+  border: 1px solid #ccc; }
+
+.bubble:after {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 15px 15px 15px 0;
+  border-color: transparent white;
+  display: block;
+  width: 0;
+  z-index: 1;
+  margin-top: -15px;
+  left: -15px;
+  top: 50%; }
+
+.bubble:before {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 15px 15px 15px 0;
+  border-color: transparent #ccc;
+  display: block;
+  width: 0;
+  z-index: 0;
+  margin-top: -15px;
+  left: -16px;
+  top: 50%; }
+
+.post-actions {
+  margin: .313rem; }
+
+.comment-form .form-group {
+  width: calc(100% - 56px);
+  margin-bottom: 0; }
+
+.comment-form input[type='text'] {
+  width: 100%; }
+
+.comment-avatar img {
+  width: 2.5rem;
+  margin-right: .313rem; }
+
+.comment {
+  border: 1px solid #ccc;
+  border-radius: .313rem;
+  padding: .25rem;
+  margin: .313rem 0;
+  overflow: auto;
+  width: 100%; }
+
+.friends {
+  margin: 0 -.313rem 1.4rem; }
+  .friends .list-inline {
+    text-align: center; }
+  .friends li {
+    margin: 0;
+    padding: .25rem .313rem; }
+  .friends img {
+    width: 4rem; }
+
+.group-item {
+  padding-bottom: .75rem;
+  margin-bottom: 1.4rem;
+  border-bottom: 1px solid #ccc;
+  overflow: hidden; }
+
+.groups img {
+  width: 5rem;
+  float: left;
+  margin-right: 1rem; }
+
+footer {
+  background: #f4f4f4;
+  height: 5.75rem;
+  color: #04519b;
+  font-weight: bold;
+  text-align: center;
+  padding-top: 2.5rem;
+  margin-top: 2rem;
+  border-top: 7px solid #04519b; }
+
+/* For data tables design */  
+.right-aligned-cell {
+    text-align: right; 
+}
+.left-aligned-cell {
+  text-align: left; 
+}
+.name-cell {
+    width: 4rem; 
+}
+.project-name-cell {
+  width: 8rem; 
+  text-align: left; 
+}
+.one-cell {
+  width: 1.3rem; 
+}
+
+/* For toggle button add 2024/10/2 */
+.switch_outer {
+  margin-left: 85%;
+  width: 90px;
+  height: 30px;
+  background-color: lightgray;
+  border-radius: 30px;
+  position: relative;
+}
+.switch_outer.active {
+  background-color: #212723;
+}
+.toggle_switch {
+  margin-left: 85%;
+  width: 25px;
+  height: 20px;
+  border-radius: 50%;
+  position: absolute;
+  background-color: white;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  margin: auto;
+}
+.toggle_switch.active {
+  left: 60px;
+}

@@ -1,0 +1,157 @@
+{
+  "get_xmail": {
+    "params": [],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)-[:XML_Root]->(d)-[:XML_Child]->(do {__tag: 'document'})\n\t\t\t\toptional match (do)-[:XML_Child]->(uu {__tag: 'uuid'})-[:XML_Data]->(uud)\n\t\t\t\toptional match (do)-[:XML_Child]->(na {__tag: 'name'})-[:XML_Data]->(nad)\n\t\t\t\toptional match (do)-[:XML_Child]->(de {__tag: 'description'})-[:XML_Data]->(ded)\n\t\t\twith d, do, [id(a), a.file, uud.value, nad.value, ded.value] as info\n\t\t\t\toptional match\n\t\t\t\t\t(d)-[:XML_Child*]->(ins {__tag: 'insertion'})\n\t\t\t\t\t-[:XML_Child]->(insuri {__tag: 'uri'})-[:XML_Data]->(insurid)\n\t\t\t\toptional match\n\t\t\t\t\t(ins)-[:XML_Child]->(insuu {__tag: 'uuid'})-[:XML_Data]->(insuud)\n\t\t\twith do, info, collect([insurid.value, insuud.value]) as insertions\n\t\t\t\toptional match (do)-[:XML_Child]->(cr {__tag: 'creator'})\n\t\t\t\toptional match (cr)-[:XML_Child]->(cruu {__tag: 'uuid'})-[:XML_Data]->(cruud)\n\t\t\t\toptional match (cr)-[:XML_Child]->(crna {__tag: 'name'})-[:XML_Data]->(crnad)\n\t\t\t\toptional match (cr)-[:XML_Child]->(crde {__tag: 'description'})-[:XML_Data]->(crded)\n\t\t\twith do, info, collect([cruud.value, crnad.value, crded.value]) as creators, insertions\n\t\t\t\toptional match (do)-[:XML_Child]->(ve {__tag: 'vendor'})\n\t\t\t\toptional match (ve)-[:XML_Child]->(veuu {__tag: 'uuid'})-[:XML_Data]->(veuud)\n\t\t\t\toptional match (ve)-[:XML_Child]->(vena {__tag: 'name'})-[:XML_Data]->(venad)\n\t\t\t\toptional match (ve)-[:XML_Child]->(vede {__tag: 'description'})-[:XML_Data]->(veded)\n\t\t\twith do, info, collect([veuud.value, venad.value, veded.value]) as vendors, creators, insertions\n\t\t\t\toptional match (do)-[:XML_Child]->(ow {__tag: 'owner'})\n\t\t\t\toptional match (ow)-[:XML_Child]->(owuu {__tag: 'uuid'})-[:XML_Data]->(owuud)\n\t\t\t\toptional match (ow)-[:XML_Child]->(owna {__tag: 'name'})-[:XML_Data]->(ownad)\n\t\t\t\toptional match (ow)-[:XML_Child]->(owde {__tag: 'description'})-[:XML_Data]->(owded)\n\t\t\twith do, info, collect([owuud.value, ownad.value, owded.value]) as owners, creators, vendors, insertions\n\t\t\t\toptional match (do)-[:XML_Child]->(ln)\n\t\t\t\t-[:XML_Child]->(lnuu {__tag: 'uuid'})-[:XML_Data]->(lnuud)\n\t\t\twhere\n\t\t\t\tln.__tag = 'chain'\n\t\t\t\tor ln.__tag = 'parent'\n\t\t\twith do, info, creators, vendors, owners, insertions, collect([ln.__tag, lnuud.value]) as linkages\n\t\t\treturn\n\t\t\t\tinfo[0] as nid,\n\t\t\t\tinfo[1] as file,\n\t\t\t\tinfo[2..5] as xmail_info,\n\t\t\t\tcreators,\n\t\t\t\tvendors,\n\t\t\t\towners,\n\t\t\t\tlinkages,\n\t\t\t\tinsertions;\n\t\t"
+  },
+  "get_PN": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->()\n\t\t\t\t-[:XML_Child*]->(pn {__tag: 'pnml'})\n\t\t\t\t-[:XML_Child]->(n)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\t\tand n.__tag<>'arc'\n\t\t\toptional match\n\t\t\t\t(n)-[:SAME*0..1]-()\n\t\t\t\t-[:PN*0.. {__edge_kind: 'arc'}]-(m)\n\t\t\twith collect(distinct m) as nodes\n\t\t\tunwind nodes as nn\n\t\t\toptional match\n\t\t\t\t(nn)-[r:PN {__edge_kind: 'arc'}]->()\n\t\t\treturn nodes, collect(r) as edges;\n\t\t"
+  },
+  "get_PNall": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->()\n\t\t\t\t-[:XML_Child*]->(n:PN)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\toptional match\n\t\t\t\t(n)-[:SAME*0..1]-()\n\t\t\t\t-[:PN*0..]-(m)\n\t\t\twith collect(distinct m) as nodes\n\t\t\tunwind nodes as nn\n\t\t\toptional match\n\t\t\t\t(nn)-[r:PN|SAME]->()\n\t\t\treturn nodes, collect(r) as edges;\n\t\t"
+  },
+  "get_PN_single": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->()\n\t\t\t\t-[:XML_Child*]->(n:PN)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\toptional match\n\t\t\t\t(n)-[:PN*0..]-(m)\n\t\t\twith collect(distinct m) as nodes\n\t\t\tunwind nodes as nn\n\t\t\toptional match\n\t\t\t\t(nn)-[r:PN]->()\n\t\t\treturn nodes, collect(r) as edges;\n\t\t"
+  },
+  "get_template": {
+    "params": [
+      "place_nid"
+    ],
+    "cypher_str": "\n\t\tmatch\n\t\t(pr {__tag: 'protocol'})\n\t\t-[:XML_Child]->(me {__tag: 'method'})\n\t\t-[:XML_Child*..2]->(pn {__tag: 'pnml'})\n\t\t-[:XML_Child]->(pl {__tag: 'place'}),\n\t\t(pr)-[:XML_Child*]->(te)-[:XML_Child]->(plR {__tag: 'placeRef'})\nwhere id(pl)=$place_nid and plR.ref = pl.id\noptional match\n\t\t(te)-[:XML_Child]->(uu {__tag: 'uuid'})-[:XML_Data]->(uud),\n\t\t(te)-[:XML_Child]->(na {__tag: 'name'})-[:XML_Data]->(nad),\n\t\t(te)-[:XML_Child]->(de {__tag: 'description'})-[:XML_Data]->(ded)\nreturn\n\t\tid(plR) as placeRef_nid,\n\t\tplR.id as placeRef_id,\n\t\tid(te) as template_nid,\n\t\tte.__tag as template_tag,\n\t\tte.id as template_id,\n\t\tuud.value as template_uuid,\n\t\tnad.value as template_name,\n\t\tded.value as template_description;\n"
+  },
+  "get_template_bylist": {
+    "params": [
+      "place_nid_list"
+    ],
+    "cypher_str": "\nmatch\n\t\t(pr {__tag: 'protocol'})\n\t\t-[:XML_Child]->(me {__tag: 'method'})\n\t\t-[:XML_Child*..2]->(pn {__tag: 'pnml'})\n\t\t-[:XML_Child]->(pl {__tag: 'place'}),\n\t\t(pr)-[:XML_Child*]->(te)-[:XML_Child]->(plR {__tag: 'placeRef'})\nwhere\n\t\tid(pl) in $place_nid_list\n\t\tand plR.ref = pl.id\noptional match\n\t\t(te)-[:XML_Child]->(uu {__tag: 'uuid'})-[:XML_Data]->(uud),\n\t\t(te)-[:XML_Child]->(na {__tag: 'name'})-[:XML_Data]->(nad),\n\t\t(te)-[:XML_Child]->(de {__tag: 'description'})-[:XML_Data]->(ded)\nreturn\n\t\tid(pl) as place_nid,\n\t\tpl.id as place_id,\n\t\tid(plR) as placeRef_nid,\n\t\tplR.id as placeRef_id,\n\t\tid(te) as template_nid,\n\t\tte.__tag as template_tag,\n\t\tte.id as template_id,\n\t\tuud.value as template_uuid,\n\t\tnad.value as template_name,\n\t\tded.value as template_description;\n"
+  },
+  "get_details_bylist": {
+    "params": [
+      "nid_list"
+    ],
+    "cypher_str": "\n\t\t\tmatch\n\t\t\t\t(n:XMLtag)\n\t\t\twhere\n\t\t\t\tid(n) in $nid_list\n\t\t\toptional match\n\t\t\t\t(n)-[:XML_Child]->(uu {__tag: 'uuid'})-[:XML_Data]->(uud)\n\t\t\toptional match\n\t\t\t\t(n)-[:XML_Child]->(na {__tag: 'name'})-[:XML_Data]->(nad)\n\t\t\toptional match\n\t\t\t\t(n)-[:XML_Child]->(de {__tag: 'description'})-[:XML_Data]->(ded)\n\t\t\treturn\n\t\t\t\tid(n) as place_nid,\n\t\t\t\tn.id as place_id,\n\t\t\t\tnull as placeRef_nid,\n\t\t\t\tnull as placeRef_id,\n\t\t\t\tnull as template_nid,\n\t\t\t\tn.__tag as template_tag,\n\t\t\t\tnull as template_id,\n\t\t\t\tuud.value as template_uuid,\n\t\t\t\tnad.value as template_name,\n\t\t\t\tded.value as template_description;\n\t\t"
+  },
+  "get_properties": {
+    "params": [
+      "template_nid"
+    ],
+    "cypher_str": "\n\t\tmatch\n\t\t(te)-[:XML_Child*0..]->(parent)-[:XML_Child]->(prop {__tag: 'property'})\nwhere\n\t\tid(te)=$template_nid\noptional match\n\t\t(prop)-[:XML_Child]->(v {__tag: 'value'})-[:XML_Data]->(vd)\noptional match\n\t\t(prop)-[:XML_Child]->(d {__tag: 'description'})-[:XML_Data]->(dd)\nreturn\n\t\tid(prop) as nid,\n\t\tid(parent) as parent_nid,\n\t\tdd.value as description,\n\t\tvd.value as value,\n\t\tproperties(prop) as attrib;\n"
+  },
+  "create_PNarc": {
+    "params": [
+      "src_nid",
+      "dst_nid"
+    ],
+    "cypher_str": "\n\t\tmatch (a:XMAIL)\n\t\t-[:XML_Root]->()\n\t\t-[:XML_Child*]->(pn {__tag: 'pnml'})\n\t\t-[:XML_Child]->(s),\n\t\t(pn)\n\t\t-[:XML_Child]->(d)\nwhere\n\tid(s)=$src_nid\n\t\tand id(d)=$dst_nid\n\t\tand s.__tag<>'arc'\n\t\tand d.__tag<>'arc'\n\t\tand s.__tag<>d.__tag\nand not (s)-[:PN]-(d)\nand not ()-[:PN]->(d {__tag: 'place'})\ncreate\n\t(s)-[:PN {__xmail_nid: id(a), __edge_kind: 'arc'}]->(d);\n\t"
+  },
+  "delete_PNarc": {
+    "params": [
+      "nid1",
+      "nid2"
+    ],
+    "cypher_str": "\n\t\tmatch\n\t\t(pn {__tag: 'pnml'})\n\t\t-[:XML_Child]->(n1)\n\t\t-[r:PN]-(n2)\nwhere\n\tid(n1)=$nid1\n\t\tand id(n2)=$nid2\ndelete r;\n"
+  },
+  "test_PNarc": {
+    "params": [
+      "src_nid",
+      "dst_nid"
+    ],
+    "cypher_str": "\n\t\tmatch\n\t\t(pn {__tag: 'pnml'})\n\t\t-[:XML_Child]->(s),\n\t\t(pn)\n\t\t-[:XML_Child]->(d)\nwhere\n\tid(s)=$src_nid\n\t\tand id(d)=$dst_nid\n\t\tand s.__tag<>'arc'\n\t\tand d.__tag<>'arc'\n\t\tand s.__tag<>d.__tag\nand not (s)-[:PN]-(d)\nand not ()-[:PN]->(d {__tag: 'place'})\nreturn\n\tcount(s)>0 as matched\n"
+  },
+  "create_PNedge": {
+    "params": [
+      "src_nid",
+      "dst_nid"
+    ],
+    "cypher_str": "\n\t\t\twith\n\t\t\t\t[['arc', null, null], ['placeRef', 'templateRef', null], [null, 'ref', 'instanceRef']] as edge_table\n\t\t\tmatch\n\t\t\t\t(n)-[:XML_Child*1..]->(s),\n\t\t\t\t(n)-[:XML_Child*1..]->(d)\n\t\t\twhere\n\t\t\t\tid(s)=$src_nid\n\t\t\t\tand id(d)=$dst_nid\n\t\t\t\tand not (s)-[:PN]->(d)\n\t\t\twith\n\t\t\t\ts, d, edge_table[s.__layer][d.__layer] as edge_kind\n\t\t\twhere\n\t\t\t\tedge_kind is not null\n\t\t\twith\n\t\t\t\ts, d, edge_kind\n\t\t\twhere\n\t\t\t\tcase edge_kind\n\t\t\t\t\twhen 'arc' then\n\t\t\t\t\t\ts.__tag <> d.__tag\n\t\t\t\t\t\tand not (s)<-[:PN]-(d)\n\t\t\t\t\t\tand not ({__tag: 'transition'})-[:PN]->(d)\n\t\t\t\t\twhen 'placeRef' then\n\t\t\t\t\t\td.__tag = 'place'\n\t\t\t\t\twhen 'ref' then\n\t\t\t\t\t\tnot (s)-[:PN {__edge_kind: 'ref'}]->()\n\t\t\t\t\t\tand d.__tag starts with s.__tag\n\t\t\t\t\telse true\n\t\t\t\tend\n\t\t\tcreate\n\t\t\t\t(s)-[r:PN {__xmail_nid: s.__xmail_nid, __edge_kind: edge_kind}]->(d)\n\t\t\treturn edge_kind;\n\t\t"
+  },
+  "delete_PNedge": {
+    "params": [
+      "src_nid",
+      "dst_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch\n\t\t\t\t(s)-[r:PN]->(d)\n\t\t\twhere\n\t\t\t\tid(s)=$src_nid\n\t\t\t\tand id(d)=$dst_nid\n\t\t\tdelete r\n\t\t\treturn count(r) as deleted;\n\t\t"
+  },
+  "create_PNnode": {
+    "params": [
+      "xmail_nid",
+      "id",
+      "kind"
+    ],
+    "cypher_str": "\n\t\tmatch (a:XMAIL)\n\t\t-[:XML_Root]->(d)\n\t\t-[:XML_Child*]->(pn {__tag: 'pnml'})\nwhere\n\tid(a)=$xmail_nid\n\t\tand not (d)-[:XML_Child*0..]->({id: $id})\ncreate\n\t(pn)-[:XML_Child]->(new:XMLtag:PN:Layer1:UNREGISTERED {__tag: $kind, id: $id, __xmail_nid: $xmail_nid, __layer: 0})\nreturn id(new) as nid;\n"
+  },
+  "append_template": {
+    "params": [
+      "place_nid",
+      "tag",
+      "id",
+      "ref_id",
+      "uuid",
+      "name",
+      "description"
+    ],
+    "cypher_str": "\n\t\tmatch\n\t\t(a:XMAIL)\n\t\t-[:XML_Root]->(d)\n\t\t-[:XML_Child]->(pr {__tag: 'protocol'})\n\t\t-[:XML_Child]->(me {__tag: 'method'})\n\t\t-[:XML_Child*..2]->(pn {__tag: 'pnml'})\n\t\t-[:XML_Child]->(pl:UNREGISTERED)\nwhere\n\t\tid(pl)=$place_nid\n\t\tand not (d)-[:XML_Child*0..]->({id: $id})\n\t\tand not (d)-[:XML_Child*0..]->({id: $ref_id})\ncreate\n\t\t(pr)\n\t\t-[:XML_Child]->\n\t\t(te:XMLtag:UNREGISTERED {__tag: $tag, id: $id})\n\t\t-[:XML_Child]->\n\t\t(ref:XMLtag:UNREGISTERED {__tag: 'placeRef', id: $ref_id, ref: pl.id}),\n\t\t(te)-[:XML_Child]->(uu:XMLtag:UNREGISTERED {__tag: 'uuid'})\n\t\t\t\t-[:XML_Data]->(uud:XMLdata:UNREGISTERED {value: $uuid}),\n\t\t(te)-[:XML_Child]->(na:XMLtag:UNREGISTERED {__tag: 'name'})\n\t\t\t\t-[:XML_Data]->(nad:XMLdata:UNREGISTERED {value: $name}),\n\t\t(te)-[:XML_Child]->(de:XMLtag:UNREGISTERED {__tag: 'description'})\n\t\t\t\t-[:XML_Data]->(ded:XMLdata:UNREGISTERED {value: $description});\n"
+  },
+  "delete_PNnode": {
+    "params": [
+      "nid"
+    ],
+    "cypher_str": "\n\t\tmatch\n\t\t(pr {__tag: 'protocol'})\n\t\t-[:XML_Child]->(me {__tag: 'method'})\n\t\t-[:XML_Child*..2]->(pn {__tag: 'pnml'})\n\t\t-[:XML_Child]->(n:UNREGISTERED)\nwhere\n\tid(n)=$nid\noptional match\n\t\t(pr)-[:XML_Child]->(te:UNREGISTERED)-[:XML_Child]->(plR {__tag: 'placeRef'})\nwhere\n\t\tplR.ref = n.id\noptional match\n\t\t(te)-[:XML_Child]->(uu {__tag: 'uuid'})-[:XML_Data]->(uud),\n\t\t(te)-[:XML_Child]->(na {__tag: 'name'})-[:XML_Data]->(nad),\n\t\t(te)-[:XML_Child]->(de {__tag: 'description'})-[:XML_Data]->(ded)\ndetach delete n, te, plR, uu, uud, na, nad, de, ded;\n"
+  },
+  "import_arc": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child]->(pr {__tag: 'protocol'})\n\t\t\t\t-[:XML_Child]->(me {__tag: 'method'})\n\t\t\t\t-[:XML_Child*..2]->(pn {__tag: 'pnml'}),\n\t\t\t\t(pn)-[:XML_Child]->(ar {__tag: 'arc'}),\n\t\t\t\t(pn)-[:XML_Child]->(s),\n\t\t\t\t(pn)-[:XML_Child]->(t)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\t\tand ar.source=s.id\n\t\t\t\tand ar.target=t.id\n\t\t\tmerge (s)-[:PN {__xmail_nid: $xmail_nid, __edge_kind: 'arc'}]->(t);\n\t\t"
+  },
+  "import_placeRef": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child]->(pr {__tag: 'protocol'})\n\t\t\t\t-[:XML_Child]->(me {__tag: 'method'})\n\t\t\t\t-[:XML_Child*..2]->(pn {__tag: 'pnml'})\n\t\t\t\t-[:XML_Child]->(pl {__tag: 'place'})\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\tmatch\n\t\t\t\t(pr)-[:XML_Child*]->(te)-[:XML_Child]->(plR {__tag: 'placeRef'})\n\t\t\twhere\n\t\t\t\tplR.ref = pl.id\n\t\t\tmerge\n\t\t\t\t(te)-[:PN {__xmail_nid: $xmail_nid, __edge_kind: 'placeRef'}]->(pl)\n\t\t\twith\n\t\t\t\tpl, te,\n\t\t\t\tcase te.__tag\n\t\t\t\t\twhen 'materialTemplate'\t\tthen 'M'\n\t\t\t\t\twhen 'conditionTemplate'\tthen 'C'\n\t\t\t\t\twhen 'resultTemplate'\t\tthen 'R'\n\t\t\t\t\telse null\n\t\t\t\tend as mtype\n\t\t\tset\n\t\t\t\tte:PN:Layer2:Layer12,\n\t\t\t\tte.__layer = 1,\n\t\t\t\tte.__xmail_nid = $xmail_nid,\n\t\t\t\tte.__maiml_type = mtype,\n\t\t\t\tpl.__maiml_type = mtype;\n\t\t"
+  },
+  "import_ref": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child]->(pr {__tag: 'protocol'})\n\t\t\t\t-[:XML_Child*]->(te)-[:XML_Child]->(plR {__tag: 'placeRef'}),\n\t\t\t\t(d)-[:XML_Child]->(data {__tag: 'data'})-[:XML_Child*]->(in)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\t\tand in.ref = te.id\n\t\t\tmerge\n\t\t\t\t(in)-[:PN {__xmail_nid: $xmail_nid, __edge_kind: 'ref'}]->(te)\n\t\t\twith\n\t\t\t\tte, in,\n\t\t\t\tcase te.__tag\n\t\t\t\t\twhen 'materialTemplate'\t\tthen 'M'\n\t\t\t\t\twhen 'conditionTemplate'\tthen 'C'\n\t\t\t\t\twhen 'resultTemplate'\t\tthen 'R'\n\t\t\t\t\telse null\n\t\t\t\tend as mtype\n\t\t\tset\n\t\t\t\tin:PN:Layer3,\n\t\t\t\tin.__layer = 2,\n\t\t\t\tin.__xmail_nid = $xmail_nid,\n\t\t\t\tin.__maiml_type = mtype;\n\t\t"
+  },
+  "import_templateRef": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child]->(pr {__tag: 'protocol'})\n\t\t\t\t-[:XML_Child*]->(te1)-[:XML_Child]->(te1R {__tag: 'templateRef'})\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\tmatch\n\t\t\t\t(pr)-[:XML_Child*]->(te2)\n\t\t\twhere\n\t\t\t\tte1R.ref = te2.id\n\t\t\tmerge\n\t\t\t\t(te1)-[:PN {__xmail_nid: $xmail_nid, __edge_kind: 'templateRef'}]->(te2);\n\t\t"
+  },
+  "import_instanceRef": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\t\t-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child]->(data {__tag: 'data'})\n\t\t\t\t-[:XML_Child*]->(in1)-[:XML_Child]->(in1R {__tag: 'instanceRef'})\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\tmatch\n\t\t\t\t(data)-[:XML_Child*]->(in2)\n\t\t\twhere\n\t\t\t\tin1R.ref = in2.id\n\t\t\tmerge\n\t\t\t\t(in1)-[:PN {__xmail_nid: $xmail_nid, __edge_kind: 'instanceRef'}]->(in2);\n\t\t"
+  },
+  "update_same_uuid": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\t//same_uuid\n\t\t\tmatch\n\t\t\t\t(a:XMAIL)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\tmatch\n\t\t\t\t(a)-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child*]->(te1)\n\t\t\t\t-[:XML_Child]->(plR1 {__tag: 'placeRef'}),\n\t\t\t\t(te1)-[:XML_Child]->(uu1 {__tag: 'uuid'})-[:XML_Data]->(uud1),\n\t\t\t\t(uu2 {__tag: 'uuid'})-[:XML_Data]->(uud2)\n\t\t\twhere\n\t\t\t\tuud1.value = uud2.value\n\t\t\t\tand id(uud1) <> id(uud2)\n\t\t\tmatch\n\t\t\t\t(pr1)-[:XML_Child*]->(te1),\n\t\t\t\t(pr1)-[:XML_Child*]->(pl1 {__tag: 'place'})\n\t\t\twhere\n\t\t\t\tplR1.ref = pl1.id\n\t\t\tmatch\n\t\t\t\t(te2)-[:XML_Child]->(plR2 {__tag: 'placeRef'}),\n\t\t\t\t(te2)-[:XML_Child]->(uu2 {__tag: 'uuid'}),\n\t\t\t\t(pr2)-[:XML_Child*]->(te2),\n\t\t\t\t(pr2)-[:XML_Child*]->(pl2 {__tag: 'place'})\n\t\t\twhere\n\t\t\t\tplR2.ref = pl2.id\n\t\t\tmerge (pl1)-[:SAME_UUID {__type: 'PN', __edge_kind: 'SAME'}]->(pl2);\n\t\t"
+  },
+  "import_same_template": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\t//same_uuid\n\t\t\tmatch\n\t\t\t\t(a:XMAIL)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\tmatch\n\t\t\t\t(a)-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child]->(pr {__tag: 'protocol'})\n\t\t\t\t-[:XML_Child*]->(te1)\n\t\t\t\t-[:XML_Child]->(plR1 {__tag: 'placeRef'}),\n\t\t\t\t(te1)-[:XML_Child]->(uu1 {__tag: 'uuid'})-[:XML_Data]->(uud1),\n\t\t\t\t(te2)-[:XML_Child]->(uu2 {__tag: 'uuid'})-[:XML_Data]->(uud2)\n\t\t\twhere\n\t\t\t\tuud1.value = uud2.value\n\t\t\t\tand id(uud1) <> id(uud2)\n\t\t\tmerge (te1)-[:SAME {__edge_kind: 'SAME'}]->(te2);\n\t\t"
+  },
+  "import_nodes": {
+    "params": [
+      "xmail_nid"
+    ],
+    "cypher_str": "\n\t\t\tmatch (a:XMAIL)\n\t\t\twhere\n\t\t\t\tid(a)=$xmail_nid\n\t\t\tmatch\n\t\t\t\t(a)-[:XML_Root]->(d)\n\t\t\t\t-[:XML_Child]->(pr {__tag: 'protocol'})\n\t\t\t\t-[:XML_Child]->(me {__tag: 'method'})\n\t\t\t\t-[:XML_Child*..2]->(pn {__tag: 'pnml'})\n\t\t\t\t-[:XML_Child]->(n)\n\t\t\twhere\n\t\t\t\tn.__tag <> 'arc'\n\t\t\tset\n\t\t\t\tn:PN:Layer1,\n\t\t\t\tn.__layer = 0,\n\t\t\t\tn.__xmail_nid = $xmail_nid;\n\t\t"
+  }
+}
