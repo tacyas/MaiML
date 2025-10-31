@@ -17,5 +17,6 @@
 1. MaiMLViewer　　: `MaiMLファイルに記載されている計測分析のフローを可視化するWEBシステム`
    1. docker-compose.yml
    2. README
+1. MaiMLViewerLocalRun　　: `MaiMLViewerのローカル環境版`
 1. Misc 　　: `MaiMLデータフォーマットを作成、解析するためのサンプルプログラム`
 1. VAMAS2MaiML　　:　`計測フローを記載したMaiMLファイルと計測結果を記載したvamas形式のファイルをマージするプログラム`
