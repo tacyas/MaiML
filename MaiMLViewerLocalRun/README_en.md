@@ -47,3 +47,6 @@ A hierarchical structure can be formed where each attribute can have multiple su
 
 * `NID` : Individual numbers assigned to each attribute information.
 * `Parent NID` : The `NID` indicating the parent that holds that information.
+
+### 3. How to Set Up the Application Environment
+Please refer to SETUP_AND_RUN_en.md.
