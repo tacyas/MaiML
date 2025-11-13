@@ -29,3 +29,8 @@ Simply open the HTML file and drag & drop a `.maiml` file to explore its structu
 
 ---
 
+## ⚠️ Note
+
+1. If the file size is large, the browser may crash.
+
+---
