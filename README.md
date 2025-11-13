@@ -8,7 +8,7 @@ A standalone HTML viewer for MaiML files — visualize MaiML data directly in yo
 サーバー不要・インストール不要で、1つのHTMLファイルだけで動作します。
 
 MaiMLファイル（`.maiml`）をブラウザにドラッグ＆ドロップするだけで、  
-構造や内容をインタラクティブに閲覧できます。
+構造や内容を可視化できます。
 
 ---
 
