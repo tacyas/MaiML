@@ -651,15 +651,15 @@
 <body>
     <header id="toolbar">
         <div id="title">MaiML Viewer</div>
-        <button class="btn" id="openFileBtn">📂アップロード…</button>
-        <button class="btn" id="dagreBtn">Dagre レイアウト</button>
-        <button class="btn" id="auto">自動レイアウト</button>
-        <button class="btn" id="reset">位置リセット</button>
-        <label class="chk"><input checked="" id="dragMode" type="checkbox" /> ドラッグ編集</label>
-        <label class="chk"><input id="showGrid" type="checkbox" /> グリッド表示</label>
-        <label class="chk"><input id="snapGrid" type="checkbox" /> グリッドにスナップ</label>
+        <button class="btn" id="openFileBtn">📂UPLOAD…</button>
+        <button class="btn" id="dagreBtn">Dagre Layout</button>
+        <button class="btn" id="auto">Auto Layout</button>
+        <button class="btn" id="reset">Reset Position</button>
+        <label class="chk"><input checked="" id="dragMode" type="checkbox" /> Drag Edit</label>
+        <label class="chk"><input id="showGrid" type="checkbox" /> Show Grid</label>
+        <label class="chk"><input id="snapGrid" type="checkbox" /> Snap to Grid</label>
         <div class="spacer"></div>
-        <button class="btn" id="themeBtn" title="ライト/ダーク切替">🌓 テーマ</button>
+        <button class="btn" id="themeBtn" title="Light/Dark Toggle">🌓 Theme</button>
     </header>
 
     <div id="mainContainer">
@@ -672,7 +672,7 @@
             <div id="metadataPanel">
                 <div id="document-info">
                     <h3>📄 Document Metadata</h3>
-                    <div class="empty-state">ファイルを選択するとメタデータが表示されます</div>
+                    <div class="empty-state">Select a file to display metadata</div>
                 </div>
             </div>
         </div>
@@ -681,14 +681,14 @@
 
         <div id="bottomSection">
             <div id="detailsPanel">
-                <div id="stats">未読み込み</div>
+                <div id="stats">Not Loaded</div>
                 <div class="toolbar">
-                    <button class="btn" id="expandAll">🔻すべて展開</button>
-                    <button class="btn" id="collapseAll">🔺すべて畳む</button>
+                    <button class="btn" id="expandAll">🔻Expand All</button>
+                    <button class="btn" id="collapseAll">🔺Collapse All</button>
                     <div class="seg" id="metaSource">
-                        <button class="active" data-mode="both">両方</button>
-                        <button data-mode="template">テンプレート</button>
-                        <button data-mode="instance">インスタンス</button>
+                        <button class="active" data-mode="both">Both</button>
+                        <button data-mode="template">Template</button>
+                        <button data-mode="instance">Instance</button>
                     </div>
                 </div>
                 <div id="meta"></div>
@@ -699,34 +699,34 @@
     <div class="modal-overlay" id="uploadModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>ファイルをアップロード</h3>
+                <h3>Upload File</h3>
                 <button class="modal-close">×</button>
             </div>
             <div class="modal-body">
                 <div class="upload-area" id="uploadArea">
                     <div style="font-size:48px; margin-bottom:1rem;">📁</div>
-                    <p>ファイルをドラッグ&ドロップ<br />または<br />クリックして選択</p>
+                    <p>Drag & Drop a file<br />or<br />Click to select</p>
                     <input accept="image/*,.tif,.tiff,.csv,.json,.txt" id="insertionFile" style="display:none;"
                         type="file" />
                 </div>
                 <div id="formatSelector" style="display:none;">
-                    <h4>表示形式を選択</h4>
+                    <h4>Select Display Format</h4>
                     <div class="format-selector">
                         <div class="format-option" data-format="image">
                             <div class="format-icon">🖼️</div>
-                            <div>画像</div>
+                            <div>Image</div>
                         </div>
                         <div class="format-option" data-format="chart">
                             <div class="format-icon">📊</div>
-                            <div>グラフ</div>
+                            <div>Chart</div>
                         </div>
                         <div class="format-option" data-format="table">
                             <div class="format-icon">📋</div>
-                            <div>テーブル</div>
+                            <div>Table</div>
                         </div>
                         <div class="format-option" data-format="text">
                             <div class="format-icon">📝</div>
-                            <div>テキスト</div>
+                            <div>Text</div>
                         </div>
                     </div>
                 </div>
@@ -734,8 +734,8 @@
                     <div id="previewContent"></div>
                 </div>
                 <div style="display:flex; gap:.5rem; justify-content:flex-end; margin-top:1rem;">
-                    <button class="btn" id="cancelBtn">キャンセル</button>
-                    <button class="btn primary" id="applyBtn" style="display:none;">適用</button>
+                    <button class="btn" id="cancelBtn">Cancel</button>
+                    <button class="btn primary" id="applyBtn" style="display:none;">Apply</button>
                 </div>
             </div>
         </div>
@@ -926,17 +926,17 @@
                 modal.innerHTML = `
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3>MaiMLファイルをアップロード</h3>
+                            <h3>Upload MaiML File</h3>
                             <button class="modal-close">&times;</button>
                         </div>
                         <div class="modal-body">
                             <div class="upload-area" id="maimlUploadArea">
                                 <div style="font-size:48px; margin-bottom:1rem;">📁</div>
-                                <p>MaiMLファイルをドラッグ&ドロップ<br />または<br />クリックして選択</p>
+                                <p>Drag & drop MaiML files<br />or<br />click to select</p>
                                 <input accept=".xml,.maiml,.mai,application/xml" id="maimlFileInput" style="display:none;" type="file" />
                             </div>
                             <div style="display:flex; gap:.5rem; justify-content:flex-end; margin-top:1rem;">
-                                <button class="btn" id="maimlCancelBtn">キャンセル</button>
+                                <button class="btn" id="maimlCancelBtn">Cancel</button>
                             </div>
                         </div>
                     </div>
@@ -1002,7 +1002,7 @@
 
                 const documentElement = xmlDoc.getElementsByTagNameNS("http://www.maiml.org/schemas", "document")[0];
                 if (!documentElement) {
-                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">ドキュメント情報が見つかりませんでした</div>';
+                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No Document Metadata found</div>';
                     return;
                 }
 
@@ -1051,7 +1051,7 @@
                 html += "</table>";
 
                 if (rowCount === 0) {
-                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">メタデータが見つかりませんでした</div>';
+                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No metadata found</div>';
                 } else {
                     $documentInfo.innerHTML = html;
                 }
@@ -1151,7 +1151,7 @@
             }
 
             async function renderPreview(file, format) {
-                $previewContent.innerHTML = '<p>読み込み中...</p>';
+                $previewContent.innerHTML = '<p>Loading...</p>';
                 $previewArea.style.display = 'flex';
                 $applyBtn.style.display = 'inline-block';
 
@@ -1171,7 +1171,7 @@
                             break;
                     }
                 } catch (err) {
-                    $previewContent.innerHTML = `<p style="color:var(--warn);">エラー: ${err.message}</p>`;
+                    $previewContent.innerHTML = `<p style="color:var(--warn);">Error: ${err.message}</p>`;
                 }
             }
 
@@ -1180,10 +1180,10 @@
 
                 if (name.endsWith('.tif') || name.endsWith('.tiff')) {
                     try {
-                        $previewContent.innerHTML = '<p>TIFFファイルを読み込んでいます...</p>';
+                        $previewContent.innerHTML = '<p>Loading TIFF file...</p>';
 
                         if (typeof UTIF === 'undefined') {
-                            throw new Error('UTIFライブラリが読み込まれていません');
+                            throw new Error('UTIF library is not loaded');
                         }
 
                         const arrayBuffer = await file.arrayBuffer();
@@ -1191,7 +1191,7 @@
 
                         const ifds = UTIF.decode(uint8Array);
                         if (!ifds || ifds.length === 0) {
-                            throw new Error('TIFFファイルの解析に失敗しました');
+                            throw new Error('Failed to parse TIFF file');
                         }
 
                         const ifd = ifds[0];
@@ -1216,17 +1216,17 @@
                         info.style.marginTop = '0.5rem';
                         info.style.fontSize = '12px';
                         info.style.color = 'var(--muted)';
-                        info.textContent = `画像サイズ: ${ifd.width} × ${ifd.height} px | TIFF形式`;
+                        info.textContent = `Image size: ${ifd.width} × ${ifd.height} px | TIFF format`;
                         $previewContent.appendChild(info);
 
                     } catch (err) {
-                        console.error('TIFF読み込みエラー:', err);
+                        console.error('TIFF loading error:', err);
                         $previewContent.innerHTML = `
         <div style="color:var(--warn); padding:1rem;">
-          <p style="margin:0 0 0.5rem 0;"><strong>TIFFファイルの読み込みに失敗しました</strong></p>
-          <p style="margin:0; font-size:12px;">エラー: ${err.message}</p>
+          <p style="margin:0 0 0.5rem 0;"><strong>Failed to load TIFF file</strong></p>
+          <p style="margin:0; font-size:12px;">Error: ${err.message}</p>
           <p style="margin:0.5rem 0 0 0; font-size:12px; color:var(--muted);">
-            別の画像形式(JPEG, PNG)への変換をお試しください。
+            Please try converting to another image format (JPEG, PNG).
           </p>
         </div>
       `;
@@ -1246,12 +1246,12 @@
                         info.style.marginTop = '0.5rem';
                         info.style.fontSize = '12px';
                         info.style.color = 'var(--muted)';
-                        info.textContent = `画像サイズ: ${img.naturalWidth} × ${img.naturalHeight} px`;
+                        info.textContent = `Image size: ${img.naturalWidth} × ${img.naturalHeight} px`;
                         $previewContent.appendChild(info);
                     };
 
                     img.onerror = () => {
-                        $previewContent.innerHTML = `<p style="color:var(--warn);">画像の読み込みに失敗しました</p>`;
+                        $previewContent.innerHTML = `<p style="color:var(--warn);">Failed to load image</p>`;
                     };
 
                     img.src = url;
@@ -1263,14 +1263,14 @@
                 const parsed = Papa.parse(text, { header: true, dynamicTyping: true });
 
                 if (parsed.errors.length > 0) {
-                    throw new Error('CSV解析エラー');
+                    throw new Error('CSV parsing error');
                 }
 
                 const data = parsed.data.filter(row => Object.values(row).some(v => v !== null && v !== ''));
                 const headers = Object.keys(data[0] || {});
 
                 if (headers.length < 2) {
-                    throw new Error('データが不十分です(最低2列必要)');
+                    throw new Error('Insufficient data (at least 2 columns required)');
                 }
 
                 const canvas = document.createElement('canvas');
@@ -1312,7 +1312,7 @@
                 }
 
                 if (data.length === 0) {
-                    throw new Error('データが空です');
+                    throw new Error('Data is empty');
                 }
 
                 const headers = Object.keys(data[0]);
@@ -1328,7 +1328,7 @@
                 });
 
                 html += '</tbody></table>';
-                if (data.length > 100) html += `<p style="margin-top:0.5rem; color:var(--muted);">(最初の100行のみ表示)</p>`;
+                if (data.length > 100) html += `<p style="margin-top:0.5rem; color:var(--muted);">(Displaying only the first 100 rows)</p>`;
 
                 $previewContent.innerHTML = html;
             }
@@ -1374,7 +1374,7 @@
                         const btn = document.querySelector(`[data-insertion-id="${currentInsertionId}"]`);
                         if (btn) {
                             btn.classList.add('has-file');
-                            btn.textContent = '🔎 ファイル表示';
+                            btn.textContent = '🔎 Show File';
                         }
 
                         closeModal();
@@ -1394,7 +1394,7 @@
 
                 const xml = new DOMParser().parseFromString(text, 'application/xml');
                 if (xml.querySelector('parsererror')) {
-                    alert('XML の解析に失敗しました。');
+                    alert('Failed to parse XML.');
                     return;
                 }
                 parseMaiML(xml);
@@ -1410,7 +1410,7 @@
                 const ac = links.length;
                 const tplCount = templateById.size;
                 const instCount = instances.length;
-                $stats.textContent = `PLACE: ${pc} / program(TRANSITION): ${tc} / ARC: ${ac} / Templates: ${tplCount} / Instances: ${instCount} (保存キー: ${layoutKey()})`;
+                $stats.textContent = `PLACE: ${pc} / program(TRANSITION): ${tc} / ARC: ${ac} / Templates: ${tplCount} / Instances: ${instCount} (Saved Key: ${layoutKey()})`;
             }
 
             function parseMaiML(xml) {
@@ -1810,7 +1810,7 @@
 
             function dagreLayout(nodes, links, dir = 'LR') {
                 if (!window.dagre) {
-                    alert('dagre が読み込まれていません');
+                    alert('dagre library is not loaded.');
                     return;
                 }
                 const g = new dagre.graphlib.Graph();
@@ -1854,12 +1854,12 @@
                     if (metaMode !== 'instance') {
                         const ht = document.createElement('h3');
                         ht.className = 'section-title';
-                        ht.textContent = `テンプレート : ${tpls.length} 件`;
+                        ht.textContent = `Templates: ${tpls.length}`;
                         $meta.appendChild(ht);
                         if (!tpls.length) {
                             const p = document.createElement('p');
                             p.className = 'hint';
-                            p.textContent = 'placeRef で参照するテンプレートは見つかりません。';
+                            p.textContent = 'No templates referenced by placeRef found.';
                             $meta.appendChild(p);
                         }
                         tpls.forEach((tpl, i) => $meta.appendChild(renderTemplateDetails(tpl, i + 1)));
@@ -1867,12 +1867,12 @@
                     if (metaMode !== 'template') {
                         const hi = document.createElement('h3');
                         hi.className = 'section-title';
-                        hi.textContent = `インスタンス : ${insts.length} 件`;
+                        hi.textContent = `Instances: ${insts.length}`;
                         $meta.appendChild(hi);
                         if (!insts.length) {
                             const p = document.createElement('p');
                             p.className = 'hint';
-                            p.textContent = 'この PLACE に対応するテンプレートを参照するインスタンスは見つかりません。';
+                            p.textContent = 'No instances referencing templates corresponding to this PLACE were found.';
                             $meta.appendChild(p);
                         }
                         insts.forEach((ins, i) => $meta.appendChild(renderInstanceDetails(ins, i + 1)));
@@ -1880,13 +1880,13 @@
                 } else if (node.type === 'transition') {
                     const h = document.createElement('h3');
                     h.className = 'section-title';
-                    h.textContent = 'program 直下テンプレート';
+                    h.textContent = 'Templates directly under program';
                     $meta.appendChild(h);
                     const tpls = Array.from(templateById.values()).filter(t => t.programId === node.id);
                     if (!tpls.length) {
                         const p = document.createElement('p');
                         p.className = 'hint';
-                        p.textContent = 'この program 配下にテンプレートは見つかりません。';
+                        p.textContent = 'No templates found under this program.';
                         $meta.appendChild(p);
                     }
                     tpls.forEach((tpl, i) => $meta.appendChild(renderTemplateDetails(tpl, i + 1)));
@@ -1931,7 +1931,7 @@
                 } else {
                     const p = document.createElement('p');
                     p.className = 'hint';
-                    p.textContent = 'property はありません。';
+                    p.textContent = 'No properties available.';
                     det.appendChild(p);
                 }
                 if (tpl.contents.length) {
@@ -1947,7 +1947,7 @@
 
                         const btn = document.createElement('button');
                         btn.className = 'insertion-upload-btn';
-                        btn.textContent = insertionFiles.has(x.id) ? '🔎 ファイル表示' : '📤 アップロード';
+                        btn.textContent = insertionFiles.has(x.id) ? '🔎 Show File' : '📤 Upload';
                         btn.dataset.insertionId = x.id;
                         if (insertionFiles.has(x.id)) btn.classList.add('has-file');
 
@@ -2003,7 +2003,7 @@
                 } else {
                     const p = document.createElement('p');
                     p.className = 'hint';
-                    p.textContent = 'property はありません。';
+                    p.textContent = 'No properties available.';
                     det.appendChild(p);
                 }
                 if (ins.contents.length) {
@@ -2019,7 +2019,7 @@
 
                         const btn = document.createElement('button');
                         btn.className = 'insertion-upload-btn';
-                        btn.textContent = insertionFiles.has(x.id) ? '🔎 ファイル表示' : '📤 アップロード';
+                        btn.textContent = insertionFiles.has(x.id) ? '🔎 Show File' : '📤 Upload';
                         btn.dataset.insertionId = x.id;
                         if (insertionFiles.has(x.id)) btn.classList.add('has-file');
 
@@ -2095,13 +2095,13 @@
                 try {
                     if (stored.format === 'image') {
                         if (stored.fileData.type === 'tiff') {
-                            container.innerHTML = '<p>TIFFファイルを読み込んでいます...</p>';
+                            container.innerHTML = '<p>Loading TIFF file...</p>';
 
                             const uint8Array = new Uint8Array(stored.fileData.data);
                             const ifds = UTIF.decode(uint8Array);
 
                             if (!ifds || ifds.length === 0) {
-                                throw new Error('TIFFファイルの解析に失敗しました');
+                                throw new Error('Failed to parse TIFF file');
                             }
 
                             const ifd = ifds[0];
@@ -2126,7 +2126,7 @@
                             info.style.marginTop = '0.5rem';
                             info.style.fontSize = '12px';
                             info.style.color = 'var(--muted)';
-                            info.textContent = `画像サイズ: ${ifd.width} × ${ifd.height} px | TIFF形式`;
+                            info.textContent = `Image Size: ${ifd.width} × ${ifd.height} px | TIFF format`;
                             container.appendChild(info);
 
                         } else if (stored.fileData.type === 'image') {
@@ -2151,8 +2151,8 @@
                         container.innerHTML = stored.preview;
                     }
                 } catch (err) {
-                    console.error('ファイル表示エラー:', err);
-                    container.innerHTML = `<p style="color:var(--warn);">ファイルの表示に失敗しました: ${err.message}</p>`;
+                    console.error('File display error:', err);
+                    container.innerHTML = `<p style="color:var(--warn);">Failed to display file: ${err.message}</p>`;
                 }
             }
 
@@ -2248,7 +2248,7 @@
                     const yIdx = wrapper.querySelector('.y-select:checked')?.dataset.idx;
 
                     if (xIdx == null || yIdx == null) {
-                        alert('X軸とY軸をそれぞれ1つ選択してください。');
+                        alert('Please select one X axis and one Y axis.');
                         return;
                     }
                     const xRow = conts[xIdx];
@@ -2258,7 +2258,7 @@
                     const yVals = parseValues(yRow.value);
 
                     if (xVals.length !== yVals.length) {
-                        alert(`X軸とY軸のデータ数が一致しません。\nX=${xVals.length}点, Y=${yVals.length}点`);
+                        alert(`The number of data points for X and Y axes do not match.\nX=${xVals.length} points, Y=${yVals.length} points`);
                         return;
                     }
 
