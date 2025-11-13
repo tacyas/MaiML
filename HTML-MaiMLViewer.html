@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="utf-8" />
@@ -746,6 +746,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         ; (function () {
             const svg = d3.select('#stage');
@@ -1127,6 +1128,10 @@
                         selectFormat('chart');
                     } else if (name.endsWith('.json')) {
                         selectFormat('table');
+                    } else if (name.endsWith('.xlsx') || name.endsWith('.xls') ||
+                        type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                        type === 'application/vnd.ms-excel') {
+                        selectFormat('table');
                     } else {
                         selectFormat('text');
                     }
@@ -1222,14 +1227,14 @@
                     } catch (err) {
                         console.error('TIFF loading error:', err);
                         $previewContent.innerHTML = `
-        <div style="color:var(--warn); padding:1rem;">
-          <p style="margin:0 0 0.5rem 0;"><strong>Failed to load TIFF file</strong></p>
-          <p style="margin:0; font-size:12px;">Error: ${err.message}</p>
-          <p style="margin:0.5rem 0 0 0; font-size:12px; color:var(--muted);">
-            Please try converting to another image format (JPEG, PNG).
-          </p>
-        </div>
-      `;
+                            <div style="color:var(--warn); padding:1rem;">
+                            <p style="margin:0 0 0.5rem 0;"><strong>Failed to load TIFF file</strong></p>
+                            <p style="margin:0; font-size:12px;">Error: ${err.message}</p>
+                            <p style="margin:0.5rem 0 0 0; font-size:12px; color:var(--muted);">
+                                Please try converting to another image format (JPEG, PNG).
+                            </p>
+                            </div>
+                        `;
                     }
                 } else {
                     const url = URL.createObjectURL(file);
@@ -1303,7 +1308,32 @@
                 const text = await file.text();
                 let data;
 
-                if (file.name.endsWith('.json')) {
+                const name = file.name.toLowerCase();
+
+                if (name.endsWith('.xlsx') || name.endsWith('.xls') ||
+                    file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                    file.type === 'application/vnd.ms-excel') {
+
+                    // Excelファイルの処理
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+                        // 最初のシートを取得
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+
+                        // JSONに変換
+                        data = XLSX.utils.sheet_to_json(worksheet);
+
+                        if (data.length === 0) {
+                            throw new Error('No data found in Excel file');
+                        }
+                    } catch (err) {
+                        throw new Error(`Failed to read Excel file: ${err.message}`);
+                    }
+
+                } else if (file.name.endsWith('.json')) {
                     data = JSON.parse(text);
                     if (!Array.isArray(data)) data = [data];
                 } else {
@@ -2058,11 +2088,11 @@
           </div>
           <div class="modal-body">
             <div class="preview-area" style="display:flex;" id="storedPreview">
-              <p>Loading...</p>
+              <p>読み込み中...</p>
             </div>
             <div style="margin-top:1rem; display:flex; gap:0.5rem; justify-content:flex-end;">
-              <button class="btn change-btn">change to another file</button>
-              <button class="btn primary close-btn">CLOSE</button>
+              <button class="btn change-btn">別のファイルに変更</button>
+              <button class="btn primary close-btn">閉じる</button>
             </div>
           </div>
         </div>
@@ -2211,8 +2241,8 @@
                     <th>Format</th>
                     <th>Description</th>
                     <th>Values</th>
-                    <th>X axis</th>
-                    <th>Y axis</th>
+                    <th>X軸</th>
+                    <th>Y軸</th>
                 </tr>
                 `;
 
@@ -2287,7 +2317,7 @@
                 modal.innerHTML = `
           <div class="modal-content" style="max-width:70vw; max-height:80vh;">
             <div class="modal-header">
-              <h3>PLOT: ${esc(yLabel)} vs ${esc(xLabel)}</h3>
+              <h3>プロット: ${esc(yLabel)} vs ${esc(xLabel)}</h3>
               <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
