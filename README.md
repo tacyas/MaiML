@@ -1,8 +1,4 @@
 # MaiMLStandaloneViewer
-A standalone HTML viewer for MaiML files — visualize MaiML data directly in your browser with no server or installation required.
-
-
-# maiml-standalone-viewer
 
 **MaiMLファイルをブラウザで可視化できる単一HTML Viewer**  
 サーバー不要・インストール不要で、1つのHTMLファイルだけで動作します。
