@@ -1,0 +1,2363 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>MaiML Viewer</title>
+    <style>
+        :root {
+            --toolbar-h: 56px;
+            --bg: #fffdfc;
+            --surface: #fffdfc;
+            --ink: #222;
+            --muted: #666;
+            --border: #c5c5c5;
+            --accent: #1976d2;
+            --accent2: #2a7;
+            --warn: #e91e63;
+            --table-head: #eef4f9;
+            --table-border: #e0e0e0;
+            --chip: #ffe699;
+            --chip-ink: #222;
+            --code-bg: #efeceb;
+            --code-ink: #25252f;
+            --link: #25252f;
+            --btn-bg: #f5f5f5;
+            --btn-ink: #222;
+            --btn-border: #ccc;
+            --btn-hover-bg: #328bff;
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #25252f;
+            --surface: #2c2c36;
+            --ink: #e8edf2;
+            --muted: #9aa4b2;
+            --border: #4a4f5a;
+            --accent: #5aa3ff;
+            --accent2: #3ddc97;
+            --warn: #ff5c93;
+            --table-head: #4a4a58;
+            --table-border: #5f6677;
+            --chip: #f6d65b;
+            --chip-ink: #222;
+            --code-bg: #15151f;
+            --code-ink: #e8edf2;
+            --link: #5aa3ff;
+            --btn-bg: #51515a;
+            --btn-ink: #e8edf2;
+            --btn-border: #767688;
+            --btn-hover-bg: #5aa3ff;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header#toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            height: var(--toolbar-h);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .5rem;
+            padding: .4rem .6rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            flex-shrink: 0;
+        }
+
+        header #title {
+            font-weight: 600;
+            margin-right: .5rem
+        }
+
+        header .spacer {
+            flex: 1 1 auto
+        }
+
+        header input[type=file] {
+            display: none
+        }
+
+        .btn,
+        .filelabel {
+            background: var(--btn-bg);
+            color: var(--btn-ink);
+            border: 1px solid var(--btn-border);
+            border-radius: 8px;
+            padding: .25rem .5rem;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover,
+        .filelabel:hover {
+            background: var(--btn-hover-bg);
+        }
+
+        .btn.primary {
+            border-color: var(--accent);
+            color: #fff;
+            background: var(--accent)
+        }
+
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: var(--muted);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chk {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .seg {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden
+        }
+
+        .seg button {
+            border: 0;
+            background: var(--surface);
+            color: var(--ink);
+            padding: .25rem .5rem;
+            cursor: pointer;
+            font-size: 12px
+        }
+
+        .seg button.active {
+            background: var(--accent);
+            color: #fff
+        }
+
+        #mainContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #topSection {
+            display: flex;
+            height: 50%;
+            min-height: 200px;
+        }
+
+        #horizontalSeparator {
+            height: 5px;
+            cursor: ns-resize;
+            background: #ccc;
+            flex-shrink: 0;
+        }
+
+        #bottomSection {
+            flex: 1;
+            min-height: 150px;
+            overflow: hidden;
+        }
+
+        #stageWrap {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+
+        svg#stage {
+            width: 100%;
+            height: 100%;
+            background: var(--bg)
+        }
+
+        #grid {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: .35;
+            background-image: linear-gradient(to right, #0000 9px, var(--border) 10px), linear-gradient(to bottom, #0000 9px, var(--border) 10px);
+            background-size: 10px 10px;
+            display: none
+        }
+
+        #verticalSeparator {
+            width: 5px;
+            cursor: ew-resize;
+            background: #ccc;
+        }
+
+        #metadataPanel {
+            width: 400px;
+            min-width: 200px;
+            background: var(--surface);
+            padding: .8rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #document-info {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .8rem;
+            font-size: 15px;
+        }
+
+        #document-info h3 {
+            margin: 0 0 .8rem 0;
+            font-size: 15px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        #document-info table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        #document-info th,
+        #document-info td {
+            border: 1px solid var(--table-border);
+            padding: .4rem .5rem;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        #document-info th {
+            background: var(--table-head);
+            font-weight: 600;
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        #document-info .empty-state {
+            color: var(--muted);
+            font-style: italic;
+            padding: 2rem 1rem;
+            text-align: center;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        #detailsPanel {
+            background: var(--surface);
+            padding: .8rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-top: 1px solid var(--border);
+            height: 100%;
+        }
+
+        #stats {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 0 0 .6rem 0;
+            padding: .5rem .6rem;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--muted);
+            margin: .25rem 0
+        }
+
+        .warn {
+            color: var(--warn)
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin: .35rem 0;
+        }
+
+        table.kv {
+            width: 100%;
+            min-width: 100px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table.kv th,
+        table.kv td {
+            border: 1px solid var(--table-border);
+            padding: .35rem .5rem;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        table.kv th {
+            background: var(--table-head);
+            text-align: left;
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        table.kv td {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nodes .place circle {
+            fill: var(--surface);
+            stroke: var(--accent2);
+            stroke-width: 2
+        }
+
+        .nodes .transition rect {
+            fill: var(--surface);
+            stroke: var(--accent);
+            stroke-width: 2;
+            rx: 4;
+            ry: 4
+        }
+
+        line.link {
+            stroke: var(--muted);
+            stroke-width: 1.5
+        }
+
+        .label {
+            font-size: 12px;
+            fill: var(--ink);
+            pointer-events: none
+        }
+
+        .node.selected :is(circle, rect) {
+            stroke: var(--warn)
+        }
+
+        details.meta {
+            border: 1px solid var(--table-border);
+            border-radius: 8px;
+            padding: .25rem .5rem;
+            margin: .5rem 0;
+            background: var(--surface)
+        }
+
+        details.meta summary {
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        details.meta summary::-webkit-details-marker {
+            display: none
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 14px;
+            padding: .1rem .4rem;
+            border-radius: 999px;
+            background: var(--chip);
+            color: var(--chip-ink);
+        }
+
+        pre.xml-snip {
+            background: var(--code-bg);
+            color: var(--code-ink);
+            padding: .6rem .8rem;
+            border-radius: 8px;
+            overflow: auto;
+            white-space: pre;
+            position: relative;
+        }
+
+        .insertion-container {
+            position: relative;
+            margin: .5rem 0;
+        }
+
+        .insertion-upload-btn {
+            position: absolute;
+            top: .5rem;
+            right: .5rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: .3rem .6rem;
+            cursor: pointer;
+            font-size: 11px;
+            z-index: 1;
+            transition: all 0.2s;
+        }
+
+        .insertion-upload-btn:hover {
+            background: var(--accent2);
+            transform: scale(1.05);
+        }
+
+        .insertion-upload-btn.has-file {
+            background: var(--accent2);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: .5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--ink);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--ink);
+        }
+
+        .modal-body {
+            color: var(--ink);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: var(--bg);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent2);
+            background: var(--bg);
+        }
+
+        .format-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: .8rem;
+            margin: 1rem 0;
+        }
+
+        .format-option {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--surface);
+        }
+
+        .format-option:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .format-option.selected {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .format-icon {
+            font-size: 32px;
+            margin-bottom: .5rem;
+        }
+
+        .preview-area {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 300px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        .preview-area img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .preview-area canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+            margin: .25rem 0 .8rem
+        }
+
+        .toolbar .btn {
+            font-size: 12px;
+            padding: .25rem .5rem
+        }
+
+        .value-cell-scroll {
+            max-height: 3em;
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: normal;
+            word-wrap: break-word;
+            padding: 2px 4px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--surface);
+            color: var(--ink);
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        textarea,
+        select {
+            background: var(--surface);
+            color: var(--ink);
+            border: 1px solid var(--border);
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            accent-color: var(--accent);
+        }
+
+        h3.section-title {
+            margin: 1rem 0 .5rem 0;
+            font-size: 14px;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: .3rem;
+        }
+
+        line.link {
+            stroke: var(--muted);
+            stroke-width: 1.5
+        }
+
+        line.link.ref-link {
+            stroke: var(--muted);
+            stroke-width: 1.2;
+            stroke-dasharray: 5, 3;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+
+<body>
+    <header id="toolbar">
+        <div id="title">MaiML Viewer</div>
+        <button class="btn" id="openFileBtn">📂アップロード…</button>
+        <button class="btn" id="dagreBtn">Dagre レイアウト</button>
+        <button class="btn" id="auto">自動レイアウト</button>
+        <button class="btn" id="reset">位置リセット</button>
+        <label class="chk"><input checked="" id="dragMode" type="checkbox" /> ドラッグ編集</label>
+        <label class="chk"><input id="showGrid" type="checkbox" /> グリッド表示</label>
+        <label class="chk"><input id="snapGrid" type="checkbox" /> グリッドにスナップ</label>
+        <div class="spacer"></div>
+        <button class="btn" id="themeBtn" title="ライト/ダーク切替">🌓 テーマ</button>
+    </header>
+
+    <div id="mainContainer">
+        <div id="topSection">
+            <div id="stageWrap">
+                <div id="grid"></div>
+                <svg id="stage"></svg>
+            </div>
+            <div id="verticalSeparator"></div>
+            <div id="metadataPanel">
+                <div id="document-info">
+                    <h3>📄 Document Metadata</h3>
+                    <div class="empty-state">ファイルを選択するとメタデータが表示されます</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="horizontalSeparator"></div>
+
+        <div id="bottomSection">
+            <div id="detailsPanel">
+                <div id="stats">未読み込み</div>
+                <div class="toolbar">
+                    <button class="btn" id="expandAll">🔻すべて展開</button>
+                    <button class="btn" id="collapseAll">🔺すべて畳む</button>
+                    <div class="seg" id="metaSource">
+                        <button class="active" data-mode="both">両方</button>
+                        <button data-mode="template">テンプレート</button>
+                        <button data-mode="instance">インスタンス</button>
+                    </div>
+                </div>
+                <div id="meta"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>ファイルをアップロード</h3>
+                <button class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <div style="font-size:48px; margin-bottom:1rem;">📁</div>
+                    <p>ファイルをドラッグ&ドロップ<br />または<br />クリックして選択</p>
+                    <input accept="image/*,.tif,.tiff,.csv,.json,.txt" id="insertionFile" style="display:none;"
+                        type="file" />
+                </div>
+                <div id="formatSelector" style="display:none;">
+                    <h4>表示形式を選択</h4>
+                    <div class="format-selector">
+                        <div class="format-option" data-format="image">
+                            <div class="format-icon">🖼️</div>
+                            <div>画像</div>
+                        </div>
+                        <div class="format-option" data-format="chart">
+                            <div class="format-icon">📊</div>
+                            <div>グラフ</div>
+                        </div>
+                        <div class="format-option" data-format="table">
+                            <div class="format-icon">📋</div>
+                            <div>テーブル</div>
+                        </div>
+                        <div class="format-option" data-format="text">
+                            <div class="format-icon">📝</div>
+                            <div>テキスト</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-area" id="previewArea" style="display:none;">
+                    <div id="previewContent"></div>
+                </div>
+                <div style="display:flex; gap:.5rem; justify-content:flex-end; margin-top:1rem;">
+                    <button class="btn" id="cancelBtn">キャンセル</button>
+                    <button class="btn primary" id="applyBtn" style="display:none;">適用</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
+    <script>
+        ; (function () {
+            const svg = d3.select('#stage');
+            const gRoot = svg.append('g');
+            const gLinks = gRoot.append('g').attr('class', 'links');
+            const gNodes = gRoot.append('g').attr('class', 'nodes');
+            svg.call(d3.zoom().scaleExtent([0.25, 6]).on('zoom', (e) => gRoot.attr('transform', e.transform)));
+
+            svg.append('defs').append('marker')
+                .attr('id', 'arrow')
+                .attr('viewBox', '0 -5 10 10')
+                // .attr('refX', 14)
+                .attr('refX', 24)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#888');
+
+            let nodes = [], links = [];
+            let byId = new Map();
+            let simulation = null, netKey = 'default';
+
+            const placeToTemplates = new Map();
+            const templateById = new Map();
+            const templateToInstances = new Map();
+            const instances = [];
+            const insertionFiles = new Map();
+
+            const $grid = document.getElementById('grid');
+            const $stats = document.getElementById('stats');
+            const $meta = document.getElementById('meta');
+            const $seg = document.getElementById('metaSource');
+            const $themeBtn = document.getElementById('themeBtn');
+            const $documentInfo = document.getElementById('document-info');
+            let metaMode = 'both';
+
+            const $modal = document.getElementById('uploadModal');
+            const $uploadArea = document.getElementById('uploadArea');
+            const $insertionFile = document.getElementById('insertionFile');
+            const $formatSelector = document.getElementById('formatSelector');
+            const $previewArea = document.getElementById('previewArea');
+            const $previewContent = document.getElementById('previewContent');
+            const $cancelBtn = document.getElementById('cancelBtn');
+            const $applyBtn = document.getElementById('applyBtn');
+            const $openFileBtn = document.getElementById('openFileBtn');
+            const $fileName = document.getElementById('fileName');
+
+            let currentInsertionId = null;
+            let currentFile = null;
+            let selectedFormat = null;
+
+            // Theme
+            const THEME_KEY = 'maiml-theme';
+            initTheme();
+            $themeBtn.addEventListener('click', () => {
+                const cur = document.documentElement.getAttribute('data-theme');
+                const next = cur === 'dark' ? 'light' : 'dark';
+                applyTheme(next);
+                localStorage.setItem(THEME_KEY, next);
+            });
+
+            function initTheme() {
+                const saved = localStorage.getItem(THEME_KEY);
+                if (saved) { applyTheme(saved); return; }
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                applyTheme(prefersDark ? 'dark' : 'light');
+            }
+
+            function applyTheme(mode) {
+                document.documentElement.setAttribute('data-theme', mode === 'dark' ? 'dark' : 'light');
+            }
+
+            // Resizers
+            setupHorizontalResizer();
+            setupVerticalResizer();
+
+            function setupHorizontalResizer() {
+                const separator = document.getElementById('horizontalSeparator');
+                let isResizing = false;
+
+                separator.addEventListener('mousedown', () => { isResizing = true; });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isResizing) return;
+
+                    const container = document.getElementById('mainContainer');
+                    const topSection = document.getElementById('topSection');
+                    const totalHeight = container.clientHeight;
+                    const minTop = 200;
+                    const minBottom = 150;
+
+                    let topHeight = e.clientY - container.offsetTop - document.getElementById('toolbar').offsetHeight;
+
+                    if (topHeight < minTop) topHeight = minTop;
+                    if (totalHeight - topHeight - separator.offsetHeight < minBottom)
+                        topHeight = totalHeight - minBottom - separator.offsetHeight;
+
+                    topSection.style.height = `${topHeight}px`;
+                    topSection.style.flex = 'none';
+                });
+
+                document.addEventListener('mouseup', () => { isResizing = false; });
+            }
+
+            function setupVerticalResizer() {
+                const separator = document.getElementById('verticalSeparator');
+                let isResizing = false;
+
+                separator.addEventListener('mousedown', () => { isResizing = true; });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isResizing) return;
+
+                    const topSection = document.getElementById('topSection');
+                    const stageWrap = document.getElementById('stageWrap');
+                    const metadataPanel = document.getElementById('metadataPanel');
+                    const totalWidth = topSection.clientWidth;
+                    const minLeft = 300;
+                    const minRight = 200;
+
+                    let leftWidth = e.clientX;
+
+                    if (leftWidth < minLeft) leftWidth = minLeft;
+                    if (totalWidth - leftWidth - separator.offsetWidth < minRight)
+                        leftWidth = totalWidth - minRight - separator.offsetWidth;
+
+                    stageWrap.style.flex = `0 0 ${leftWidth}px`;
+                    metadataPanel.style.width = `${totalWidth - leftWidth - separator.offsetWidth}px`;
+                });
+
+                document.addEventListener('mouseup', () => { isResizing = false; });
+            }
+
+            // Seg control
+            $seg.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'BUTTON') return;
+                metaMode = e.target.dataset.mode;
+                for (const b of $seg.querySelectorAll('button')) b.classList.toggle('active', b === e.target);
+                const sel = gNodes.selectAll('g.node.selected').datum();
+                if (sel) showDetails(sel);
+            });
+
+            document.getElementById('expandAll').addEventListener('click', () => toggleAll(true));
+            document.getElementById('collapseAll').addEventListener('click', () => toggleAll(false));
+
+            function toggleAll(open) {
+                $meta.querySelectorAll('details.meta').forEach(d => d.open = open);
+            }
+
+            document.getElementById('auto').addEventListener('click', runAutoLayout);
+            document.getElementById('dagreBtn').addEventListener('click', () => {
+                dagreLayout(nodes, links, 'LR');
+                ticked();
+                saveLayout();
+            });
+            document.getElementById('reset').addEventListener('click', () => {
+                localStorage.removeItem(layoutKey());
+                nodes.forEach(n => { delete n.fx; delete n.fy; });
+                runAutoLayout(true);
+            });
+            document.getElementById('dragMode').addEventListener('change', (e) => enableDrag(e.target.checked));
+            document.getElementById('snapGrid').addEventListener('change', () => { });
+            document.getElementById('showGrid').addEventListener('change', (e) => {
+                $grid.style.display = e.target.checked ? 'block' : 'none';
+            });
+
+            // MaiMLファイルアップロードモーダルを開く
+            $openFileBtn.addEventListener('click', () => {
+                openMaiMLUploadModal();
+            });
+
+            function openMaiMLUploadModal() {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay show';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>MaiMLファイルをアップロード</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="upload-area" id="maimlUploadArea">
+                                <div style="font-size:48px; margin-bottom:1rem;">📁</div>
+                                <p>MaiMLファイルをドラッグ&ドロップ<br />または<br />クリックして選択</p>
+                                <input accept=".xml,.maiml,.mai,application/xml" id="maimlFileInput" style="display:none;" type="file" />
+                            </div>
+                            <div style="display:flex; gap:.5rem; justify-content:flex-end; margin-top:1rem;">
+                                <button class="btn" id="maimlCancelBtn">キャンセル</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                const uploadArea = modal.querySelector('#maimlUploadArea');
+                const fileInput = modal.querySelector('#maimlFileInput');
+                const closeBtn = modal.querySelector('.modal-close');
+                const cancelBtn = modal.querySelector('#maimlCancelBtn');
+
+                // クリックでファイル選択
+                uploadArea.addEventListener('click', () => fileInput.click());
+
+                // ファイル選択時の処理
+                fileInput.addEventListener('change', async (e) => {
+                    if (e.target.files[0]) {
+                        await handleMaiMLFile(e.target.files[0]);
+                        document.body.removeChild(modal);
+                    }
+                });
+
+                // ドラッグ&ドロップ
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    if (e.dataTransfer.files[0]) {
+                        await handleMaiMLFile(e.dataTransfer.files[0]);
+                        document.body.removeChild(modal);
+                    }
+                });
+
+                // モーダルを閉じる
+                closeBtn.addEventListener('click', () => document.body.removeChild(modal));
+                cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) document.body.removeChild(modal);
+                });
+            }
+
+            async function handleMaiMLFile(file) {
+                netKey = file.name.replace(/\.[^.]+$/, '');
+                // ブラウザのタブにファイル名を表示
+                document.title = `${file.name}`;
+                const text = await file.text();
+                loadXml(text);
+                extractDocumentMetadata(text);
+            }
+
+            function extractDocumentMetadata(xmlText) {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+                const documentElement = xmlDoc.getElementsByTagNameNS("http://www.maiml.org/schemas", "document")[0];
+                if (!documentElement) {
+                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">ドキュメント情報が見つかりませんでした</div>';
+                    return;
+                }
+
+                let html = '<h3>📄 Document Metadata</h3><table>';
+                let rowCount = 0;
+
+                // UUID と Annotation を最初に表示
+                const uuidEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "uuid")[0];
+                const nameEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "name")[0];
+                const descriptionEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "description")[0];
+                const annotationEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "annotation")[0];
+
+                if (uuidEl) {
+                    html += `<tr><th>UUID</th><td colspan="2">${esc(uuidEl.textContent)}</td></tr>`;
+                    rowCount++;
+                }
+                if (nameEl) {
+                    html += `<tr><th>Name</th><td colspan="2">${esc(nameEl.textContent)}</td></tr>`;
+                    rowCount++;
+                }
+                if (descriptionEl) {
+                    html += `<tr><th>Description</th><td colspan="2">${esc(descriptionEl.textContent)}</td></tr>`;
+                    rowCount++;
+                }
+                if (annotationEl) {
+                    html += `<tr><th>Annotation</th><td colspan="2">${esc(annotationEl.textContent)}</td></tr>`;
+                    rowCount++;
+                }
+
+                // ヘッダー行を追加
+                if (rowCount > 0) html += '<tr><th>Element</th><th>Name</th><th>Description</th></tr>';
+
+                const tags = ["creator", "owner", "vendor", "instrument"];
+
+                tags.forEach(tag => {
+                    const elements = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", tag);
+                    for (let el of elements) {
+                        const nameEl = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "name")[0];
+                        const descEl = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "description")[0];
+                        const name = nameEl ? nameEl.textContent : "";
+                        const desc = descEl ? descEl.textContent : "";
+                        html += `<tr><td>${esc(tag)}</td><td>${esc(name)}</td><td>${esc(desc)}</td></tr>`;
+                        rowCount++;
+                    }
+                });
+                html += "</table>";
+
+                if (rowCount === 0) {
+                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">メタデータが見つかりませんでした</div>';
+                } else {
+                    $documentInfo.innerHTML = html;
+                }
+            }
+
+            function openUploadModal(insertionId) {
+                currentInsertionId = insertionId;
+                currentFile = null;
+                selectedFormat = null;
+
+                $formatSelector.style.display = 'none';
+                $previewArea.style.display = 'none';
+                $applyBtn.style.display = 'none';
+
+                if (insertionFiles.has(insertionId)) {
+                    const stored = insertionFiles.get(insertionId);
+                    currentFile = stored.file;
+                    selectedFormat = stored.format;
+                    showFormatSelector();
+                    selectFormat(selectedFormat);
+                }
+
+                $modal.classList.add('show');
+            }
+
+            function closeModal() {
+                $modal.classList.remove('show');
+                currentInsertionId = null;
+                currentFile = null;
+                selectedFormat = null;
+                $previewContent.innerHTML = '';
+            }
+
+            $modal.querySelector('.modal-close').addEventListener('click', closeModal);
+            $cancelBtn.addEventListener('click', closeModal);
+            $modal.addEventListener('click', (e) => {
+                if (e.target === $modal) closeModal();
+            });
+
+            $uploadArea.addEventListener('click', () => $insertionFile.click());
+            $insertionFile.addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFile(e.target.files[0]);
+            });
+
+            $uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                $uploadArea.classList.add('dragover');
+            });
+            $uploadArea.addEventListener('dragleave', () => {
+                $uploadArea.classList.remove('dragover');
+            });
+            $uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                $uploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+            });
+
+            function handleFile(file) {
+                currentFile = file;
+                showFormatSelector();
+            }
+
+            function showFormatSelector() {
+                $formatSelector.style.display = 'block';
+
+                if (currentFile) {
+                    const type = currentFile.type;
+                    const name = currentFile.name.toLowerCase();
+
+                    if (type.startsWith('image/') || name.endsWith('.tif') || name.endsWith('.tiff')) {
+                        selectFormat('image');
+                    } else if (name.endsWith('.csv')) {
+                        selectFormat('chart');
+                    } else if (name.endsWith('.json')) {
+                        selectFormat('table');
+                    } else {
+                        selectFormat('text');
+                    }
+                }
+            }
+
+            document.querySelectorAll('.format-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    selectFormat(opt.dataset.format);
+                });
+            });
+
+            function selectFormat(format) {
+                selectedFormat = format;
+                document.querySelectorAll('.format-option').forEach(opt => {
+                    opt.classList.toggle('selected', opt.dataset.format === format);
+                });
+
+                if (currentFile) {
+                    renderPreview(currentFile, format);
+                }
+            }
+
+            async function renderPreview(file, format) {
+                $previewContent.innerHTML = '<p>読み込み中...</p>';
+                $previewArea.style.display = 'flex';
+                $applyBtn.style.display = 'inline-block';
+
+                try {
+                    switch (format) {
+                        case 'image':
+                            await renderImage(file);
+                            break;
+                        case 'chart':
+                            await renderChart(file);
+                            break;
+                        case 'table':
+                            await renderTable(file);
+                            break;
+                        case 'text':
+                            await renderText(file);
+                            break;
+                    }
+                } catch (err) {
+                    $previewContent.innerHTML = `<p style="color:var(--warn);">エラー: ${err.message}</p>`;
+                }
+            }
+
+            async function renderImage(file) {
+                const name = file.name.toLowerCase();
+
+                if (name.endsWith('.tif') || name.endsWith('.tiff')) {
+                    try {
+                        $previewContent.innerHTML = '<p>TIFFファイルを読み込んでいます...</p>';
+
+                        if (typeof UTIF === 'undefined') {
+                            throw new Error('UTIFライブラリが読み込まれていません');
+                        }
+
+                        const arrayBuffer = await file.arrayBuffer();
+                        const uint8Array = new Uint8Array(arrayBuffer);
+
+                        const ifds = UTIF.decode(uint8Array);
+                        if (!ifds || ifds.length === 0) {
+                            throw new Error('TIFFファイルの解析に失敗しました');
+                        }
+
+                        const ifd = ifds[0];
+                        UTIF.decodeImage(uint8Array, ifd);
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = ifd.width;
+                        canvas.height = ifd.height;
+                        const ctx = canvas.getContext('2d');
+
+                        const rgba = UTIF.toRGBA8(ifd);
+                        const imageData = new ImageData(new Uint8ClampedArray(rgba), ifd.width, ifd.height);
+                        ctx.putImageData(imageData, 0, 0);
+
+                        $previewContent.innerHTML = '';
+                        canvas.style.maxWidth = '100%';
+                        canvas.style.height = 'auto';
+                        canvas.style.borderRadius = '4px';
+                        $previewContent.appendChild(canvas);
+
+                        const info = document.createElement('p');
+                        info.style.marginTop = '0.5rem';
+                        info.style.fontSize = '12px';
+                        info.style.color = 'var(--muted)';
+                        info.textContent = `画像サイズ: ${ifd.width} × ${ifd.height} px | TIFF形式`;
+                        $previewContent.appendChild(info);
+
+                    } catch (err) {
+                        console.error('TIFF読み込みエラー:', err);
+                        $previewContent.innerHTML = `
+        <div style="color:var(--warn); padding:1rem;">
+          <p style="margin:0 0 0.5rem 0;"><strong>TIFFファイルの読み込みに失敗しました</strong></p>
+          <p style="margin:0; font-size:12px;">エラー: ${err.message}</p>
+          <p style="margin:0.5rem 0 0 0; font-size:12px; color:var(--muted);">
+            別の画像形式(JPEG, PNG)への変換をお試しください。
+          </p>
+        </div>
+      `;
+                    }
+                } else {
+                    const url = URL.createObjectURL(file);
+                    const img = new Image();
+
+                    img.onload = () => {
+                        $previewContent.innerHTML = '';
+                        img.style.maxWidth = '100%';
+                        img.style.height = 'auto';
+                        img.style.borderRadius = '4px';
+                        $previewContent.appendChild(img);
+
+                        const info = document.createElement('p');
+                        info.style.marginTop = '0.5rem';
+                        info.style.fontSize = '12px';
+                        info.style.color = 'var(--muted)';
+                        info.textContent = `画像サイズ: ${img.naturalWidth} × ${img.naturalHeight} px`;
+                        $previewContent.appendChild(info);
+                    };
+
+                    img.onerror = () => {
+                        $previewContent.innerHTML = `<p style="color:var(--warn);">画像の読み込みに失敗しました</p>`;
+                    };
+
+                    img.src = url;
+                }
+            }
+
+            async function renderChart(file) {
+                const text = await file.text();
+                const parsed = Papa.parse(text, { header: true, dynamicTyping: true });
+
+                if (parsed.errors.length > 0) {
+                    throw new Error('CSV解析エラー');
+                }
+
+                const data = parsed.data.filter(row => Object.values(row).some(v => v !== null && v !== ''));
+                const headers = Object.keys(data[0] || {});
+
+                if (headers.length < 2) {
+                    throw new Error('データが不十分です(最低2列必要)');
+                }
+
+                const canvas = document.createElement('canvas');
+                $previewContent.innerHTML = '';
+                $previewContent.appendChild(canvas);
+
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(row => row[headers[0]]),
+                        datasets: headers.slice(1).map((header, i) => ({
+                            label: header,
+                            data: data.map(row => row[header]),
+                            borderColor: `hsl(${i * 60}, 70%, 50%)`,
+                            backgroundColor: `hsla(${i * 60}, 70%, 50%, 0.1)`,
+                            tension: 0.3
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true }
+                        }
+                    }
+                });
+            }
+
+            async function renderTable(file) {
+                const text = await file.text();
+                let data;
+
+                if (file.name.endsWith('.json')) {
+                    data = JSON.parse(text);
+                    if (!Array.isArray(data)) data = [data];
+                } else {
+                    const parsed = Papa.parse(text, { header: true });
+                    data = parsed.data.filter(row => Object.values(row).some(v => v !== null && v !== ''));
+                }
+
+                if (data.length === 0) {
+                    throw new Error('データが空です');
+                }
+
+                const headers = Object.keys(data[0]);
+                let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+                html += '<thead><tr>';
+                headers.forEach(h => html += `<th style="border:1px solid var(--border); padding:0.5rem; background:var(--table-head);">${h}</th>`);
+                html += '</tr></thead><tbody>';
+
+                data.slice(0, 100).forEach(row => {
+                    html += '<tr>';
+                    headers.forEach(h => html += `<td style="border:1px solid var(--border); padding:0.5rem;">${row[h] ?? ''}</td>`);
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                if (data.length > 100) html += `<p style="margin-top:0.5rem; color:var(--muted);">(最初の100行のみ表示)</p>`;
+
+                $previewContent.innerHTML = html;
+            }
+
+            async function renderText(file) {
+                const text = await file.text();
+                $previewContent.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${text}</pre>`;
+            }
+
+            $applyBtn.addEventListener('click', () => {
+                if (currentFile && selectedFormat && currentInsertionId) {
+                    const storeFileData = async () => {
+                        if (currentFile.name.toLowerCase().endsWith('.tif') || currentFile.name.toLowerCase().endsWith('.tiff')) {
+                            const arrayBuffer = await currentFile.arrayBuffer();
+                            return {
+                                type: 'tiff',
+                                data: arrayBuffer,
+                                name: currentFile.name
+                            };
+                        } else if (currentFile.type.startsWith('image/')) {
+                            return {
+                                type: 'image',
+                                data: URL.createObjectURL(currentFile),
+                                name: currentFile.name
+                            };
+                        } else {
+                            return {
+                                type: 'file',
+                                data: currentFile,
+                                name: currentFile.name
+                            };
+                        }
+                    };
+
+                    storeFileData().then(fileData => {
+                        insertionFiles.set(currentInsertionId, {
+                            file: currentFile,
+                            fileData: fileData,
+                            format: selectedFormat,
+                            preview: $previewContent.innerHTML
+                        });
+
+                        const btn = document.querySelector(`[data-insertion-id="${currentInsertionId}"]`);
+                        if (btn) {
+                            btn.classList.add('has-file');
+                            btn.textContent = '🔎 ファイル表示';
+                        }
+
+                        closeModal();
+                    });
+                }
+            });
+
+            function loadXml(text) {
+                nodes = [];
+                links = [];
+                byId.clear();
+                placeToTemplates.clear();
+                templateById.clear();
+                templateToInstances.clear();
+                instances.length = 0;
+                insertionFiles.clear();
+
+                const xml = new DOMParser().parseFromString(text, 'application/xml');
+                if (xml.querySelector('parsererror')) {
+                    alert('XML の解析に失敗しました。');
+                    return;
+                }
+                parseMaiML(xml);
+                render();
+                if (!restoreLayout()) runAutoLayout(true);
+                else ticked();
+                updateStats();
+            }
+
+            function updateStats() {
+                const pc = nodes.filter(n => n.type === 'place').length;
+                const tc = nodes.filter(n => n.type === 'transition').length;
+                const ac = links.length;
+                const tplCount = templateById.size;
+                const instCount = instances.length;
+                $stats.textContent = `PLACE: ${pc} / program(TRANSITION): ${tc} / ARC: ${ac} / Templates: ${tplCount} / Instances: ${instCount} (保存キー: ${layoutKey()})`;
+            }
+
+            function parseMaiML(xml) {
+                const all = Array.from(xml.getElementsByTagName('*'));
+                const attr = (el, ...names) => {
+                    for (const n of names) {
+                        if (el.hasAttribute(n)) return el.getAttribute(n);
+                        const lo = n.toLowerCase(),
+                            up = n.toUpperCase();
+                        if (el.hasAttribute(lo)) return el.getAttribute(lo);
+                        if (el.hasAttribute(up)) return el.getAttribute(up);
+                    }
+                };
+                const num = v => {
+                    const x = Number(v);
+                    return Number.isFinite(x) ? x : undefined;
+                };
+                const local = el => el.tagName.split(':').pop().toLowerCase();
+                const getXsiType = (el) => {
+                    let v = el.getAttribute('xsi:type') || el.getAttribute('type');
+                    if (!v && el.getAttributeNS) {
+                        try {
+                            v = el.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type');
+                        } catch (e) { }
+                    }
+                    return v ? v.split(':').pop() : '';
+                };
+                const findAncestor = (el, pred) => {
+                    let p = el.parentElement;
+                    while (p) {
+                        if (pred(p)) return p;
+                        p = p.parentElement;
+                    }
+                    return null;
+                };
+
+                for (const el of all) {
+                    const l = local(el);
+                    if (l === 'place') {
+                        const id = attr(el, 'id', 'ID', 'Id') || genId('p');
+                        const label = attr(el, 'name') || id;
+                        const x = num(attr(el, 'x', 'cx')),
+                            y = num(attr(el, 'y', 'cy'));
+                        const r = num(attr(el, 'r', 'radius')) || 16;
+                        const n = { id, type: 'place', label, r, x, y, rawEl: el };
+                        nodes.push(n);
+                        byId.set(id, n);
+                    } else if (l === 'transition') {
+                        const id = attr(el, 'id', 'ID', 'Id') || genId('t');
+                        const label = attr(el, 'name') || id;
+                        const x = num(attr(el, 'x')),
+                            y = num(attr(el, 'y'));
+                        const w = num(attr(el, 'w', 'width')) || 24,
+                            h = num(attr(el, 'h', 'height')) || 50;
+                        const n = { id, type: 'transition', label, w, h, x, y, rawEl: el };
+                        nodes.push(n);
+                        byId.set(id, n);
+                    }
+                }
+
+                for (const el of all) {
+                    const l = local(el);
+                    if (l.endsWith('arc')) {
+                        let s = attr(el, 'source');
+                        let tg = attr(el, 'target');
+                        if (!s && !tg) {
+                            const pr = attr(el, 'place', 'placeRef', 'placeID');
+                            const tr = attr(el, 'transition', 'transitionRef');
+                            if (pr && tr) {
+                                s = pr;
+                                tg = tr;
+                            }
+                        }
+                        if (s && tg && byId.has(s) && byId.has(tg)) links.push({ source: s, target: tg, rawEl: el });
+                    }
+                }
+
+                for (const el of all) {
+                    const l = local(el);
+                    let role = null;
+                    if (l === 'materialtemplate') role = 'material';
+                    else if (l === 'conditiontemplate') role = 'condition';
+                    else if (l === 'resulttemplate') role = 'result';
+                    if (!role) continue;
+                    const prog = findAncestor(el, a => ['program', 'transition'].includes(local(a)));
+                    const programId = prog ? (prog.getAttribute('id') || prog.getAttribute('ID') || prog.getAttribute('Id')) : null;
+                    const tpl = extractTemplate(el, role, programId);
+                    templateById.set(tpl.id, tpl);
+                    const refs = Array.from(el.getElementsByTagName('*')).filter(e => local(e) === 'placeref');
+                    for (const r of refs) {
+                        const refId = r.getAttribute('ref') || r.getAttribute('Ref') || r.getAttribute('REF');
+                        if (refId) {
+                            tpl.placeRef = tpl.placeRef || refId;
+                            (placeToTemplates.get(refId) || placeToTemplates.set(refId, []).get(refId)).push(tpl);
+                        }
+                    }
+                }
+
+                for (const el of all) {
+                    const l = local(el);
+                    let role = null;
+                    if (l === 'material') role = 'material';
+                    else if (l === 'condition') role = 'condition';
+                    else if (l === 'result') role = 'result';
+                    if (!role) continue;
+                    const tplRef = el.getAttribute('ref') || el.getAttribute('Ref') || el.getAttribute('REF') || el.getAttribute('templateRef') || el.getAttribute('classRef');
+                    const id = el.getAttribute('id') || el.getAttribute('ID') || el.getAttribute('Id') || genId(role[0]);
+
+                    const meta = extractMetaBlock(el);
+                    const rec = {
+                        id,
+                        role,
+                        templateRef: tplRef || null,
+                        properties: meta.properties,
+                        contents: meta.contents,
+                        insertions: meta.insertions,
+                        uuid: meta.uuid,
+                        name: meta.name,
+                        description: meta.description,
+                        annotation: meta.annotation,
+                        instanceRefs: meta.instanceRefs,  // 追加
+                        rawEl: el
+                    };
+                    instances.push(rec);
+                    if (tplRef) {
+                        (templateToInstances.get(tplRef) || templateToInstances.set(tplRef, []).get(tplRef)).push(rec);
+                    }
+                    // テンプレート間の参照リンクを作成
+                    for (const tpl of templateById.values()) {
+                        if (tpl.templateRefs && tpl.templateRefs.length > 0) {
+                            tpl.templateRefs.forEach(refId => {
+                                const refTpl = templateById.get(refId);
+                                if (refTpl && tpl.placeRef && refTpl.placeRef) {
+                                    links.push({
+                                        source: tpl.placeRef,
+                                        target: refTpl.placeRef,
+                                        type: 'templateRef',
+                                        rawEl: null
+                                    });
+                                }
+                            });
+                        }
+                    }
+
+                    // インスタンス間の参照リンクを作成
+                    for (const inst of instances) {
+                        if (inst.instanceRefs && inst.instanceRefs.length > 0) {
+                            inst.instanceRefs.forEach(refId => {
+                                const refInst = instances.find(i => i.id === refId);
+                                if (refInst) {
+                                    // 両方のインスタンスのテンプレートを探す
+                                    const srcTpl = templateById.get(inst.templateRef);
+                                    const tgtTpl = templateById.get(refInst.templateRef);
+                                    if (srcTpl && tgtTpl && srcTpl.placeRef && tgtTpl.placeRef) {
+                                        links.push({
+                                            source: srcTpl.placeRef,
+                                            target: tgtTpl.placeRef,
+                                            type: 'instanceRef',
+                                            rawEl: null
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+
+                function genId(prefix) {
+                    return prefix + '_' + Math.random().toString(36).slice(2, 8);
+                }
+
+                function extractTemplate(tEl, role, programId) {
+                    const id = tEl.getAttribute('id') || tEl.getAttribute('ID') || tEl.getAttribute('Id') || genId(role[0] + 'tpl');
+                    const base = extractMetaBlock(tEl);
+                    return {
+                        id,
+                        tag: tEl.tagName,
+                        role,
+                        programId,
+                        properties: base.properties,
+                        contents: base.contents,
+                        insertions: base.insertions,
+                        uuid: base.uuid,
+                        name: base.name,
+                        description: base.description,
+                        annotation: base.annotation,
+                        templateRefs: base.templateRefs,
+                        placeRef: null
+                    };
+                }
+
+                function extractMetaBlock(root) {
+                    const props = [], conts = [], insertions = [];
+                    let uuid = '', name = '', description = '', annotation = '';
+                    const templateRefs = [];
+                    const instanceRefs = [];
+
+                    const directChildren = Array.from(root.children || []);
+                    for (const child of directChildren) {
+                        const l = local(child);
+
+                        if (l === 'uuid') uuid = child.textContent.trim();
+                        else if (l === 'name') name = child.textContent.trim();
+                        else if (l === 'description') description = child.textContent.trim();
+                        else if (l === 'annotation') annotation = child.textContent.trim();
+                        else if (l === 'templateref') {
+                            const refId = child.getAttribute('ref') || child.getAttribute('Ref') || child.getAttribute('REF');
+                            if (refId) templateRefs.push(refId);
+                        }
+                        else if (l === 'instanceref') {
+                            const refId = child.getAttribute('ref') || child.getAttribute('Ref') || child.getAttribute('REF');
+                            if (refId) instanceRefs.push(refId);
+                        }
+                    }
+
+                    const list = Array.from(root.getElementsByTagName('*'));
+                    for (const e of list) {
+                        const l = local(e);
+                        if (l === 'property') props.push(readProperty(e));
+                        else if (l === 'content') conts.push(readContent(e));
+                        else if (l === 'insertion') insertions.push({ raw: e.outerHTML, id: genId('ins') });
+                    }
+
+                    return { properties: props, contents: conts, insertions, uuid, name, description, annotation, templateRefs, instanceRefs };  // instanceRefs追加
+                }
+
+                function readProperty(el) {
+                    const child = name => {
+                        const c = Array.from(el.children || []).find(x => local(x) === name);
+                        return c ? (c.textContent || '').trim() : '';
+                    };
+                    const key = el.getAttribute('key') || '';
+                    const type = getXsiType(el);
+                    const units = el.getAttribute('units') || '';
+                    const fstring = el.getAttribute('formatString') || '';
+                    const name = child('name');
+                    const description = child('description') || el.getAttribute('description') || el.getAttribute('desc') || '';
+                    const value = child('value') || el.getAttribute('value') || (el.childElementCount ? '' : (el.textContent || '').trim());
+                    return { kind: 'property', key, name, type, description, value, units, fstring };
+                }
+
+                function readContent(el) {
+                    const child = name => {
+                        const c = Array.from(el.children || []).find(x => local(x) === name);
+                        return c ? (c.textContent || '').trim() : '';
+                    };
+                    const key = el.getAttribute('key') || '';
+                    const type = getXsiType(el);
+                    const units = el.getAttribute('units') || '';
+                    const fstring = el.getAttribute('formatString') || '';
+                    const name = child('name') || el.getAttribute('name') || '';
+                    const description = child('description') || el.getAttribute('description') || el.getAttribute('desc') || '';
+                    const value = child('value') || el.getAttribute('value') || (el.childElementCount ? '' : (el.textContent || '').trim());
+                    return { kind: 'content', key, name, type, description, value, units, fstring };
+                }
+            }
+
+            let selLinks, selNodes;
+
+            function render() {
+                // 参照関係を破線で表示
+                selLinks = gLinks.selectAll('line.link').data(links, d => {
+                    const src = d.source.id || d.source;
+                    const tgt = d.target.id || d.target;
+                    const type = d.type || 'arc';
+                    return `${src}->${tgt}-${type}`;
+                });
+                selLinks.exit().remove();
+                selLinks = selLinks.enter()
+                    .append('line')
+                    .attr('class', d => d.type ? `link ref-link` : 'link')
+                    .attr('marker-end', 'url(#arrow)') // arcを矢印で示す
+                    .merge(selLinks);
+
+                selNodes = gNodes.selectAll('g.node').data(nodes, d => d.id);
+                selNodes.exit().remove();
+                const enter = selNodes.enter().append('g').attr('class', d => `node ${d.type}`);
+
+                enter.each(function (d) {
+                    const s = d3.select(this);
+                    if (d.type === 'place') {
+                        const r = d.r || 16;
+                        s.append('circle').attr('r', r);
+                        s.append('text').attr('class', 'label').attr('dy', r + 12).attr('text-anchor', 'middle').text(d.label || d.id);
+                    } else {
+                        d.w = d.w || 24;
+                        d.h = d.h || 50;
+                        s.append('rect').attr('x', -d.w / 2).attr('y', -d.h / 2).attr('width', d.w).attr('height', d.h);
+                        s.append('text').attr('class', 'label').attr('dy', d.h / 2 + 12).attr('text-anchor', 'middle').text(d.label || d.id);
+                    }
+                });
+
+                selNodes = enter.merge(selNodes);
+                selNodes.on('click', (e, d) => {
+                    selNodes.classed('selected', n => n === d);
+                    showDetails(d);
+                });
+                enableDrag(true);
+            }
+
+            function runAutoLayout(resetAlpha = false) {
+                if (simulation) simulation.stop();
+                const W = svg.node().clientWidth,
+                    H = svg.node().clientHeight;
+                nodes.forEach(n => {
+                    if (!Number.isFinite(n.x) || !Number.isFinite(n.y)) {
+                        n.x = W / 2 + (Math.random() - 0.5) * 200;
+                        n.y = H / 2 + (Math.random() - 0.5) * 200;
+                    }
+                });
+                const separateX = d3.forceX(d => d.type === 'place' ? W * 0.4 : W * 0.6).strength(0.08);
+                const collide = d3.forceCollide().radius(d => (d.type === 'place' ? (d.r || 16) : Math.max(d.w || 28, d.h || 18) / 2) + 8);
+                simulation = d3.forceSimulation(nodes)
+                    .force('link', d3.forceLink(links).id(d => d.id).distance(72).strength(0.6))
+                    .force('charge', d3.forceManyBody().strength(-280))
+                    .force('center', d3.forceCenter(W / 2, H / 2))
+                    .force('separate', separateX)
+                    .force('collide', collide)
+                    .alpha(resetAlpha ? 1 : 0.3)
+                    .alphaDecay(0.05)
+                    .on('tick', ticked)
+                    .on('end', () => saveLayout());
+            }
+
+            function ticked() {
+                const W = svg.node().clientWidth,
+                    H = svg.node().clientHeight;
+                selNodes.attr('transform', d => {
+                    const m = 20,
+                        hw = (d.type === 'place') ? (d.r || 16) : (d.w || 28) / 2,
+                        hh = (d.type === 'place') ? (d.r || 16) : (d.h || 18) / 2;
+                    d.x = Math.max(m + hw, Math.min(W - m - hw, d.x));
+                    d.y = Math.max(m + hh, Math.min(H - m - hh, d.y));
+                    return `translate(${d.x},${d.y})`;
+                });
+                selLinks.attr('x1', d => getN(d.source).x).attr('y1', d => getN(d.source).y)
+                    .attr('x2', d => getN(d.target).x).attr('y2', d => getN(d.target).y);
+            }
+
+            function getN(idOrObj) {
+                return (typeof idOrObj === 'object') ? idOrObj : nodes.find(n => n.id === idOrObj);
+            }
+
+            const gridSize = 10;
+
+            function enableDrag(enabled) {
+                selNodes.call(enabled ? d3.drag()
+                    .on('start', (event, d) => {
+                        if (simulation) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    })
+                    .on('drag', (event, d) => {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                        ticked();
+                    })
+                    .on('end', (event, d) => {
+                        if (document.getElementById('snapGrid').checked) {
+                            d.fx = Math.round(d.fx / gridSize) * gridSize;
+                            d.fy = Math.round(d.fy / gridSize) * gridSize;
+                            d.x = d.fx;
+                            d.y = d.fy;
+                        }
+                        if (simulation) simulation.alphaTarget(0);
+                        saveLayout();
+                    }) : null);
+            }
+
+            function layoutKey() {
+                return 'maiml-layout:' + (netKey || 'default');
+            }
+
+            function saveLayout() {
+                const pos = Object.fromEntries(nodes.map(n => [n.id, { x: n.fx ?? n.x, y: n.fy ?? n.y }]));
+                localStorage.setItem(layoutKey(), JSON.stringify(pos));
+            }
+
+            function restoreLayout() {
+                const raw = localStorage.getItem(layoutKey());
+                if (!raw) return false;
+                try {
+                    const pos = JSON.parse(raw);
+                    nodes.forEach(n => {
+                        if (pos[n.id]) {
+                            n.x = pos[n.id].x;
+                            n.y = pos[n.id].y;
+                            n.fx = n.x;
+                            n.fy = n.y;
+                        }
+                    });
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            }
+
+            function dagreLayout(nodes, links, dir = 'LR') {
+                if (!window.dagre) {
+                    alert('dagre が読み込まれていません');
+                    return;
+                }
+                const g = new dagre.graphlib.Graph();
+                g.setGraph({ rankdir: dir, nodesep: 32, ranksep: 80, marginx: 20, marginy: 20 });
+                g.setDefaultEdgeLabel(() => ({}));
+                nodes.forEach(n => {
+                    const w = (n.type === 'place') ? (n.r || 16) * 2 : (n.w || 28);
+                    const h = (n.type === 'place') ? (n.r || 16) * 2 : (n.h || 18);
+                    g.setNode(n.id, { width: w, height: h, label: n.label || n.id });
+                });
+                links.forEach(l => g.setEdge((l.source.id || l.source), (l.target.id || l.target)));
+                dagre.layout(g);
+                g.nodes().forEach(id => {
+                    const p = g.node(id);
+                    const n = nodes.find(x => x.id === id);
+                    n.x = p.x;
+                    n.y = p.y;
+                    n.fx = n.x;
+                    n.fy = n.y;
+                });
+            }
+
+            function showDetails(node) {
+                $meta.innerHTML = '';
+                const basic = document.createElement('table');
+                basic.className = 'kv';
+                basic.innerHTML = `
+        <tr><th>ID</th><td>${esc(node.id)}</td></tr>
+        <tr><th>Type</th><td>${esc(node.type)}</td></tr>`;
+                $meta.appendChild(basic);
+
+                if (node.type === 'place') {
+                    const tpls = placeToTemplates.get(node.id) || [];
+                    const insts = tpls.flatMap(t => templateToInstances.get(t.id) || []);
+
+                    const diag = document.createElement('div');
+                    diag.className = 'hint';
+                    diag.textContent = `templates: ${tpls.length}, instances: ${insts.length}`;
+                    $meta.appendChild(diag);
+
+                    if (metaMode !== 'instance') {
+                        const ht = document.createElement('h3');
+                        ht.className = 'section-title';
+                        ht.textContent = `テンプレート : ${tpls.length} 件`;
+                        $meta.appendChild(ht);
+                        if (!tpls.length) {
+                            const p = document.createElement('p');
+                            p.className = 'hint';
+                            p.textContent = 'placeRef で参照するテンプレートは見つかりません。';
+                            $meta.appendChild(p);
+                        }
+                        tpls.forEach((tpl, i) => $meta.appendChild(renderTemplateDetails(tpl, i + 1)));
+                    }
+                    if (metaMode !== 'template') {
+                        const hi = document.createElement('h3');
+                        hi.className = 'section-title';
+                        hi.textContent = `インスタンス : ${insts.length} 件`;
+                        $meta.appendChild(hi);
+                        if (!insts.length) {
+                            const p = document.createElement('p');
+                            p.className = 'hint';
+                            p.textContent = 'この PLACE に対応するテンプレートを参照するインスタンスは見つかりません。';
+                            $meta.appendChild(p);
+                        }
+                        insts.forEach((ins, i) => $meta.appendChild(renderInstanceDetails(ins, i + 1)));
+                    }
+                } else if (node.type === 'transition') {
+                    const h = document.createElement('h3');
+                    h.className = 'section-title';
+                    h.textContent = 'program 直下テンプレート';
+                    $meta.appendChild(h);
+                    const tpls = Array.from(templateById.values()).filter(t => t.programId === node.id);
+                    if (!tpls.length) {
+                        const p = document.createElement('p');
+                        p.className = 'hint';
+                        p.textContent = 'この program 配下にテンプレートは見つかりません。';
+                        $meta.appendChild(p);
+                    }
+                    tpls.forEach((tpl, i) => $meta.appendChild(renderTemplateDetails(tpl, i + 1)));
+                }
+            }
+
+            function renderTemplateDetails(tpl, idx) {
+                const det = document.createElement('details');
+                det.className = 'meta';
+                const sum = document.createElement('summary');
+                // sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}] – id: ${esc(tpl.id || '')}`;
+                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}] – ${esc(tpl.id || '')}`;
+                det.appendChild(sum);
+
+                if (tpl.programId) {
+                    const p2 = document.createElement('p');
+                    p2.className = 'hint';
+                    p2.textContent = `[program] - ${tpl.programId}`;
+                    det.appendChild(p2);
+                }
+
+                if (tpl.uuid || tpl.name || tpl.description || tpl.annotation || tpl.placeRef || (tpl.templateRefs && tpl.templateRefs.length > 0)) {
+                    const infoTable = document.createElement('table');
+                    infoTable.className = 'kv';
+                    infoTable.style.marginTop = '0.5rem';
+                    let html = '';
+                    if (tpl.uuid) html += `<tr><th>UUID</th><td>${esc(tpl.uuid)}</td></tr>`;
+                    if (tpl.name) html += `<tr><th>Name</th><td>${esc(tpl.name)}</td></tr>`;
+                    if (tpl.description) html += `<tr><th>Description</th><td>${esc(tpl.description)}</td></tr>`;
+                    if (tpl.annotation) html += `<tr><th>Annotation</th><td>${esc(tpl.annotation)}</td></tr>`;
+                    if (tpl.placeRef) html += `<tr><th>Reference Place</th><td>${esc(tpl.placeRef)}</td></tr>`;
+                    if (tpl.templateRefs && tpl.templateRefs.length > 0) {
+                        html += `<tr><th>Reference Template</th><td>${tpl.templateRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
+                    }
+                    infoTable.innerHTML = html;
+                    det.appendChild(infoTable);
+                }
+
+
+                if (tpl.properties.length) {
+                    det.appendChild(renderPropertiesTable(tpl.properties));
+                } else {
+                    const p = document.createElement('p');
+                    p.className = 'hint';
+                    p.textContent = 'property はありません。';
+                    det.appendChild(p);
+                }
+                if (tpl.contents.length) {
+                    det.appendChild(renderContentsTable(tpl.contents));
+                }
+                if ((tpl.insertions || []).length) {
+                    const h = document.createElement('h4');
+                    h.textContent = 'insertion';
+                    det.appendChild(h);
+                    tpl.insertions.forEach(x => {
+                        const container = document.createElement('div');
+                        container.className = 'insertion-container';
+
+                        const btn = document.createElement('button');
+                        btn.className = 'insertion-upload-btn';
+                        btn.textContent = insertionFiles.has(x.id) ? '🔎 ファイル表示' : '📤 アップロード';
+                        btn.dataset.insertionId = x.id;
+                        if (insertionFiles.has(x.id)) btn.classList.add('has-file');
+
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (insertionFiles.has(x.id)) {
+                                showStoredFile(x.id);
+                            } else {
+                                openUploadModal(x.id);
+                            }
+                        });
+
+                        const pre = document.createElement('pre');
+                        pre.className = 'xml-snip';
+                        pre.textContent = x.raw || '';
+
+                        container.appendChild(btn);
+                        container.appendChild(pre);
+                        det.appendChild(container);
+                    });
+                }
+                return det;
+            }
+
+            function renderInstanceDetails(ins, idx) {
+
+                const det = document.createElement('details');
+                det.className = 'meta';
+                const sum = document.createElement('summary');
+                // sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}] – id: ${esc(ins.id || '')}`;
+                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}] – ${esc(ins.id || '')}`;
+                det.appendChild(sum);
+
+                if (ins.uuid || ins.name || ins.description || ins.annotation || ins.templateRef || (ins.instanceRefs && ins.instanceRefs.length > 0)) {
+                    const infoTable = document.createElement('table');
+                    infoTable.className = 'kv';
+                    infoTable.style.marginTop = '0.5rem';
+                    let html = '';
+                    if (ins.uuid) html += `<tr><th>UUID</th><td>${esc(ins.uuid)}</td></tr>`;
+                    if (ins.name) html += `<tr><th>Name</th><td>${esc(ins.name)}</td></tr>`;
+                    if (ins.description) html += `<tr><th>Description</th><td>${esc(ins.description)}</td></tr>`;
+                    if (ins.annotation) html += `<tr><th>Annotation</th><td>${esc(ins.annotation)}</td></tr>`;
+                    if (ins.templateRef) html += `<tr><th>Reference Template</th><td>${esc(ins.templateRef)}</td></tr>`;
+                    if (ins.instanceRefs && ins.instanceRefs.length > 0) {
+                        html += `<tr><th>Reference Instance</th><td>${ins.instanceRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
+                    }
+                    infoTable.innerHTML = html;
+                    det.appendChild(infoTable);
+                }
+
+                if (ins.properties.length) {
+                    det.appendChild(renderPropertiesTable(ins.properties));
+                } else {
+                    const p = document.createElement('p');
+                    p.className = 'hint';
+                    p.textContent = 'property はありません。';
+                    det.appendChild(p);
+                }
+                if (ins.contents.length) {
+                    det.appendChild(renderContentsTable(ins.contents));
+                }
+                if ((ins.insertions || []).length) {
+                    const h = document.createElement('h4');
+                    h.textContent = 'insertion';
+                    det.appendChild(h);
+                    ins.insertions.forEach(x => {
+                        const container = document.createElement('div');
+                        container.className = 'insertion-container';
+
+                        const btn = document.createElement('button');
+                        btn.className = 'insertion-upload-btn';
+                        btn.textContent = insertionFiles.has(x.id) ? '🔎 ファイル表示' : '📤 アップロード';
+                        btn.dataset.insertionId = x.id;
+                        if (insertionFiles.has(x.id)) btn.classList.add('has-file');
+
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (insertionFiles.has(x.id)) {
+                                showStoredFile(x.id);
+                            } else {
+                                openUploadModal(x.id);
+                            }
+                        });
+
+                        const pre = document.createElement('pre');
+                        pre.className = 'xml-snip';
+                        pre.textContent = x.raw || '';
+
+                        container.appendChild(btn);
+                        container.appendChild(pre);
+                        det.appendChild(container);
+                    });
+                }
+                return det;
+            }
+
+            function showStoredFile(insertionId) {
+                const stored = insertionFiles.get(insertionId);
+                if (!stored) return;
+
+                const viewModal = document.createElement('div');
+                viewModal.className = 'modal-overlay show';
+                viewModal.innerHTML = `
+        <div class="modal-content" style="max-width:80vw; max-height:80vh;">
+          <div class="modal-header">
+            <h3>${stored.file.name}</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="preview-area" style="display:flex;" id="storedPreview">
+              <p>読み込み中...</p>
+            </div>
+            <div style="margin-top:1rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+              <button class="btn change-btn">別のファイルに変更</button>
+              <button class="btn primary close-btn">閉じる</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+                document.body.appendChild(viewModal);
+
+                const previewContainer = viewModal.querySelector('#storedPreview');
+                renderStoredFile(stored, previewContainer);
+
+                viewModal.querySelector('.modal-close').addEventListener('click', () => {
+                    document.body.removeChild(viewModal);
+                });
+
+                viewModal.querySelector('.close-btn').addEventListener('click', () => {
+                    document.body.removeChild(viewModal);
+                });
+
+                viewModal.querySelector('.change-btn').addEventListener('click', () => {
+                    document.body.removeChild(viewModal);
+                    openUploadModal(insertionId);
+                });
+
+                viewModal.addEventListener('click', (e) => {
+                    if (e.target === viewModal) document.body.removeChild(viewModal);
+                });
+            }
+
+            async function renderStoredFile(stored, container) {
+                try {
+                    if (stored.format === 'image') {
+                        if (stored.fileData.type === 'tiff') {
+                            container.innerHTML = '<p>TIFFファイルを読み込んでいます...</p>';
+
+                            const uint8Array = new Uint8Array(stored.fileData.data);
+                            const ifds = UTIF.decode(uint8Array);
+
+                            if (!ifds || ifds.length === 0) {
+                                throw new Error('TIFFファイルの解析に失敗しました');
+                            }
+
+                            const ifd = ifds[0];
+                            UTIF.decodeImage(uint8Array, ifd);
+
+                            const canvas = document.createElement('canvas');
+                            canvas.width = ifd.width;
+                            canvas.height = ifd.height;
+                            const ctx = canvas.getContext('2d');
+
+                            const rgba = UTIF.toRGBA8(ifd);
+                            const imageData = new ImageData(new Uint8ClampedArray(rgba), ifd.width, ifd.height);
+                            ctx.putImageData(imageData, 0, 0);
+
+                            container.innerHTML = '';
+                            canvas.style.maxWidth = '100%';
+                            canvas.style.height = 'auto';
+                            canvas.style.borderRadius = '4px';
+                            container.appendChild(canvas);
+
+                            const info = document.createElement('p');
+                            info.style.marginTop = '0.5rem';
+                            info.style.fontSize = '12px';
+                            info.style.color = 'var(--muted)';
+                            info.textContent = `画像サイズ: ${ifd.width} × ${ifd.height} px | TIFF形式`;
+                            container.appendChild(info);
+
+                        } else if (stored.fileData.type === 'image') {
+                            container.innerHTML = '';
+                            const img = document.createElement('img');
+                            img.src = stored.fileData.data;
+                            img.style.maxWidth = '100%';
+                            img.style.height = 'auto';
+                            img.style.borderRadius = '4px';
+                            container.appendChild(img);
+                        }
+                    } else if (stored.format === 'chart') {
+                        await renderChart(stored.fileData.data);
+                        container.innerHTML = $previewContent.innerHTML;
+                    } else if (stored.format === 'table') {
+                        await renderTable(stored.fileData.data);
+                        container.innerHTML = $previewContent.innerHTML;
+                    } else if (stored.format === 'text') {
+                        await renderText(stored.fileData.data);
+                        container.innerHTML = $previewContent.innerHTML;
+                    } else {
+                        container.innerHTML = stored.preview;
+                    }
+                } catch (err) {
+                    console.error('ファイル表示エラー:', err);
+                    container.innerHTML = `<p style="color:var(--warn);">ファイルの表示に失敗しました: ${err.message}</p>`;
+                }
+            }
+
+            function renderPropertiesTable(props) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-wrapper';
+
+                const tbl = document.createElement('table');
+                tbl.className = 'kv';
+                let html = '<tr><th>Key</th><th>Type</th><th>Units</th><th>Format</th><th>Description</th><th>Value</th></tr>';
+
+                props.forEach(pr => {
+                    let values = [];
+                    //if (Array.isArray(pr.value)) values = pr.value;
+                    //else if (typeof pr.value === 'string') values = pr.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
+                    
+                    // keyに"List"が含まれている場合のみカンマ区切りに変換
+                    if (pr.key && pr.key.includes('List')) {
+                        let values = [];
+                        if (Array.isArray(pr.value)) values = pr.value;
+                        else if (typeof pr.value === 'string') values = pr.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
+                        displayValue = values.join(', ');
+                    } else {
+                        // それ以外はそのまま表示
+                        displayValue = Array.isArray(pr.value) ? pr.value.join(' ') : (pr.value || '');
+                    }
+
+                    html += `<tr>
+                        <td>${esc(pr.key || '')}</td>
+                        <td>${esc(pr.type || '')}</td>
+                        <td>${esc(pr.units || '')}</td>
+                        <td>${esc(pr.fstring || '')}</td>
+                        <td>${esc(pr.description || '')}</td>
+                        <td>
+                            <div class="value-cell-scroll">${esc(displayValue)}</div>
+                        </td>
+                    </tr>`;
+                });
+                tbl.innerHTML = html;
+                wrapper.appendChild(tbl);
+                return wrapper;
+            }
+
+            function renderContentsTable(conts) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-wrapper';
+
+                const tbl = document.createElement('table');
+                tbl.className = 'kv';
+
+                let html = `
+                <tr>
+                    <th>Key</th>
+                    <th>Type</th>
+                    <th>Units</th>
+                    <th>Format</th>
+                    <th>Description</th>
+                    <th>Values</th>
+                    <th>X軸</th>
+                    <th>Y軸</th>
+                </tr>
+                `;
+
+                conts.forEach((c, idx) => {
+                    let values = [];
+                    if (Array.isArray(c.value)) values = c.value;
+                    else if (typeof c.value === 'string') values = c.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
+
+                    html += `<tr data-idx="${idx}">
+                    <td>${esc(c.key || '')}</td>
+                    <td>${esc(c.type || '')}</td>
+                    <td>${esc(c.units || '')}</td>
+                    <td>${esc(c.fstring || '')}</td>
+                    <td>${esc(c.description || '')}</td>
+                    <td>
+                        <div class="value-cell-scroll">${esc(values.join(', '))}</div>
+                    </td>
+                    <td style="text-align:center;"><input type="radio" name="xSelect" data-idx="${idx}" class="x-select"></td>
+                    <td style="text-align:center;"><input type="radio" name="ySelect" data-idx="${idx}" class="y-select"></td>
+                    </tr>`;
+                        });
+
+                tbl.innerHTML = html;
+                wrapper.appendChild(tbl);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn primary';
+                btn.textContent = '📈 PLOT';
+                btn.style.marginTop = '0.5rem';
+
+                btn.addEventListener('click', () => {
+                    const xIdx = wrapper.querySelector('.x-select:checked')?.dataset.idx;
+                    const yIdx = wrapper.querySelector('.y-select:checked')?.dataset.idx;
+
+                    if (xIdx == null || yIdx == null) {
+                        alert('X軸とY軸をそれぞれ1つ選択してください。');
+                        return;
+                    }
+                    const xRow = conts[xIdx];
+                    const yRow = conts[yIdx];
+
+                    const xVals = parseValues(xRow.value);
+                    const yVals = parseValues(yRow.value);
+
+                    if (xVals.length !== yVals.length) {
+                        alert(`X軸とY軸のデータ数が一致しません。\nX=${xVals.length}点, Y=${yVals.length}点`);
+                        return;
+                    }
+
+                    showXYPlotModal(xRow.key || 'X', yRow.key || 'Y', xVals, yVals);
+                });
+
+                const container = document.createElement('div');
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '0.5rem';
+
+                container.appendChild(wrapper);
+
+                const btnWrapper = document.createElement('div');
+                btnWrapper.style.display = 'flex';
+                btnWrapper.style.justifyContent = 'flex-end';
+                btnWrapper.appendChild(btn);
+
+                container.appendChild(btnWrapper);
+                return container;
+            }
+
+            function showXYPlotModal(xLabel, yLabel, xVals, yVals) {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay show';
+                modal.innerHTML = `
+          <div class="modal-content" style="max-width:70vw; max-height:80vh;">
+            <div class="modal-header">
+              <h3>プロット: ${esc(yLabel)} vs ${esc(xLabel)}</h3>
+              <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <canvas id="xyPlotCanvas" style="width:100%; height:400px;"></canvas>
+            </div>
+          </div>
+        `;
+
+                document.body.appendChild(modal);
+                modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) modal.remove();
+                });
+
+                const ctx = modal.querySelector('#xyPlotCanvas');
+                const dataPoints = xVals.map((x, i) => ({ x: x, y: yVals[i] }));
+
+                new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: `${yLabel} vs ${xLabel}`,
+                            data: dataPoints,
+                            borderColor: 'rgba(25,118,210,1)',
+                            backgroundColor: 'rgba(25,118,210,0.2)',
+                            showLine: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: xLabel } },
+                            y: { title: { display: true, text: yLabel } }
+                        }
+                    }
+                });
+            }
+
+            function parseValues(val) {
+                if (Array.isArray(val)) return val.map(v => parseFloat(v)).filter(v => !isNaN(v));
+                if (typeof val === 'string')
+                    return val.split(/[\s,]+/).map(v => parseFloat(v)).filter(v => !isNaN(v));
+                return [];
+            }
+
+            function esc(s) {
+                return (s == null ? '' : (s + '')).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
+            }
+
+            ;
+            (function demo() {
+                nodes = [
+                    { id: 'place_Material', type: 'place', label: 'MaterialPlace', r: 18 },
+                    { id: 'place_Condition', type: 'place', label: 'ConditionPlace', r: 18 },
+                    { id: 'transition1', type: 'transition', label: 'measurementTransition', w: 24, h: 50 },
+                    { id: 'place_Result', type: 'place', label: 'ResultPlace', r: 18 }
+                ];
+                links = [
+                    { source: 'place_Material', target: 'transition1' },
+                    { source: 'place_Condition', target: 'transition1' },
+                    { source: 'transition1', target: 'place_Result' }
+                ];
+                render();
+                runAutoLayout(true);
+                updateStats();
+            })();
+
+        })();
+    </script>
+</body>
+
+</html>
