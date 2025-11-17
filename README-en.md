@@ -14,6 +14,7 @@ Simply open the HTML file and drag & drop a `.maiml` file to explore its structu
 - View **template and instance sections** of MaiML data  
 - Supports **external data visualization**  
 - Cross-platform: works on **macOS, Windows, and Linux**
+- **Summary feature** using the Gemini API
 
 ---
 
@@ -23,7 +24,8 @@ Simply open the HTML file and drag & drop a `.maiml` file to explore its structu
 2. Open it in your web browser (Chrome, Safari, Edge, etc.)  
 3. Drag & drop a `.maiml` file  
 4. Upload external files for visualization  
-5. Visualize **2D content elements** as graphs
+5. Visualize 2D content elements as graphs
+6. Display summaries of the material/condition/result contents
 
 > 💡 No internet connection or server is required.
 
