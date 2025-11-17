@@ -645,7 +645,51 @@
             stroke-dasharray: 5, 3;
             opacity: 0.4;
         }
-    </style>
+
+/* AI Summary Modal Specific Styles: Layout Improvement */
+#aiSummaryModal .modal-content {
+    width: 650px; /* ダイアログの幅を少し広げて見やすく */
+    max-width: 90vw;
+    height: 70vh; /* ダイアログの高さを画面の70%に固定 */
+    max-height: 90vh;
+    overflow: hidden; /* 親でスクロールさせない */
+    display: flex; /* 子要素のレイアウト制御のため */
+    flex-direction: column;
+}
+
+#aiSummaryModal .modal-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* modal-contentの残りのスペースを占める */
+    min-height: 0;
+    padding-top: 0.5rem;
+}
+
+#aiSummaryTarget {
+    max-height: 150px !important; /* 入力エリアの最大高さを固定 */
+    overflow-y: auto !important;
+    flex-shrink: 0; /* 縮まないようにする */
+}
+
+.ai-summary-result-container {
+    flex-grow: 1; /* 残りの高さをすべて取る */
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5rem;
+}
+
+#aiSummaryResult {
+    flex-grow: 1;
+    overflow-y: auto; /* 結果エリアでのみスクロール可能にする */
+    padding: .5rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    border-radius: 4px;
+    white-space: pre-wrap; /* Markdown形式の改行を保持 */
+}
+
+</style>
 </head>
 
 <body>
@@ -1931,6 +1975,34 @@
                 sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}] – ${esc(tpl.id || '')}`;
                 det.appendChild(sum);
 
+    // AI summary button
+    (function(){
+        const aiBtn = document.createElement('button');
+        aiBtn.textContent = 'AI要約';
+        aiBtn.className = 'btn';
+        aiBtn.style.marginLeft = '8px';
+        aiBtn.style.fontSize = '11px';
+        aiBtn.addEventListener('click', () => {
+            const obj = tpl;
+            let parts = [];
+            ['id','role','name','description','annotation'].forEach(k=>{
+                if(obj[k]) parts.push(k.toUpperCase()+": "+obj[k]);
+            });
+            if(obj.properties) {
+                parts.push("Properties:");
+                obj.properties.forEach(p=>parts.push((p.key||p.name)+": "+(p.value||p.description||"")));
+            }
+            if(obj.contents) {
+                parts.push("Contents:");
+                obj.contents.forEach(c=>parts.push((c.key||c.name)+": "+(c.value||c.description||"")));
+            }
+            const text = parts.join("\n");
+            window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI要約機能が初期化されていません");
+        });
+        sum.appendChild(aiBtn);
+    })();
+
+
                 if (tpl.programId) {
                     const p2 = document.createElement('p');
                     p2.className = 'hint';
@@ -2010,6 +2082,34 @@
                 // sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}] – id: ${esc(ins.id || '')}`;
                 sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}] – ${esc(ins.id || '')}`;
                 det.appendChild(sum);
+
+    // AI summary button
+    (function(){
+        const aiBtn = document.createElement('button');
+        aiBtn.textContent = 'AI要約';
+        aiBtn.className = 'btn';
+        aiBtn.style.marginLeft = '8px';
+        aiBtn.style.fontSize = '11px';
+        aiBtn.addEventListener('click', () => {
+            const obj = ins;
+            let parts = [];
+            ['id','role','name','description','annotation'].forEach(k=>{
+                if(obj[k]) parts.push(k.toUpperCase()+": "+obj[k]);
+            });
+            if(obj.properties) {
+                parts.push("Properties:");
+                obj.properties.forEach(p=>parts.push((p.key||p.name)+": "+(p.value||p.description||"")));
+            }
+            if(obj.contents) {
+                parts.push("Contents:");
+                obj.contents.forEach(c=>parts.push((c.key||c.name)+": "+(c.value||c.description||"")));
+            }
+            const text = parts.join("\n");
+            window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI要約機能が初期化されていません");
+        });
+        sum.appendChild(aiBtn);
+    })();
+
 
                 if (ins.uuid || ins.name || ins.description || ins.annotation || ins.templateRef || (ins.instanceRefs && ins.instanceRefs.length > 0)) {
                     const infoTable = document.createElement('table');
@@ -2388,6 +2488,162 @@
 
         })();
     </script>
+
+<!-- AI Summary Modal -->
+<!-- <div class="modal-overlay" id="aiSummaryModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>AI 要約</h3>
+      <button class="modal-close" id="aiSummaryClose">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:8px;">
+        <label>要約レベル：
+          <select id="summaryLevel">
+            <option value="3" selected>3文（短め）</option>
+            <option value="5">5文（標準）</option>
+            <option value="10">10文（長め）</option>
+          </select>
+        </label>
+      </div>
+      <div id="aiSummaryTarget" style="display:none; white-space:pre-wrap; font-size:13px; color:var(--muted); margin-bottom:8px;"></div>
+      <div id="aiSummaryResult" style="white-space:pre-wrap; font-size:14px;"></div>
+    </div>
+  </div>
+</div> -->
+<div class="modal-overlay" id="aiSummaryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>AI Summary</h3>
+                <button class="modal-close" id="aiSummaryClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:0.5rem; display:flex; align-items:center; gap:1rem;">
+                    要約レベル:
+                    <select id="summaryLevel">
+                        <option value="3">3文程度</option>
+                        <option value="5" selected>5文程度</option>
+                        <option value="10">10文程度</option>
+                    </select>
+                </div>
+                <h4>入力テキスト（要約対象）</h4>
+                <pre id="aiSummaryTarget" style="max-height:100px; overflow-y:auto; padding:.5rem; border:1px solid var(--border); background:var(--bg); border-radius:4px;"></pre>
+                
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:0.5rem;">
+                    <h4>AI要約結果</h4>
+                    <button class="btn" id="copySummaryBtn" style="font-size:12px; padding:.25rem .5rem;">📋 コピー</button>
+                </div>
+                <div class="ai-summary-result-container">
+                    <div id="aiSummaryResult">要約生成中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+// Gemini key button
+(function(){
+  const themeBtn = document.getElementById("themeBtn");
+  if(!themeBtn) return;
+  const gemBtn = document.createElement('button');
+  gemBtn.className = 'btn';
+  gemBtn.id = 'geminiKeyBtn';
+  gemBtn.textContent = '🔑 Gemini API Key';
+  themeBtn.before(gemBtn);
+  function refresh(){ gemBtn.style.background = localStorage.getItem("geminiApiKey")?'#3c6':''; }
+  refresh();
+  gemBtn.addEventListener('click', ()=>{
+    const key = prompt("Google Gemini API Key を入力してください\nhttps://aistudio.google.com/", localStorage.getItem("geminiApiKey")||"");
+    if(key===null) return;
+    if(key.trim()===""){ localStorage.removeItem("geminiApiKey"); }
+    else{ localStorage.setItem("geminiApiKey", key.trim()); }
+    refresh();
+  });
+})();
+</script>
+
+<script>
+// summary dialog
+(function(){
+  const modal=document.getElementById("aiSummaryModal");
+  const closeBtn=document.getElementById("aiSummaryClose");
+  const targetDiv=document.getElementById("aiSummaryTarget");
+  const resultDiv=document.getElementById("aiSummaryResult");
+  const levelSel=document.getElementById("summaryLevel");
+  const copyBtn = document.getElementById("copySummaryBtn"); // <-- コピーボタンの要素を追加
+
+  window.openAISummaryDialog=function(text){
+    modal.classList.add("show");
+    targetDiv.style.display="block";
+    targetDiv.textContent=text;
+    resultDiv.textContent="要約生成中...";
+    // コピーボタンのテキストを初期化
+    copyBtn.textContent = '📋 コピー';
+    runGemini(text);
+  };
+  closeBtn.addEventListener("click",()=>modal.classList.remove("show"));
+  // modal.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("show"); }); // <-- 削除: 誤操作によるクローズを防止
+
+  // コピー機能のイベントリスナーを追加
+  copyBtn.addEventListener("click", async () => {
+      const textToCopy = resultDiv.textContent;
+      if (!textToCopy || textToCopy === '要約生成中...' || textToCopy === 'API Key 未設定' || textToCopy.startsWith('ネットワークエラー')) {
+          return;
+      }
+      try {
+          await navigator.clipboard.writeText(textToCopy);
+          copyBtn.textContent = '✅ コピーしました！';
+          setTimeout(() => copyBtn.textContent = '📋 コピー', 2000);
+      } catch (err) {
+          console.error('コピーに失敗しました:', err);
+          copyBtn.textContent = '❌ コピー失敗';
+          setTimeout(() => copyBtn.textContent = '📋 コピー', 2000);
+          alert('クリップボードへの書き込みに失敗しました。ブラウザの権限を確認してください。');
+      }
+  });
+
+
+    async function runGemini(text) {
+        const key = localStorage.getItem("geminiApiKey");
+        if (!key) { resultDiv.textContent = "API Key 未設定"; return; }
+
+        // 🌍 ブラウザの言語設定を取得
+        const browserLang = navigator.language || navigator.userLanguage; // 'ja', 'en-US', etc.
+        const langCode = browserLang.split('-')[0]; // 'ja', 'en' など、主要な言語コードを取得
+
+        const lvl = levelSel.value;
+
+        // 📝 言語コードに応じてプロンプトを動的に生成
+        let prompt;
+        if (langCode === 'ja') {
+            prompt = `以下を${lvl}文で日本語要約し、表などを用いたMarkdown形式のレポートを生成：\n${text}`;
+        } else if (langCode === 'en') {
+            // 英語ユーザー向けにプロンプトも英語にする
+            prompt = `Summarize the following text in ${lvl} sentences and generate a Markdown report using tables if appropriate. The summary must be **in English**:\n${text}`;
+        } else {
+            // それ以外の言語の場合、モデルにその言語での回答を依頼する
+            prompt = `Summarize the following text in ${lvl} sentences and generate a Markdown report using tables if appropriate. Please respond in the language corresponding to the code **${langCode}**:\n${text}`;
+        }
+
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`;
+        const body = { contents: [{ parts: [{ text: prompt }] }] };
+
+        try {
+            const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+            const data = await res.json();
+
+            if (data.error) {
+                resultDiv.textContent = `APIエラー: ${data.error.message}`;
+            } else {
+                // テキストとMarkdownをそのまま表示
+                resultDiv.textContent = data.candidates[0].content.parts[0].text.trim();
+            }
+        } catch (e) {
+            resultDiv.textContent = `<p style="color:var(--warn);">ネットワークエラーまたはAPI呼び出しの失敗: ${esc(e.message)}</p>`;
+        }
+    }
+})();
+</script>
+
 </body>
 
 </html>
