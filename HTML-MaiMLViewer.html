@@ -646,50 +646,163 @@
             opacity: 0.4;
         }
 
-/* AI Summary Modal Specific Styles: Layout Improvement */
-#aiSummaryModal .modal-content {
-    width: 650px; /* ダイアログの幅を少し広げて見やすく */
-    max-width: 90vw;
-    height: 70vh; /* ダイアログの高さを画面の70%に固定 */
-    max-height: 90vh;
-    overflow: hidden; /* 親でスクロールさせない */
-    display: flex; /* 子要素のレイアウト制御のため */
-    flex-direction: column;
-}
+        #aiSummaryModal .modal-content {
+            width: 650px;
+            max-width: 90vw;
+            height: 70vh;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-#aiSummaryModal .modal-body {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* modal-contentの残りのスペースを占める */
-    min-height: 0;
-    padding-top: 0.5rem;
-}
+        #aiSummaryModal .modal-body {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+            padding-top: 0.5rem;
+        }
 
-#aiSummaryTarget {
-    max-height: 150px !important; /* 入力エリアの最大高さを固定 */
-    overflow-y: auto !important;
-    flex-shrink: 0; /* 縮まないようにする */
-}
+        #aiSummaryTarget {
+            max-height: 150px !important;
+            overflow-y: auto !important;
+            flex-shrink: 0;
+        }
 
-.ai-summary-result-container {
-    flex-grow: 1; /* 残りの高さをすべて取る */
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 0.5rem;
-}
+        .ai-summary-result-container {
+            flex-grow: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0.5rem;
+        }
 
-#aiSummaryResult {
-    flex-grow: 1;
-    overflow-y: auto; /* 結果エリアでのみスクロール可能にする */
-    padding: .5rem;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    border-radius: 4px;
-    white-space: pre-wrap; /* Markdown形式の改行を保持 */
-}
+        #aiSummaryResult {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: .5rem;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
 
-</style>
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: var(--accent);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.3rem;
+        }
+
+        .markdown-content h1 { font-size: 1.5em; }
+        .markdown-content h2 { font-size: 1.3em; }
+        .markdown-content h3 { font-size: 1.1em; }
+
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5rem 0;
+            font-size: 13px;
+        }
+
+        .markdown-content table th,
+        .markdown-content table td {
+            border: 1px solid var(--table-border);
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+        }
+
+        .markdown-content table th {
+            background: var(--table-head);
+            font-weight: 600;
+        }
+
+        .markdown-content p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+
+        .markdown-content ul, .markdown-content ol {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .markdown-content code {
+            background: var(--code-bg);
+            color: var(--code-ink);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .markdown-content pre {
+            background: var(--code-bg);
+            color: var(--code-ink);
+            padding: 0.8rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        .markdown-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .markdown-content strong {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .markdown-content em {
+            font-style: italic;
+            color: var(--muted);
+        }
+
+        .markdown-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 1rem;
+            margin: 0.5rem 0;
+            color: var(--muted);
+        }
+
+        .ai-disclaimer {
+            margin-top: 1.5rem;
+            padding: 0.8rem;
+            background: var(--bg);
+            border-left: 3px solid var(--warn);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .ai-disclaimer::before {
+            content: "⚠️ ";
+            font-style: normal;
+        }
+
+        .prompt-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+            align-items: center;
+        }
+
+        .prompt-selector label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .prompt-selector select {
+            flex: 1;
+            padding: 0.4rem;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+    </style>
 </head>
 
 <body>
@@ -703,7 +816,7 @@
         <label class="chk"><input id="showGrid" type="checkbox" /> Show Grid</label>
         <label class="chk"><input id="snapGrid" type="checkbox" /> Snap to Grid</label>
         <div class="spacer"></div>
-        <button class="btn" id="themeBtn" title="Light/Dark Toggle">🌓 Theme</button>
+        <button class="btn" id="themeBtn" title="Light/Dark Toggle">🌙 Theme</button>
     </header>
 
     <div id="mainContainer">
@@ -785,12 +898,44 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="aiSummaryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>AI Summary</h3>
+                <button class="modal-close" id="aiSummaryClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="prompt-selector">
+                    <label>Summary Type:</label>
+                    <select id="promptTemplate">
+                        <option value="quick" selected>Quick Summary</option>
+                        <option value="standard">Standard Summary</option>
+                        <option value="detailed">Detailed Analysis</option>
+                        <!-- <option value="technical">Technical Report</option> -->
+                    </select>
+                </div>
+
+                <h4>Input Text (to be summarized)</h4>
+                <pre id="aiSummaryTarget" style="max-height:100px; overflow-y:auto; padding:.5rem; border:1px solid var(--border); background:var(--bg); border-radius:4px;"></pre>
+                
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:0.5rem;">
+                    <h4>AI Summary Result</h4>
+                    <button class="btn" id="copySummaryBtn" style="font-size:12px; padding:.25rem .5rem;">📋 Copy</button>
+                </div>
+                <div class="ai-summary-result-container">
+                    <div id="aiSummaryResult" class="markdown-content">Generating summary...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script>
         ; (function () {
             const svg = d3.select('#stage');
@@ -802,7 +947,6 @@
             svg.append('defs').append('marker')
                 .attr('id', 'arrow')
                 .attr('viewBox', '0 -5 10 10')
-                // .attr('refX', 14)
                 .attr('refX', 24)
                 .attr('refY', 0)
                 .attr('markerWidth', 6)
@@ -839,7 +983,6 @@
             const $cancelBtn = document.getElementById('cancelBtn');
             const $applyBtn = document.getElementById('applyBtn');
             const $openFileBtn = document.getElementById('openFileBtn');
-            const $fileName = document.getElementById('fileName');
 
             let currentInsertionId = null;
             let currentFile = null;
@@ -960,7 +1103,6 @@
                 $grid.style.display = e.target.checked ? 'block' : 'none';
             });
 
-            // MaiMLファイルアップロードモーダルを開く
             $openFileBtn.addEventListener('click', () => {
                 openMaiMLUploadModal();
             });
@@ -994,10 +1136,8 @@
                 const closeBtn = modal.querySelector('.modal-close');
                 const cancelBtn = modal.querySelector('#maimlCancelBtn');
 
-                // クリックでファイル選択
                 uploadArea.addEventListener('click', () => fileInput.click());
 
-                // ファイル選択時の処理
                 fileInput.addEventListener('change', async (e) => {
                     if (e.target.files[0]) {
                         await handleMaiMLFile(e.target.files[0]);
@@ -1005,7 +1145,6 @@
                     }
                 });
 
-                // ドラッグ&ドロップ
                 uploadArea.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     uploadArea.classList.add('dragover');
@@ -1024,7 +1163,6 @@
                     }
                 });
 
-                // モーダルを閉じる
                 closeBtn.addEventListener('click', () => document.body.removeChild(modal));
                 cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
                 modal.addEventListener('click', (e) => {
@@ -1034,7 +1172,6 @@
 
             async function handleMaiMLFile(file) {
                 netKey = file.name.replace(/\.[^.]+$/, '');
-                // ブラウザのタブにファイル名を表示
                 document.title = `${file.name}`;
                 const text = await file.text();
                 loadXml(text);
@@ -1054,7 +1191,6 @@
                 let html = '<h3>📄 Document Metadata</h3><table>';
                 let rowCount = 0;
 
-                // UUID と Annotation を最初に表示
                 const uuidEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "uuid")[0];
                 const nameEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "name")[0];
                 const descriptionEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "description")[0];
@@ -1077,7 +1213,6 @@
                     rowCount++;
                 }
 
-                // ヘッダー行を追加
                 if (rowCount > 0) html += '<tr><th>Element</th><th>Name</th><th>Description</th></tr>';
 
                 const tags = ["creator", "owner", "vendor", "instrument"];
@@ -1358,16 +1493,13 @@
                     file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
                     file.type === 'application/vnd.ms-excel') {
 
-                    // Excelファイルの処理
                     try {
                         const arrayBuffer = await file.arrayBuffer();
                         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
-                        // 最初のシートを取得
                         const firstSheetName = workbook.SheetNames[0];
                         const worksheet = workbook.Sheets[firstSheetName];
 
-                        // JSONに変換
                         data = XLSX.utils.sheet_to_json(worksheet);
 
                         if (data.length === 0) {
@@ -1605,14 +1737,13 @@
                         name: meta.name,
                         description: meta.description,
                         annotation: meta.annotation,
-                        instanceRefs: meta.instanceRefs,  // 追加
+                        instanceRefs: meta.instanceRefs,
                         rawEl: el
                     };
                     instances.push(rec);
                     if (tplRef) {
                         (templateToInstances.get(tplRef) || templateToInstances.set(tplRef, []).get(tplRef)).push(rec);
                     }
-                    // テンプレート間の参照リンクを作成
                     for (const tpl of templateById.values()) {
                         if (tpl.templateRefs && tpl.templateRefs.length > 0) {
                             tpl.templateRefs.forEach(refId => {
@@ -1629,13 +1760,11 @@
                         }
                     }
 
-                    // インスタンス間の参照リンクを作成
                     for (const inst of instances) {
                         if (inst.instanceRefs && inst.instanceRefs.length > 0) {
                             inst.instanceRefs.forEach(refId => {
                                 const refInst = instances.find(i => i.id === refId);
                                 if (refInst) {
-                                    // 両方のインスタンスのテンプレートを探す
                                     const srcTpl = templateById.get(inst.templateRef);
                                     const tgtTpl = templateById.get(refInst.templateRef);
                                     if (srcTpl && tgtTpl && srcTpl.placeRef && tgtTpl.placeRef) {
@@ -1708,7 +1837,7 @@
                         else if (l === 'insertion') insertions.push({ raw: e.outerHTML, id: genId('ins') });
                     }
 
-                    return { properties: props, contents: conts, insertions, uuid, name, description, annotation, templateRefs, instanceRefs };  // instanceRefs追加
+                    return { properties: props, contents: conts, insertions, uuid, name, description, annotation, templateRefs, instanceRefs };
                 }
 
                 function readProperty(el) {
@@ -1745,7 +1874,6 @@
             let selLinks, selNodes;
 
             function render() {
-                // 参照関係を破線で表示
                 selLinks = gLinks.selectAll('line.link').data(links, d => {
                     const src = d.source.id || d.source;
                     const tgt = d.target.id || d.target;
@@ -1756,7 +1884,7 @@
                 selLinks = selLinks.enter()
                     .append('line')
                     .attr('class', d => d.type ? `link ref-link` : 'link')
-                    .attr('marker-end', 'url(#arrow)') // arcを矢印で示す
+                    .attr('marker-end', 'url(#arrow)')
                     .merge(selLinks);
 
                 selNodes = gNodes.selectAll('g.node').data(nodes, d => d.id);
@@ -1971,37 +2099,34 @@
                 const det = document.createElement('details');
                 det.className = 'meta';
                 const sum = document.createElement('summary');
-                // sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}] – id: ${esc(tpl.id || '')}`;
                 sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}] – ${esc(tpl.id || '')}`;
                 det.appendChild(sum);
 
-    // AI summary button
-    (function(){
-        const aiBtn = document.createElement('button');
-        aiBtn.textContent = 'AI Summary';
-        aiBtn.className = 'btn';
-        aiBtn.style.marginLeft = '8px';
-        aiBtn.style.fontSize = '11px';
-        aiBtn.addEventListener('click', () => {
-            const obj = tpl;
-            let parts = [];
-            ['id','role','name','description','annotation'].forEach(k=>{
-                if(obj[k]) parts.push(k.toUpperCase()+": "+obj[k]);
-            });
-            if(obj.properties) {
-                parts.push("Properties:");
-                obj.properties.forEach(p=>parts.push((p.key||p.name)+": "+(p.value||p.description||"")));
-            }
-            if(obj.contents) {
-                parts.push("Contents:");
-                obj.contents.forEach(c=>parts.push((c.key||c.name)+": "+(c.value||c.description||"")));
-            }
-            const text = parts.join("\n");
-            window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
-        });
-        sum.appendChild(aiBtn);
-    })();
-
+                (function(){
+                    const aiBtn = document.createElement('button');
+                    aiBtn.textContent = 'AI Summary';
+                    aiBtn.className = 'btn';
+                    aiBtn.style.marginLeft = '8px';
+                    aiBtn.style.fontSize = '11px';
+                    aiBtn.addEventListener('click', () => {
+                        const obj = tpl;
+                        let parts = [];
+                        ['id','role','name','description','annotation'].forEach(k=>{
+                            if(obj[k]) parts.push(k.toUpperCase()+": "+obj[k]);
+                        });
+                        if(obj.properties) {
+                            parts.push("Properties:");
+                            obj.properties.forEach(p=>parts.push((p.key||p.name)+": "+(p.value||p.description||"")));
+                        }
+                        if(obj.contents) {
+                            parts.push("Contents:");
+                            obj.contents.forEach(c=>parts.push((c.key||c.name)+": "+(c.value||c.description||"")));
+                        }
+                        const text = parts.join("\n");
+                        window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
+                    });
+                    sum.appendChild(aiBtn);
+                })();
 
                 if (tpl.programId) {
                     const p2 = document.createElement('p');
@@ -2026,7 +2151,6 @@
                     infoTable.innerHTML = html;
                     det.appendChild(infoTable);
                 }
-
 
                 if (tpl.properties.length) {
                     det.appendChild(renderPropertiesTable(tpl.properties));
@@ -2075,41 +2199,37 @@
             }
 
             function renderInstanceDetails(ins, idx) {
-
                 const det = document.createElement('details');
                 det.className = 'meta';
                 const sum = document.createElement('summary');
-                // sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}] – id: ${esc(ins.id || '')}`;
                 sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}] – ${esc(ins.id || '')}`;
                 det.appendChild(sum);
 
-    // AI summary button
-    (function(){
-        const aiBtn = document.createElement('button');
-        aiBtn.textContent = 'AI Summary';
-        aiBtn.className = 'btn';
-        aiBtn.style.marginLeft = '8px';
-        aiBtn.style.fontSize = '11px';
-        aiBtn.addEventListener('click', () => {
-            const obj = ins;
-            let parts = [];
-            ['id','role','name','description','annotation'].forEach(k=>{
-                if(obj[k]) parts.push(k.toUpperCase()+": "+obj[k]);
-            });
-            if(obj.properties) {
-                parts.push("Properties:");
-                obj.properties.forEach(p=>parts.push((p.key||p.name)+": "+(p.value||p.description||"")));
-            }
-            if(obj.contents) {
-                parts.push("Contents:");
-                obj.contents.forEach(c=>parts.push((c.key||c.name)+": "+(c.value||c.description||"")));
-            }
-            const text = parts.join("\n");
-            window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
-        });
-        sum.appendChild(aiBtn);
-    })();
-
+                (function(){
+                    const aiBtn = document.createElement('button');
+                    aiBtn.textContent = 'AI Summary';
+                    aiBtn.className = 'btn';
+                    aiBtn.style.marginLeft = '8px';
+                    aiBtn.style.fontSize = '11px';
+                    aiBtn.addEventListener('click', () => {
+                        const obj = ins;
+                        let parts = [];
+                        ['id','role','name','description','annotation'].forEach(k=>{
+                            if(obj[k]) parts.push(k.toUpperCase()+": "+obj[k]);
+                        });
+                        if(obj.properties) {
+                            parts.push("Properties:");
+                            obj.properties.forEach(p=>parts.push((p.key||p.name)+": "+(p.value||p.description||"")));
+                        }
+                        if(obj.contents) {
+                            parts.push("Contents:");
+                            obj.contents.forEach(c=>parts.push((c.key||c.name)+": "+(c.value||c.description||"")));
+                        }
+                        const text = parts.join("\n");
+                        window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
+                    });
+                    sum.appendChild(aiBtn);
+                })();
 
                 if (ins.uuid || ins.name || ins.description || ins.annotation || ins.templateRef || (ins.instanceRefs && ins.instanceRefs.length > 0)) {
                     const infoTable = document.createElement('table');
@@ -2295,18 +2415,13 @@
                 let html = '<tr><th>Key</th><th>Type</th><th>Units</th><th>Format</th><th>Description</th><th>Value</th></tr>';
 
                 props.forEach(pr => {
-                    let values = [];
-                    //if (Array.isArray(pr.value)) values = pr.value;
-                    //else if (typeof pr.value === 'string') values = pr.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
-                    
-                    // keyに"List"が含まれている場合のみカンマ区切りに変換
+                    let displayValue;
                     if (pr.key && pr.key.includes('List')) {
                         let values = [];
                         if (Array.isArray(pr.value)) values = pr.value;
                         else if (typeof pr.value === 'string') values = pr.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
                         displayValue = values.join(', ');
                     } else {
-                        // それ以外はそのまま表示
                         displayValue = Array.isArray(pr.value) ? pr.value.join(' ') : (pr.value || '');
                     }
 
@@ -2363,7 +2478,7 @@
                     <td style="text-align:center;"><input type="radio" name="xSelect" data-idx="${idx}" class="x-select"></td>
                     <td style="text-align:center;"><input type="radio" name="ySelect" data-idx="${idx}" class="y-select"></td>
                     </tr>`;
-                        });
+                });
 
                 tbl.innerHTML = html;
                 wrapper.appendChild(tbl);
@@ -2489,56 +2604,6 @@
         })();
     </script>
 
-<!-- AI Summary Modal -->
-<!-- <div class="modal-overlay" id="aiSummaryModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>AI Summary</h3>
-      <button class="modal-close" id="aiSummaryClose">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="margin-bottom:8px;">
-        <label>Summary Level:
-          <select id="summaryLevel">
-            <option value="3" selected>3 sentences (short)</option>
-            <option value="5">5 sentences (standard)</option>
-            <option value="10">10 sentences (long)</option>
-          </select>
-        </label>
-      </div>
-      <div id="aiSummaryTarget" style="display:none; white-space:pre-wrap; font-size:13px; color:var(--muted); margin-bottom:8px;"></div>
-      <div id="aiSummaryResult" style="white-space:pre-wrap; font-size:14px;"></div>
-    </div>
-  </div>
-</div> -->
-<div class="modal-overlay" id="aiSummaryModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>AI Summary</h3>
-                <button class="modal-close" id="aiSummaryClose">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div style="margin-bottom:0.5rem; display:flex; align-items:center; gap:1rem;">
-                    Summary Level:
-                    <select id="summaryLevel">
-                        <option value="3">3 sentences (short)</option>
-                        <option value="5" selected>5 sentences (standard)</option>
-                        <option value="10">10 sentences (long)</option>
-                    </select>
-                </div>
-                <h4>Input Text (to be summarized)</h4>
-                <pre id="aiSummaryTarget" style="max-height:100px; overflow-y:auto; padding:.5rem; border:1px solid var(--border); background:var(--bg); border-radius:4px;"></pre>
-                
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:0.5rem;">
-                    <h4>AI Summary Result</h4>
-                    <button class="btn" id="copySummaryBtn" style="font-size:12px; padding:.25rem .5rem;">📋 Copy</button>
-                </div>
-                <div class="ai-summary-result-container">
-                    <div id="aiSummaryResult">Generating summary...</div>
-                </div>
-            </div>
-        </div>
-    </div>
 <script>
 // Gemini key button
 (function(){
@@ -2568,25 +2633,63 @@
   const closeBtn=document.getElementById("aiSummaryClose");
   const targetDiv=document.getElementById("aiSummaryTarget");
   const resultDiv=document.getElementById("aiSummaryResult");
-  const levelSel=document.getElementById("summaryLevel");
   const copyBtn = document.getElementById("copySummaryBtn");
+  const promptTemplateSel = document.getElementById("promptTemplate");
+
+  let rawTextContent = '';
+  let currentText = ''; // 現在の入力テキストを保持
+
+const promptTemplates = {
+    quick: {  // デフォルト、軽量
+        ja: "以下の情報を2〜3文程度で簡潔にまとめ、箇条書きとMarkdown形式で示してください：\n{TEXT}",
+        en: "Summarize the following information in 2–3 sentences using bullet points in Markdown. Focus on key points:\n{TEXT}",
+        other: "Summarize the following information in 2–3 sentences using bullet points in Markdown. Please respond in {LANG} and focus on key points:\n{TEXT}"
+    },
+    standard: {  // 標準要約
+        ja: "以下の内容を5〜7文程度で要約し、必要に応じて表を使用したMarkdown形式のレポートを生成してください：\n{TEXT}",
+        en: "Summarize the following text in approximately 5-7 sentences and generate a Markdown report using tables if appropriate:\n{TEXT}",
+        other: "Summarize the following text in approximately 5-7 sentences and generate a Markdown report using tables if appropriate. Please respond in {LANG}:\n{TEXT}"
+    },
+    // technical: {  // 技術・データ分析
+    //     ja: "以下の技術データを15文程度で専門的に分析し、重要なパラメータを表形式で整理したMarkdownレポートを作成してください：\n{TEXT}",
+    //     en: "Provide a technical analysis of the following data in approximately 10 sentences, organizing key parameters in table format as a Markdown report:\n{TEXT}",
+    //     other: "Provide a technical analysis of the following data in approximately 10 sentences, organizing key parameters in table format as a Markdown report. Please respond in {LANG}:\n{TEXT}"
+    // },
+    detailed: {  // 詳細分析・報告書
+        ja: "以下の内容について10〜15文程度で詳細な分析レポートを作成し、見出し、表、強調を用いたMarkdown形式で出力してください：\n{TEXT}",
+        en: "Create a detailed analytical report of the following content in approximately 10-15 sentences, using headings, tables, and emphasis in Markdown format:\n{TEXT}",
+        other: "Create a detailed analytical report of the following content in approximately 10-15 sentences, using headings, tables, and emphasis in Markdown format. Please respond in {LANG}:\n{TEXT}"
+    }
+};
+
+  // Summary Typeが変更されたら再要約
+  promptTemplateSel.addEventListener("change", () => {
+    if (currentText && modal.classList.contains("show")) {
+      resultDiv.textContent = "Regenerating summary...";
+      resultDiv.classList.add("markdown-content");
+      runGemini(currentText);
+    }
+  });
 
   window.openAISummaryDialog=function(text){
+    currentText = text; // テキストを保存
     modal.classList.add("show");
     targetDiv.style.display="block";
     targetDiv.textContent=text;
     resultDiv.textContent="Generating summary...";
-    // コピーボタンのテキストを初期化
+    resultDiv.classList.add("markdown-content");
     copyBtn.textContent = '📋 Copy';
     runGemini(text);
   };
-  closeBtn.addEventListener("click",()=>modal.classList.remove("show"));
-  // modal.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("show"); }); // <-- 削除: 誤操作によるクローズを防止
+  
+  closeBtn.addEventListener("click",()=>{
+    modal.classList.remove("show");
+    currentText = ''; // モーダルを閉じたらクリア
+  });
 
-  // コピー機能のイベントリスナーを追加
   copyBtn.addEventListener("click", async () => {
-      const textToCopy = resultDiv.textContent;
-      if (!textToCopy || textToCopy === 'Generating summary...' || textToCopy === 'API Key not set' || textToCopy.startsWith('Network error')) {
+      const textToCopy = rawTextContent || resultDiv.textContent;
+      if (!textToCopy || textToCopy === 'Generating summary...' || textToCopy === 'Regenerating summary...' || textToCopy === 'API Key not set' || textToCopy.startsWith('Network error')) {
           return;
       }
       try {
@@ -2601,49 +2704,72 @@
       }
   });
 
+  function getPrompt(text, lang) {
+    const template = promptTemplateSel.value;
+    const promptSet = promptTemplates[template] || promptTemplates.default;
+    const langKey = lang === 'ja' ? 'ja' : lang === 'en' ? 'en' : 'other';
+    
+    return promptSet[langKey]
+      .replace('{TEXT}', text)
+      .replace('{LANG}', lang);
+  }
 
-    async function runGemini(text) {
-        const key = localStorage.getItem("geminiApiKey");
-        if (!key) { resultDiv.textContent = "API Key not set"; return; }
-
-        // 🌍 ブラウザの言語設定を取得
-        const browserLang = navigator.language || navigator.userLanguage; // 'ja', 'en-US', etc.
-        const langCode = browserLang.split('-')[0]; // 'ja', 'en' など、主要な言語コードを取得
-
-        const lvl = levelSel.value;
-
-        // 📝 言語コードに応じてプロンプトを動的に生成
-        let prompt;
-        if (langCode === 'ja') {
-            prompt = `Summarize the following in ${ lvl } sentences in Japanese and generate a Markdown - formatted report using tables: \n${ text }`;
-        } else if (langCode === 'en') {
-            // 英語ユーザー向けにプロンプトも英語にする
-            prompt = `Summarize the following text in ${lvl} sentences and generate a Markdown report using tables if appropriate. The summary must be **in English**:\n${text}`;
-        } else {
-            // それ以外の言語の場合、モデルにその言語での回答を依頼する
-            prompt = `Summarize the following text in ${lvl} sentences and generate a Markdown report using tables if appropriate. Please respond in the language corresponding to the code **${langCode}**:\n${text}`;
-        }
-
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`;
-        const body = { contents: [{ parts: [{ text: prompt }] }] };
-
-        try {
-            const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-            const data = await res.json();
-
-            if (data.error) {
-                resultDiv.textContent = `API Error: ${data.error.message}`;
-            } else {
-                // テキストとMarkdownをそのまま表示
-                resultDiv.textContent = data.candidates[0].content.parts[0].text.trim();
-            }
-        } catch (e) {
-            resultDiv.textContent = `<p style="color:var(--warn);">Network error or API call failed: ${esc(e.message)}</p>`;
-        }
+  async function runGemini(text) {
+    const key = localStorage.getItem("geminiApiKey");
+    if (!key) { 
+      resultDiv.textContent = "API Key not set"; 
+      resultDiv.classList.remove("markdown-content");
+      return; 
     }
+
+    const browserLang = navigator.language || navigator.userLanguage;
+    const langCode = browserLang.split('-')[0];
+    const prompt = getPrompt(text, langCode);
+
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`;
+    const body = { contents: [{ parts: [{ text: prompt }] }] };
+
+    try {
+        const res = await fetch(url, { 
+          method: "POST", 
+          headers: { "Content-Type": "application/json" }, 
+          body: JSON.stringify(body) 
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            rawTextContent = `API Error: ${data.error.message}`;
+            resultDiv.textContent = rawTextContent;
+            resultDiv.classList.remove("markdown-content");
+        } else {
+            rawTextContent = data.candidates[0].content.parts[0].text.trim();
+            
+            if (typeof marked !== 'undefined') {
+              resultDiv.innerHTML = marked.parse(rawTextContent);
+              resultDiv.classList.add("markdown-content");
+              
+              // 注意書きを追加
+              const disclaimer = document.createElement('div');
+              disclaimer.className = 'ai-disclaimer';
+              if (langCode === 'ja') {
+                disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
+              } else {
+                disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
+              }
+              resultDiv.appendChild(disclaimer);
+            } else {
+              resultDiv.textContent = rawTextContent;
+              resultDiv.classList.remove("markdown-content");
+            }
+        }
+    } catch (e) {
+        rawTextContent = `Network error or API call failed: ${e.message}`;
+        resultDiv.textContent = rawTextContent;
+        resultDiv.classList.remove("markdown-content");
+    }
+  }
 })();
 </script>
 
 </body>
-
 </html>
