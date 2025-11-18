@@ -9,6 +9,7 @@
    2. Run on Docker
    3. README
 1. MaiMLFileSamples　　: `MaiMLファイルのサンプル集`
+1. MaiMLStandaloneViewer　　: `MaiMLファイルをブラウザで可視化できる単一HTML Viewer`
 1. MaiMLTiffMerger 　　: `MaiMLファイルに記載された計測分析工程の情報に、TIFFのメタ情報などの計測結果情報を追加するWEBシステム`
    1. MorphoS
    2. README

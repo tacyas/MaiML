@@ -9,6 +9,7 @@
    2. Run on Docker
    3. README
 1. MaiMLFileSamples　　: `A collection of sample MaiML files.`
+1. MaiMLStandaloneViewer　　: `A standalone HTML viewer for MaiML files`
 1. MaiMLTiffMerger 　　: `A web system for adding measurement result information, such as TIFF metadata, to the measurement and analysis process information described in MaiML files.`
    1. MorphoS
    2. README
