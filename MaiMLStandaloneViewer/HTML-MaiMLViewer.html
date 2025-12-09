@@ -190,7 +190,8 @@
         }
 
         #stageWrap {
-            flex: 1;
+            /* flex: 1; */
+            flex: 1 1 50%;
             position: relative;
             overflow: hidden;
             border-right: 1px solid var(--border);
@@ -213,13 +214,15 @@
         }
 
         #verticalSeparator {
+            flex-shrink: 0;
             width: 5px;
             cursor: ew-resize;
             background: #ccc;
         }
 
         #metadataPanel {
-            width: 400px;
+            /* width: 400px; */
+            flex: 1 1 50%;
             min-width: 200px;
             background: var(--surface);
             padding: .8rem;
@@ -985,6 +988,11 @@
             const instances = [];
             const insertionFiles = new Map();
 
+            // トランジション関連のデータ
+            const instructionById = new Map();
+            const transitionToInstructions = new Map();
+            const eventsByInstructionId = new Map();
+
             const $grid = document.getElementById('grid');
             const $stats = document.getElementById('stats');
             const $meta = document.getElementById('meta');
@@ -1249,7 +1257,69 @@
                 });
                 html += "</table>";
 
-                if (rowCount === 0) {
+                // <property>要素の抽出と表示（階層構造対応）
+                const propertyElements = Array.from(documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "property"));
+
+                // document要素の直接の子要素であるpropertyのみをフィルタリング
+                const directProperties = propertyElements.filter(prop => prop.parentNode === documentElement);
+
+                // 再帰的にproperty要素を解析する関数
+                function parsePropertyRecursive(propEl, level = 0) {
+                    const key = propEl.getAttribute('key') || '';
+                    const type = propEl.getAttribute('xsi:type') || propEl.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type') || '';
+
+                    // 直接の子要素のみを取得
+                    const directChildren = Array.from(propEl.children || []);
+                    const descEl = directChildren.find(e => e.localName === 'description' || e.tagName.includes('description'));
+                    const valueEl = directChildren.find(e => e.localName === 'value' || e.tagName.includes('value'));
+                    const childProperties = directChildren.filter(e => e.localName === 'property' || e.tagName.includes('property'));
+
+                    const description = descEl ? descEl.textContent.trim() : '';
+                    const value = valueEl ? valueEl.textContent.trim() : '';
+
+                    return {
+                        key,
+                        type,
+                        description,
+                        value,
+                        level,
+                        children: childProperties.map(child => parsePropertyRecursive(child, level + 1))
+                    };
+                }
+
+                // プロパティを階層的に表示する関数
+                function renderPropertyRows(propData) {
+                    let rows = '';
+                    const indent = '　'.repeat(propData.level); // 全角スペースでインデント
+
+                    rows += `<tr>
+        <td>${esc(indent + propData.key)}</td>
+        <td>${esc(propData.type)}</td>
+        <td>${esc(propData.description)}</td>
+        <td><div class="value-cell-scroll">${esc(propData.value)}</div></td>
+    </tr>`;
+
+                    // 子要素を再帰的に表示
+                    propData.children.forEach(child => {
+                        rows += renderPropertyRows(child);
+                    });
+
+                    return rows;
+                }
+
+                if (directProperties.length > 0) {
+                    html += '<h3 style="margin-top:1rem;">📋 Document Properties</h3><table>';
+                    html += '<tr><th>Key</th><th>Type</th><th>Description</th><th>Value</th></tr>';
+
+                    directProperties.forEach(prop => {
+                        const propData = parsePropertyRecursive(prop, 0);
+                        html += renderPropertyRows(propData);
+                    });
+
+                    html += '</table>';
+                }
+
+                if (rowCount === 0 && directProperties.length === 0) {
                     $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No metadata found</div>';
                 } else {
                     $documentInfo.innerHTML = html;
@@ -1616,6 +1686,9 @@
                 templateToInstances.clear();
                 instances.length = 0;
                 insertionFiles.clear();
+                instructionById.clear();
+                transitionToInstructions.clear();
+                eventsByInstructionId.clear();
 
                 const xml = new DOMParser().parseFromString(text, 'application/xml');
                 if (xml.querySelector('parsererror')) {
@@ -1623,6 +1696,11 @@
                     return;
                 }
                 parseMaiML(xml);
+
+                // 下パネルの表示をクリア
+                $meta.innerHTML = '';
+                $stats.textContent = 'Loading...';
+
                 render();
                 if (!restoreLayout()) runAutoLayout(true);
                 else ticked();
@@ -1800,7 +1878,55 @@
                     }
                 }
 
+                // ... 既存のループ処理の後 ...
+
+                // --- 【追加】instruction要素の解析 ---
+                for (const el of all) {
+                    const l = local(el);
+                    if (l === 'instruction') {
+                        const id = attr(el, 'id', 'ID', 'Id');
+                        if (!id) continue;
+
+                        // トランジションへの参照を探す
+                        // 1. 子要素 <transitionRef ref="..."> を探す (標準的)
+                        let tRef = null;
+                        const trRefEl = Array.from(el.getElementsByTagName('*')).find(e => local(e) === 'transitionref');
+                        if (trRefEl) tRef = attr(trRefEl, 'ref', 'Ref', 'REF');
+
+                        // 2. 属性 ref="..." を探す (ユーザー様のケース)
+                        if (!tRef) tRef = attr(el, 'ref', 'Ref', 'REF') || attr(el, 'transitionRef');
+
+                        const meta = extractMetaBlock(el);
+                        instructionById.set(id, {
+                            id,
+                            transitionRef: tRef,
+                            ...meta,
+                            rawEl: el
+                        });
+
+                        if (tRef) {
+                            if (!transitionToInstructions.has(tRef)) transitionToInstructions.set(tRef, []);
+                            transitionToInstructions.get(tRef).push(id);
+                        }
+                    }
+                }
+
+                // --- 【追加】event要素の解析 ---
+                for (const el of all) {
+                    const l = local(el);
+                    if (l === 'event') {
+                        const ref = attr(el, 'ref', 'Ref', 'REF'); // instructionを参照
+                        if (ref) {
+                            const meta = extractMetaBlock(el);
+                            if (!eventsByInstructionId.has(ref)) eventsByInstructionId.set(ref, []);
+                            eventsByInstructionId.get(ref).push({ ...meta, rawEl: el });
+                        }
+                    }
+                }
+                // ---------------------------------------
+
                 function genId(prefix) {
+                    // ...
                     return prefix + '_' + Math.random().toString(36).slice(2, 8);
                 }
 
@@ -1848,8 +1974,9 @@
                         }
                     }
 
-                    const list = Array.from(root.getElementsByTagName('*'));
-                    for (const e of list) {
+                    // 直接の子要素からproperty/content/insertionを取得（再帰的に子孫を取得しない）
+                    const directChildren2 = Array.from(root.children || []);  // ← 新しいコード
+                    for (const e of directChildren2) {
                         const l = local(e);
                         if (l === 'property') props.push(readProperty(e));
                         else if (l === 'content') conts.push(readContent(e));
@@ -1870,8 +1997,31 @@
                     const fstring = el.getAttribute('formatString') || '';
                     const name = child('name');
                     const description = child('description') || el.getAttribute('description') || el.getAttribute('desc') || '';
-                    const value = child('value') || el.getAttribute('value') || (el.childElementCount ? '' : (el.textContent || '').trim());
-                    return { kind: 'property', key, name, type, description, value, units, fstring };
+
+                    // value要素を持つ場合はそのテキスト、持たない場合は属性値、それもなければ空文字
+                    const valueEl = Array.from(el.children || []).find(x => local(x) === 'value');
+                    const value = valueEl ? valueEl.textContent.trim() : (el.getAttribute('value') || '');
+
+                    // 子要素を取得（property要素とcontent要素の両方）
+                    const directChildren = Array.from(el.children || []);
+                    const childProperties = directChildren.filter(e => {
+                        const tagName = local(e);
+                        return tagName === 'property';
+                    });
+                    const childContents = directChildren.filter(e => {
+                        const tagName = local(e);
+                        return tagName === 'content';
+                    });
+
+                    // 子property要素を再帰的に処理
+                    const children = childProperties.map(childEl => readProperty(childEl));
+
+                    // 子content要素も処理して追加
+                    childContents.forEach(childEl => {
+                        children.push(readContent(childEl));
+                    });
+
+                    return { kind: 'property', key, name, type, description, value, units, fstring, children };
                 }
 
                 function readContent(el) {
@@ -1885,8 +2035,20 @@
                     const fstring = el.getAttribute('formatString') || '';
                     const name = child('name') || el.getAttribute('name') || '';
                     const description = child('description') || el.getAttribute('description') || el.getAttribute('desc') || '';
-                    const value = child('value') || el.getAttribute('value') || (el.childElementCount ? '' : (el.textContent || '').trim());
-                    return { kind: 'content', key, name, type, description, value, units, fstring };
+
+                    // value要素を持つ場合はそのテキスト、持たない場合は属性値、それもなければ空文字
+                    const valueEl = Array.from(el.children || []).find(x => local(x) === 'value');
+                    const value = valueEl ? valueEl.textContent.trim() : (el.getAttribute('value') || '');
+
+                    // 子content要素を取得
+                    const directChildren = Array.from(el.children || []);
+                    const childContents = directChildren.filter(e => {
+                        const tagName = local(e);
+                        return tagName === 'content';
+                    });
+                    const children = childContents.map(childEl => readContent(childEl));
+
+                    return { kind: 'content', key, name, type, description, value, units, fstring, children };
                 }
             }
 
@@ -2099,18 +2261,100 @@
                         insts.forEach((ins, i) => $meta.appendChild(renderInstanceDetails(ins, i + 1)));
                     }
                 } else if (node.type === 'transition') {
-                    const h = document.createElement('h3');
-                    h.className = 'section-title';
-                    h.textContent = 'Templates directly under program';
-                    $meta.appendChild(h);
+                    // --- 【修正】テンプレート表示ロジックの変更 ---
                     const tpls = Array.from(templateById.values()).filter(t => t.programId === node.id);
-                    if (!tpls.length) {
+
+                    // テンプレートがある場合のみセクションを表示
+                    if (tpls.length > 0) {
+                        const h = document.createElement('h3');
+                        h.className = 'section-title';
+                        h.textContent = 'Templates directly under program';
+                        $meta.appendChild(h);
+                        tpls.forEach((tpl, i) => $meta.appendChild(renderTemplateDetails(tpl, i + 1)));
+                    }
+
+                    // --- 【追加】Instructions / Events の表示 ---
+                    const instrIds = transitionToInstructions.get(node.id) || [];
+
+                    if (instrIds.length > 0) {
+                        const h2 = document.createElement('h3');
+                        h2.className = 'section-title';
+                        h2.textContent = `Instructions: ${instrIds.length}`;
+                        $meta.appendChild(h2);
+
+                        instrIds.forEach((iid, idx) => {
+                            const instr = instructionById.get(iid);
+                            const events = eventsByInstructionId.get(iid) || [];
+
+                            const det = document.createElement('details');
+                            det.className = 'meta';
+                            const sum = document.createElement('summary');
+                            sum.innerHTML = `<span class="badge">#${idx + 1}</span> [Instruction]  ${esc(instr.id)}`;
+                            det.appendChild(sum);
+                            // Instructionのメタデータ表示
+                            // UUID, Name, Description, Annotation, Reference Transition を表示
+                            if (instr.uuid || instr.name || instr.description || instr.annotation || instr.transitionRef) {
+                                const tbl = document.createElement('table');
+                                tbl.className = 'kv';
+                                tbl.style.marginTop = '0.5rem';
+                                let html = '';
+
+                                // UUID
+                                if (instr.uuid) html += `<tr><th>UUID</th><td>${esc(instr.uuid)}</td></tr>`;
+                                // Name
+                                if (instr.name) html += `<tr><th>Name</th><td>${esc(instr.name)}</td></tr>`;
+                                // Description
+                                if (instr.description) html += `<tr><th>Description</th><td>${esc(instr.description)}</td></tr>`;
+                                // Annotation
+                                if (instr.annotation) html += `<tr><th>Annotation</th><td>${esc(instr.annotation)}</td></tr>`;
+                                // Reference Transition (このInstructionが参照しているトランジションID)
+                                if (instr.transitionRef) html += `<tr><th>Ref. Transition</th><td>${esc(instr.transitionRef)}</td></tr>`;
+
+                                tbl.innerHTML = html;
+                                det.appendChild(tbl);
+                            }
+
+                            // Instructionのプロパティ
+                            if (instr.properties && instr.properties.length > 0) {
+                                det.appendChild(renderPropertiesTable(instr.properties));
+                            }
+
+                            // 紐づくEventがあれば表示
+                            if (events.length > 0) {
+                                const hEvt = document.createElement('h4');
+                                hEvt.style.margin = '0.5rem 0 0.2rem';
+                                hEvt.textContent = `Event Properties: ${events.length}`;
+                                det.appendChild(hEvt);
+
+                                events.forEach((evt, eIdx) => {
+                                    const div = document.createElement('div');
+                                    div.style.border = '1px dashed var(--border)';
+                                    div.style.padding = '0.5rem';
+                                    div.style.margin = '0.2rem 0';
+                                    div.style.borderRadius = '4px';
+
+                                    div.innerHTML = `<div style="font-size:12px; font-weight:bold; color:var(--accent);">Event #${eIdx + 1}</div>`;
+
+                                    if (evt.properties && evt.properties.length > 0) {
+                                        div.appendChild(renderPropertiesTable(evt.properties));
+                                    } else {
+                                        div.insertAdjacentHTML('beforeend', '<span class="hint">No properties</span>');
+                                    }
+                                    det.appendChild(div);
+                                });
+                            }
+
+                            $meta.appendChild(det);
+                        });
+                    }
+
+                    // テンプレートもInstructionもない場合
+                    if (tpls.length === 0 && instrIds.length === 0) {
                         const p = document.createElement('p');
                         p.className = 'hint';
-                        p.textContent = 'No templates found under this program.';
+                        p.textContent = 'No templates or instructions linked to this transition.';
                         $meta.appendChild(p);
                     }
-                    tpls.forEach((tpl, i) => $meta.appendChild(renderTemplateDetails(tpl, i + 1)));
                 }
             }
 
@@ -2118,7 +2362,7 @@
                 const det = document.createElement('details');
                 det.className = 'meta';
                 const sum = document.createElement('summary');
-                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}] – ${esc(tpl.id || '')}`;
+                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}]  ${esc(tpl.id || '')}`;
                 det.appendChild(sum);
 
                 (function () {
@@ -2133,13 +2377,35 @@
                         ['id', 'role', 'name', 'description', 'annotation'].forEach(k => {
                             if (obj[k]) parts.push(k.toUpperCase() + ": " + obj[k]);
                         });
-                        if (obj.properties) {
-                            parts.push("Properties:");
-                            obj.properties.forEach(p => parts.push((p.key || p.name) + ": " + (p.value || p.description || "")));
+
+                        // 階層構造を再帰的に処理する関数
+                        function flattenProperties(items, prefix = '') {
+                            const result = [];
+                            items.forEach(item => {
+                                const key = prefix ? `${prefix}.${item.key || item.name}` : (item.key || item.name);
+                                const info = [];
+                                if (item.type) info.push(`type=${item.type}`);
+                                if (item.description) info.push(`desc="${item.description}"`);
+                                if (item.value) info.push(`value="${item.value}"`);
+                                if (item.units) info.push(`units=${item.units}`);
+
+                                result.push(`${key}: ${info.join(', ')}`);
+
+                                // 子要素があれば再帰的に処理
+                                if (item.children && item.children.length > 0) {
+                                    result.push(...flattenProperties(item.children, key));
+                                }
+                            });
+                            return result;
                         }
-                        if (obj.contents) {
+
+                        if (obj.properties && obj.properties.length > 0) {
+                            parts.push("Properties:");
+                            parts.push(...flattenProperties(obj.properties));
+                        }
+                        if (obj.contents && obj.contents.length > 0) {
                             parts.push("Contents:");
-                            obj.contents.forEach(c => parts.push((c.key || c.name) + ": " + (c.value || c.description || "")));
+                            parts.push(...flattenProperties(obj.contents));
                         }
                         const text = parts.join("\n");
                         window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
@@ -2163,24 +2429,24 @@
                     if (tpl.name) html += `<tr><th>Name</th><td>${esc(tpl.name)}</td></tr>`;
                     if (tpl.description) html += `<tr><th>Description</th><td>${esc(tpl.description)}</td></tr>`;
                     if (tpl.annotation) html += `<tr><th>Annotation</th><td>${esc(tpl.annotation)}</td></tr>`;
-                    if (tpl.placeRef) html += `<tr><th>Reference Place</th><td>${esc(tpl.placeRef)}</td></tr>`;
+                    if (tpl.placeRef) html += `<tr><th>Ref. Place</th><td>${esc(tpl.placeRef)}</td></tr>`;
                     if (tpl.templateRefs && tpl.templateRefs.length > 0) {
-                        html += `<tr><th>Reference Template</th><td>${tpl.templateRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
+                        html += `<tr><th>Ref. Template</th><td>${tpl.templateRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
                     }
                     infoTable.innerHTML = html;
                     det.appendChild(infoTable);
                 }
 
-                if (tpl.properties.length) {
-                    det.appendChild(renderPropertiesTable(tpl.properties));
+                // propertyとcontentを統合して表示
+                const allItems = [...tpl.properties, ...tpl.contents]; // 修正: contentsを追加
+
+                if (allItems.length) {
+                    det.appendChild(renderPropertiesTable(allItems));
                 } else {
                     const p = document.createElement('p');
                     p.className = 'hint';
                     p.textContent = 'No properties available.';
                     det.appendChild(p);
-                }
-                if (tpl.contents.length) {
-                    det.appendChild(renderContentsTable(tpl.contents));
                 }
                 if ((tpl.insertions || []).length) {
                     const h = document.createElement('h4');
@@ -2221,7 +2487,7 @@
                 const det = document.createElement('details');
                 det.className = 'meta';
                 const sum = document.createElement('summary');
-                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}] – ${esc(ins.id || '')}`;
+                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}]  ${esc(ins.id || '')}`;
                 det.appendChild(sum);
 
                 (function () {
@@ -2236,13 +2502,35 @@
                         ['id', 'role', 'name', 'description', 'annotation'].forEach(k => {
                             if (obj[k]) parts.push(k.toUpperCase() + ": " + obj[k]);
                         });
-                        if (obj.properties) {
-                            parts.push("Properties:");
-                            obj.properties.forEach(p => parts.push((p.key || p.name) + ": " + (p.value || p.description || "")));
+
+                        // 階層構造を再帰的に処理する関数
+                        function flattenProperties(items, prefix = '') {
+                            const result = [];
+                            items.forEach(item => {
+                                const key = prefix ? `${prefix}.${item.key || item.name}` : (item.key || item.name);
+                                const info = [];
+                                if (item.type) info.push(`type=${item.type}`);
+                                if (item.description) info.push(`desc="${item.description}"`);
+                                if (item.value) info.push(`value="${item.value}"`);
+                                if (item.units) info.push(`units=${item.units}`);
+
+                                result.push(`${key}: ${info.join(', ')}`);
+
+                                // 子要素があれば再帰的に処理
+                                if (item.children && item.children.length > 0) {
+                                    result.push(...flattenProperties(item.children, key));
+                                }
+                            });
+                            return result;
                         }
-                        if (obj.contents) {
+
+                        if (obj.properties && obj.properties.length > 0) {
+                            parts.push("Properties:");
+                            parts.push(...flattenProperties(obj.properties));
+                        }
+                        if (obj.contents && obj.contents.length > 0) {
                             parts.push("Contents:");
-                            obj.contents.forEach(c => parts.push((c.key || c.name) + ": " + (c.value || c.description || "")));
+                            parts.push(...flattenProperties(obj.contents));
                         }
                         const text = parts.join("\n");
                         window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
@@ -2259,24 +2547,24 @@
                     if (ins.name) html += `<tr><th>Name</th><td>${esc(ins.name)}</td></tr>`;
                     if (ins.description) html += `<tr><th>Description</th><td>${esc(ins.description)}</td></tr>`;
                     if (ins.annotation) html += `<tr><th>Annotation</th><td>${esc(ins.annotation)}</td></tr>`;
-                    if (ins.templateRef) html += `<tr><th>Reference Template</th><td>${esc(ins.templateRef)}</td></tr>`;
+                    if (ins.templateRef) html += `<tr><th>Ref. Template</th><td>${esc(ins.templateRef)}</td></tr>`;
                     if (ins.instanceRefs && ins.instanceRefs.length > 0) {
-                        html += `<tr><th>Reference Instance</th><td>${ins.instanceRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
+                        html += `<tr><th>Ref. Instance</th><td>${ins.instanceRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
                     }
                     infoTable.innerHTML = html;
                     det.appendChild(infoTable);
                 }
 
-                if (ins.properties.length) {
-                    det.appendChild(renderPropertiesTable(ins.properties));
+                // propertyとcontentを統合して表示
+                const allItems = [...ins.properties, ...ins.contents]; // 修正: contentsを追加
+
+                if (allItems.length) {
+                    det.appendChild(renderPropertiesTable(allItems));
                 } else {
                     const p = document.createElement('p');
                     p.className = 'hint';
                     p.textContent = 'No properties available.';
                     det.appendChild(p);
-                }
-                if (ins.contents.length) {
-                    det.appendChild(renderContentsTable(ins.contents));
                 }
                 if ((ins.insertions || []).length) {
                     const h = document.createElement('h4');
@@ -2431,32 +2719,114 @@
 
                 const tbl = document.createElement('table');
                 tbl.className = 'kv';
-                let html = '<tr><th>Key</th><th>Type</th><th>Units</th><th>Format</th><th>Description</th><th>Value</th></tr>';
+                let html = '<tr><th>Key</th><th>Type</th><th>Units</th><th>Format</th><th>Description</th><th>Value</th><th>X axis</th><th>Y axis</th></tr>';
 
-                props.forEach(pr => {
+                let contentIndex = 0; // content要素のインデックス
+                const contentItems = []; // PLOT用にcontent要素を保存
+
+                // 階層的に行を生成する関数（propertyとcontentの両方に対応）
+                function renderPropertyRow(pr, level = 0) {
+                    let rows = '';
+                    const indent = '　'.repeat(level); // 全角スペースでインデント
+
                     let displayValue;
-                    if (pr.key && pr.key.includes('List')) {
+                    const isContent = pr.kind === 'content';
+
+                    if (isContent) {
+                        // content要素の場合
                         let values = [];
                         if (Array.isArray(pr.value)) values = pr.value;
                         else if (typeof pr.value === 'string') values = pr.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
                         displayValue = values.join(', ');
                     } else {
-                        displayValue = Array.isArray(pr.value) ? pr.value.join(' ') : (pr.value || '');
+                        // property要素の場合
+                        if (pr.key && pr.key.includes('List')) {
+                            let values = [];
+                            if (Array.isArray(pr.value)) values = pr.value;
+                            else if (typeof pr.value === 'string') values = pr.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
+                            displayValue = values.join(', ');
+                        } else {
+                            displayValue = Array.isArray(pr.value) ? pr.value.join(' ') : (pr.value || '');
+                        }
                     }
 
-                    html += `<tr>
-                        <td>${esc(pr.key || '')}</td>
-                        <td>${esc(pr.type || '')}</td>
-                        <td>${esc(pr.units || '')}</td>
-                        <td>${esc(pr.fstring || '')}</td>
-                        <td>${esc(pr.description || '')}</td>
-                        <td>
-                            <div class="value-cell-scroll">${esc(displayValue)}</div>
-                        </td>
-                    </tr>`;
+                    // content要素の場合はラジオボタンを表示
+                    let xRadio = '', yRadio = '';
+                    if (isContent) {
+                        const idx = contentIndex;
+                        contentItems.push(pr);
+                        xRadio = `<input type="radio" name="xSelect" data-idx="${idx}" class="x-select">`;
+                        yRadio = `<input type="radio" name="ySelect" data-idx="${idx}" class="y-select">`;
+                        contentIndex++;
+                    }
+
+                    rows += `<tr data-idx="${isContent ? contentIndex - 1 : ''}">
+            <td>${esc(indent + (pr.key || ''))}</td>
+            <td>${esc(pr.type || '')}</td>
+            <td>${esc(pr.units || '')}</td>
+            <td>${esc(pr.fstring || '')}</td>
+            <td>${esc(pr.description || '')}</td>
+            <td>
+                <div class="value-cell-scroll">${esc(displayValue)}</div>
+            </td>
+            <td style="text-align:center;">${xRadio}</td>
+            <td style="text-align:center;">${yRadio}</td>
+        </tr>`;
+
+                    // 子要素がある場合は再帰的に処理
+                    if (pr.children && pr.children.length > 0) {
+                        pr.children.forEach(child => {
+                            rows += renderPropertyRow(child, level + 1);
+                        });
+                    }
+
+                    return rows;
+                }
+
+                props.forEach(pr => {
+                    html += renderPropertyRow(pr, 0);
                 });
+
                 tbl.innerHTML = html;
                 wrapper.appendChild(tbl);
+
+                // content要素が2つ以上ある場合はPLOTボタンを追加
+                if (contentItems.length >= 2) {
+                    const btnWrapper = document.createElement('div');
+                    btnWrapper.style.display = 'flex';
+                    btnWrapper.style.justifyContent = 'flex-end';
+                    btnWrapper.style.marginTop = '0.5rem';
+
+                    const plotBtn = document.createElement('button');
+                    plotBtn.className = 'btn primary';
+                    plotBtn.textContent = '📈 PLOT';
+                    plotBtn.addEventListener('click', () => {
+                        const xIdx = wrapper.querySelector('.x-select:checked')?.dataset.idx;
+                        const yIdx = wrapper.querySelector('.y-select:checked')?.dataset.idx;
+
+                        if (xIdx == null || yIdx == null) {
+                            alert('Please select one X axis and one Y axis.');
+                            return;
+                        }
+
+                        const xRow = contentItems[xIdx];
+                        const yRow = contentItems[yIdx];
+
+                        const xVals = parseValues(xRow.value);
+                        const yVals = parseValues(yRow.value);
+
+                        if (xVals.length !== yVals.length) {
+                            alert(`The number of data points for X and Y axes do not match.\nX=${xVals.length} points, Y=${yVals.length} points`);
+                            return;
+                        }
+
+                        showXYPlotModal(xRow.key || 'X', yRow.key || 'Y', xVals, yVals);
+                    });
+
+                    btnWrapper.appendChild(plotBtn);
+                    wrapper.appendChild(btnWrapper);
+                }
+
                 return wrapper;
             }
 
@@ -2468,35 +2838,68 @@
                 tbl.className = 'kv';
 
                 let html = `
-                <tr>
-                    <th>Key</th>
-                    <th>Type</th>
-                    <th>Units</th>
-                    <th>Format</th>
-                    <th>Description</th>
-                    <th>Values</th>
-                    <th>X axis</th>
-                    <th>Y axis</th>
-                </tr>
-                `;
+    <tr>
+        <th>Key</th>
+        <th>Type</th>
+        <th>Units</th>
+        <th>Format</th>
+        <th>Description</th>
+        <th>Values</th>
+        <th>X axis</th>
+        <th>Y axis</th>
+    </tr>
+    `;
 
-                conts.forEach((c, idx) => {
+                // 階層的に行を生成する関数
+                function renderContentRow(c, idx, level = 0) {
+                    let rows = '';
+                    const indent = '　'.repeat(level); // 全角スペースでインデント
+
                     let values = [];
                     if (Array.isArray(c.value)) values = c.value;
                     else if (typeof c.value === 'string') values = c.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
 
-                    html += `<tr data-idx="${idx}">
-                    <td>${esc(c.key || '')}</td>
-                    <td>${esc(c.type || '')}</td>
-                    <td>${esc(c.units || '')}</td>
-                    <td>${esc(c.fstring || '')}</td>
-                    <td>${esc(c.description || '')}</td>
-                    <td>
-                        <div class="value-cell-scroll">${esc(values.join(', '))}</div>
-                    </td>
-                    <td style="text-align:center;"><input type="radio" name="xSelect" data-idx="${idx}" class="x-select"></td>
-                    <td style="text-align:center;"><input type="radio" name="ySelect" data-idx="${idx}" class="y-select"></td>
-                    </tr>`;
+                    rows += `<tr data-idx="${idx}">
+        <td>${esc(indent + (c.key || ''))}</td>
+        <td>${esc(c.type || '')}</td>
+        <td>${esc(c.units || '')}</td>
+        <td>${esc(c.fstring || '')}</td>
+        <td>${esc(c.description || '')}</td>
+        <td>
+            <div class="value-cell-scroll">${esc(values.join(', '))}</div>
+        </td>
+        <td style="text-align:center;"><input type="radio" name="xSelect" data-idx="${idx}" class="x-select"></td>
+        <td style="text-align:center;"><input type="radio" name="ySelect" data-idx="${idx}" class="y-select"></td>
+        </tr>`;
+
+                    // 子要素がある場合は再帰的に処理（ただしラジオボタンは親のみ）
+                    if (c.children && c.children.length > 0) {
+                        c.children.forEach(child => {
+                            let childValues = [];
+                            if (Array.isArray(child.value)) childValues = child.value;
+                            else if (typeof child.value === 'string') childValues = child.value.split(/[\s,]+/).map(v => v.trim()).filter(v => v);
+
+                            const childIndent = '　'.repeat(level + 1);
+                            rows += `<tr>
+                <td>${esc(childIndent + (child.key || ''))}</td>
+                <td>${esc(child.type || '')}</td>
+                <td>${esc(child.units || '')}</td>
+                <td>${esc(child.fstring || '')}</td>
+                <td>${esc(child.description || '')}</td>
+                <td>
+                    <div class="value-cell-scroll">${esc(childValues.join(', '))}</div>
+                </td>
+                <td></td>
+                <td></td>
+                </tr>`;
+                        });
+                    }
+
+                    return rows;
+                }
+
+                conts.forEach((c, idx) => {
+                    html += renderContentRow(c, idx, 0);
                 });
 
                 tbl.innerHTML = html;
@@ -2623,7 +3026,7 @@
         })();
     </script>
 
-    <script>
+    <!-- <script>
         // Gemini key button
         (function () {
             const themeBtn = document.getElementById("themeBtn");
@@ -2641,6 +3044,111 @@
                 if (key.trim() === "") { localStorage.removeItem("geminiApiKey"); }
                 else { localStorage.setItem("geminiApiKey", key.trim()); }
                 refresh();
+            });
+        })();
+    </script> -->
+    <script>
+        // Gemini key button with Custom Modal
+        (function () {
+            const themeBtn = document.getElementById("themeBtn");
+            if (!themeBtn) return;
+
+            // 1. ボタンの作成
+            const gemBtn = document.createElement('button');
+            gemBtn.className = 'btn';
+            gemBtn.id = 'geminiKeyBtn';
+            gemBtn.textContent = '🔑 Gemini API Key';
+            themeBtn.before(gemBtn);
+
+            // 2. モーダルHTMLの注入
+            const modalHtml = `
+            <div class="modal-overlay" id="apiKeyModal">
+                <div class="modal-content" style="max-width: 450px;">
+                    <div class="modal-header">
+                        <h3>Gemini API Key Settings</h3>
+                        <button class="modal-close" id="apiKeyClose">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 1rem; line-height: 1.5;">
+                            To use AI summary features, please set your Gemini API Key.<br>
+                            You can get a free key from: <br>
+                            <a href="https://aistudio.google.com/" target="_blank" style="color:var(--accent); text-decoration:underline; font-weight:bold;">
+                                Google AI Studio 🔗
+                            </a>
+                        </p>
+                        <label style="font-size:12px; font-weight:600;">API Key:</label>
+                        <input type="password" id="apiKeyInput" placeholder="Paste your API Key here" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0 1.5rem;" autocomplete="off" />
+                        
+                        <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
+                            <button class="btn" id="removeKeyBtn" style="color:var(--warn); border-color:var(--warn);">🗑️ Remove Key</button>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button class="btn" id="cancelKeyBtn">Cancel</button>
+                                <button class="btn primary" id="saveKeyBtn">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // 3. 要素の取得
+            const modal = document.getElementById('apiKeyModal');
+            const input = document.getElementById('apiKeyInput');
+            const saveBtn = document.getElementById('saveKeyBtn');
+            const removeBtn = document.getElementById('removeKeyBtn');
+            const cancelBtn = document.getElementById('cancelKeyBtn');
+            const closeBtn = document.getElementById('apiKeyClose');
+
+            // 4. 表示更新ロジック
+            function refresh() {
+                const key = localStorage.getItem("geminiApiKey");
+                if (key) {
+                    gemBtn.style.background = '#3c6';
+                    gemBtn.style.color = '#fff';
+                    gemBtn.style.borderColor = '#2a9';
+                } else {
+                    gemBtn.style.background = '';
+                    gemBtn.style.color = '';
+                    gemBtn.style.borderColor = '';
+                }
+            }
+            refresh();
+
+            // 5. イベントハンドラ
+            gemBtn.addEventListener('click', () => {
+                // キーを読み込むが、inputはpasswordタイプなので表示はマスクされる
+                input.value = localStorage.getItem("geminiApiKey") || "";
+                modal.classList.add('show');
+                input.focus();
+            });
+
+            function closeModal() {
+                modal.classList.remove('show');
+            }
+
+            saveBtn.addEventListener('click', () => {
+                const val = input.value.trim();
+                if (val) {
+                    localStorage.setItem("geminiApiKey", val);
+                } else {
+                    localStorage.removeItem("geminiApiKey");
+                }
+                refresh();
+                closeModal();
+            });
+
+            removeBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to remove the API Key?')) {
+                    localStorage.removeItem("geminiApiKey");
+                    input.value = "";
+                    refresh();
+                    closeModal();
+                }
+            });
+
+            [cancelBtn, closeBtn].forEach(btn => btn.addEventListener('click', closeModal));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
             });
         })();
     </script>
