@@ -277,23 +277,55 @@
             border-radius: 6px;
         }
 
+        /* 1. パネル自体のスクロールを止め、中身を縦並びにする */
         #detailsPanel {
             background: var(--surface);
-            padding: .8rem;
-            overflow-y: auto;
-            overflow-x: hidden;
+            padding: 0;
+            /* ツールバーを端まで広げるため一旦 0 にし、中身で調整します */
+            overflow: hidden;
+            /* 全体のスクロールを禁止 */
             border-top: 1px solid var(--border);
             height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* 2. Stats（Not Loadedなど）とツールバーを固定エリアにする */
         #stats {
             font-size: 12px;
             color: var(--muted);
-            margin: 0 0 .6rem 0;
+            margin: .8rem .8rem .6rem .8rem;
+            /* paddingの代わりにmarginで余白調整 */
             padding: .5rem .6rem;
             background: var(--bg);
             border-radius: 6px;
+            flex-shrink: 0;
+            /* 潰れないように固定 */
         }
+
+        #detailsPanel .toolbar {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 10;
+            padding: 0 .8rem .8rem .8rem;
+            /* 下のコンテンツとの間隔 */
+            margin: 0;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            /* 潰れないように固定 */
+        }
+
+        /* 3. 詳細が表示される #meta だけをスクロールさせる */
+        #meta {
+            flex-grow: 1;
+            overflow-y: auto;
+            /* ここにスクロールバーを出す */
+            overflow-x: hidden;
+            padding: .8rem;
+            /* ここで元々のパネルの余白を再現 */
+        }
+
 
         .hint {
             font-size: 12px;
@@ -337,6 +369,30 @@
             max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        table.kv td.key-cell {
+            position: relative;
+        }
+
+        table.kv td.key-cell .key-text {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        table.kv td.key-cell:hover .key-text {
+            overflow: visible;
+            white-space: normal;
+            word-break: break-all;
+            background: var(--surface);
+            position: relative;
+            z-index: 10;
+            padding: 0.2rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .nodes .place circle {
@@ -958,6 +1014,7 @@
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script>
         ; (function () {
             const svg = d3.select('#stage');
@@ -1145,10 +1202,16 @@
                         </div>
                         <div class="modal-body">
                             <div class="upload-area" id="maimlUploadArea">
-                                <div style="font-size:48px; margin-bottom:1rem;">📁</div>
-                                <p>Drag & drop MaiML files<br />or<br />click to select</p>
-                                <input accept=".xml,.maiml,.mai,application/xml" id="maimlFileInput" style="display:none;" type="file" />
+                                <div style="font-size:48px; margin-bottom:1rem;">📂</div>
+                                <p>Drag & drop MaiML files (.maiml or .maiml.zip)<br />or<br />click to select</p>
+                                <input accept=".xml,.maiml,.mai,.zip,application/xml,application/zip" id="maimlFileInput" style="display:none;" type="file" />
                             </div>
+                            <div id="zipProgress" style="display:none; margin-top:1rem; padding:0.8rem; background:var(--bg); border-radius:6px;">
+                                <div style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">Processing ZIP archive...</div>
+                                <div style="background:var(--border); height:4px; border-radius:2px; overflow:hidden;">
+                                <div id="zipProgressBar" style="background:var(--accent); height:100%; width:0%; transition:width 0.3s;"></div>
+                            </div>
+                        </div>
                             <div style="display:flex; gap:.5rem; justify-content:flex-end; margin-top:1rem;">
                                 <button class="btn" id="maimlCancelBtn">Cancel</button>
                             </div>
@@ -1197,12 +1260,537 @@
                 });
             }
 
+            // グローバル変数として追加
+            let zipFileCache = new Map(); // ZIPから展開したファイルをキャッシュ
+
             async function handleMaiMLFile(file) {
-                netKey = file.name.replace(/\.[^.]+$/, '');
-                document.title = `${file.name}`;
-                const text = await file.text();
-                loadXml(text);
-                extractDocumentMetadata(text);
+                const fileName = file.name.toLowerCase();
+
+                // ZIPファイルかどうか判定
+                if (fileName.endsWith('.zip') || fileName.endsWith('.maiml.zip')) {
+                    await handleMaiMLZipFile(file);
+                } else {
+                    // 単独のMaiMLファイル
+                    netKey = file.name.replace(/\.[^.]+$/, '');
+                    document.title = `${file.name}`;
+                    const text = await file.text();
+                    loadXml(text);
+                    extractDocumentMetadata(text);
+                }
+            }
+
+            async function handleMaiMLZipFile(file) {
+                const modal = document.querySelector('.modal-overlay.show');
+                const progressDiv = modal?.querySelector('#zipProgress');
+                const progressBar = modal?.querySelector('#zipProgressBar');
+
+                try {
+                    if (progressDiv) {
+                        progressDiv.style.display = 'block';
+                        progressBar.style.width = '10%';
+                    }
+
+                    console.log('Loading ZIP file:', file.name);
+
+                    // JSZipでZIPファイルを読み込み
+                    if (typeof JSZip === 'undefined') {
+                        throw new Error('JSZip library is not loaded. Please check the script tag.');
+                    }
+
+                    const zip = await JSZip.loadAsync(file);
+                    console.log('ZIP loaded, files:', Object.keys(zip.files).length);
+
+                    if (progressBar) progressBar.style.width = '30%';
+
+                    // MaiMLファイルを探す
+                    let maimlFile = null;
+                    let maimlFileName = '';
+
+                    for (const [filename, zipEntry] of Object.entries(zip.files)) {
+                        if (!zipEntry.dir && (filename.endsWith('.maiml') || filename.endsWith('.xml') || filename.endsWith('.mai'))) {
+                            maimlFile = zipEntry;
+                            maimlFileName = filename;
+                            break;
+                        }
+                    }
+
+                    if (!maimlFile) {
+                        throw new Error('No MaiML file (.maiml, .xml, .mai) found in ZIP archive');
+                    }
+
+                    console.log('Found MaiML file:', maimlFileName);
+
+                    if (progressBar) progressBar.style.width = '50%';
+
+                    // MaiMLファイルの内容を読み込み
+                    const maimlText = await maimlFile.async('text');
+
+                    // ファイル名からnetKeyを設定
+                    netKey = maimlFileName.replace(/\.[^.]+$/, '');
+                    document.title = maimlFileName;
+
+                    if (progressBar) progressBar.style.width = '60%';
+
+                    // ZIP内の全ファイルをキャッシュに格納
+                    zipFileCache.clear();
+                    const totalFiles = Object.keys(zip.files).length;
+                    let processedFiles = 0;
+
+                    for (const [filename, zipEntry] of Object.entries(zip.files)) {
+                        if (!zipEntry.dir && filename !== maimlFileName) {
+                            try {
+                                // ファイル拡張子で処理を分岐
+                                const ext = filename.toLowerCase().split('.').pop();
+                                const imageExts = ['jpg', 'jpeg', 'png', 'bmp', 'tif', 'tiff', 'gif'];
+                                const textExts = ['txt', 'csv', 'json', 'xml', 'log', 'md'];
+
+                                let fileData;
+                                if (imageExts.includes(ext)) {
+                                    // 画像ファイルはArrayBufferとして読み込み
+                                    fileData = await zipEntry.async('arraybuffer');
+                                } else {
+                                    // テキストファイルはテキストとして読み込み
+                                    fileData = await zipEntry.async('text');
+                                }
+
+                                // ファイル名のバリエーションを登録
+                                const cacheEntry = { data: fileData, ext: ext, originalName: filename };
+
+                                console.log('--- Caching file:', filename, '---');
+
+                                // 1. 元のファイル名
+                                zipFileCache.set(filename, cacheEntry);
+                                console.log('  Cached as:', filename);
+
+                                // 2. デコードしたファイル名
+                                try {
+                                    const decodedName = decodeURIComponent(filename);
+                                    if (filename !== decodedName) {
+                                        zipFileCache.set(decodedName, cacheEntry);
+                                        console.log('  Cached as (decoded):', decodedName);
+                                    }
+                                } catch (e) {
+                                    console.warn('  Failed to decode:', e);
+                                }
+
+                                // 3. パス区切り文字を正規化
+                                const normalizedName = filename.replace(/\\/g, '/');
+                                if (normalizedName !== filename) {
+                                    zipFileCache.set(normalizedName, cacheEntry);
+                                    console.log('  Cached as (normalized):', normalizedName);
+                                }
+
+                                // 4. ファイル名のみ（パスなし）
+                                const baseFileName = filename.split('/').pop().split('\\').pop();
+                                zipFileCache.set(baseFileName, cacheEntry);
+                                console.log('  Cached as (basename):', baseFileName);
+
+                                // 5. 小文字版
+                                zipFileCache.set(filename.toLowerCase(), cacheEntry);
+                                zipFileCache.set(baseFileName.toLowerCase(), cacheEntry);
+                                console.log('  Cached as (lowercase):', baseFileName.toLowerCase());
+
+                                console.log('Cached file:', filename, 'Size:',
+                                    typeof fileData === 'string' ? fileData.length : fileData.byteLength, 'bytes');
+                            } catch (err) {
+                                console.warn('Failed to cache file:', filename, err);
+                            }
+                        }
+
+                        processedFiles++;
+                        if (progressBar) {
+                            progressBar.style.width = `${60 + (processedFiles / totalFiles) * 20}%`;
+                        }
+                    }
+
+                    console.log('Total cached files:', zipFileCache.size);
+
+                    if (progressBar) progressBar.style.width = '85%';
+
+                    // MaiMLファイルをパース
+                    loadXml(maimlText);
+                    extractDocumentMetadata(maimlText);
+
+                    if (progressBar) progressBar.style.width = '95%';
+
+                    // insertionファイルを自動マッチング
+                    let matchCount = 0;
+                    try {
+                        matchCount = await autoMatchInsertionFiles();
+                    } catch (autoMatchError) {
+                        console.error('Auto-match error:', autoMatchError);
+                        // エラーが出てもZIP読み込み自体は成功として扱う
+                    }
+
+                    if (progressBar) progressBar.style.width = '100%';
+
+                    console.log('ZIP processing complete');
+
+                    // 成功メッセージ
+                    if (progressDiv) {
+                        setTimeout(() => {
+                            progressDiv.innerHTML = `
+                    <div style="color:var(--accent2); font-weight:600; text-align:center;">
+                        ✅ Successfully loaded ${Object.keys(zip.files).length} files from ZIP
+                        <br><span style="font-size:11px; font-weight:normal;">Auto-matched ${matchCount} insertion file(s)</span>
+                    </div>
+                `;
+                        }, 300);
+
+                        setTimeout(() => {
+                            if (modal && modal.parentElement) {
+                                document.body.removeChild(modal);
+                            }
+                        }, 1500);
+                    }
+
+                } catch (error) {
+                    console.error('ZIP processing error:', error);
+
+                    // エラーでもファイルがマッチしていれば部分的成功として扱う
+                    const matchedCount = insertionFiles.size;
+                    if (matchedCount > 0) {
+                        console.log('Despite error, successfully matched', matchedCount, 'insertion files');
+                        if (progressDiv) {
+                            progressDiv.innerHTML = `
+                    <div style="color:var(--accent2); font-weight:600; text-align:center;">
+                        ⚠️ Loaded with warnings
+                        <br><span style="font-size:11px; font-weight:normal;">Auto-matched ${matchedCount} insertion file(s)</span>
+                    </div>
+                `;
+                            setTimeout(() => {
+                                if (modal && modal.parentElement) {
+                                    document.body.removeChild(modal);
+                                }
+                            }, 2000);
+                            return; // alertを出さない
+                        }
+                    }
+
+                    if (progressDiv) {
+                        progressDiv.innerHTML = `
+                <div style="color:var(--warn); font-weight:600;">
+                    ❌ Error: ${error.message}
+                </div>
+            `;
+                    }
+                    alert('Failed to process ZIP file:\n' + error.message);
+                }
+            }
+
+            async function autoMatchInsertionFiles() {
+                console.log('=== Starting auto-match for insertion files ===');
+                console.log('Available cached files:', Array.from(zipFileCache.keys()));
+                console.log('Current insertionFiles Map size:', insertionFiles.size);
+
+                let matchCount = 0;
+
+                // まず、parseMaiML内で作成されたinsertionデータを確認
+                console.log('Checking global instances array...');
+                const allInsertions = [];
+
+                // instancesとtemplatesの両方からinsertionを収集
+                if (window.instances) {
+                    window.instances.forEach(inst => {
+                        if (inst.insertions && inst.insertions.length > 0) {
+                            inst.insertions.forEach(ins => {
+                                allInsertions.push({
+                                    id: ins.id,
+                                    raw: ins.raw,
+                                    element: ins.element,
+                                    parentType: 'instance',
+                                    parentId: inst.id
+                                });
+                            });
+                        }
+                    });
+                }
+
+                if (window.templateById) {
+                    window.templateById.forEach(tpl => {
+                        if (tpl.insertions && tpl.insertions.length > 0) {
+                            tpl.insertions.forEach(ins => {
+                                allInsertions.push({
+                                    id: ins.id,
+                                    raw: ins.raw,
+                                    element: ins.element,
+                                    parentType: 'template',
+                                    parentId: tpl.id
+                                });
+                            });
+                        }
+                    });
+                }
+
+                console.log('Total insertions found:', allInsertions.length);
+
+                if (allInsertions.length === 0) {
+                    console.warn('No insertions found in parsed data');
+                    return;
+                }
+
+                // 各insertionに対して処理
+                for (const insertion of allInsertions) {
+                    console.log('---');
+                    console.log('Processing insertion:', insertion.id);
+                    console.log('Parent:', insertion.parentType, insertion.parentId);
+
+                    // すでにファイルが登録済みならスキップ
+                    if (insertionFiles.has(insertion.id)) {
+                        console.log('→ Already has file, skipping');
+                        continue;
+                    }
+
+                    // XMLからURIを抽出
+                    let uri = null;
+
+                    // 方法1: element から直接取得
+                    if (insertion.element) {
+                        const uriElement = insertion.element.getElementsByTagName('uri')[0] ||
+                            insertion.element.querySelector('[uri]') ||
+                            Array.from(insertion.element.children || []).find(c =>
+                                c.tagName.toLowerCase().includes('uri') ||
+                                c.localName === 'uri'
+                            );
+
+                        if (uriElement) {
+                            uri = uriElement.textContent || uriElement.getAttribute('uri') || uriElement.getAttribute('value');
+                        }
+                    }
+
+                    // 方法2: raw HTML文字列から正規表現で抽出
+                    if (!uri && insertion.raw) {
+                        const uriMatch = insertion.raw.match(/<uri[^>]*>(.*?)<\/uri>/is) ||
+                            insertion.raw.match(/uri\s*=\s*["']([^"']+)["']/i);
+                        if (uriMatch) {
+                            uri = uriMatch[1];
+                        }
+                    }
+
+                    if (!uri) {
+                        console.log('→ No URI found');
+                        continue;
+                    }
+
+                    uri = uri.trim();
+                    console.log('Found URI:', uri);
+                    console.log('Found URI (raw bytes):', Array.from(uri).map(c => c.charCodeAt(0).toString(16)).join(' '));
+
+                    // URIデコードと正規化
+                    let decodedUri = uri;
+                    try {
+                        decodedUri = decodeURIComponent(uri);
+                        console.log('Decoded URI:', decodedUri);
+                    } catch (e) {
+                        console.warn('Failed to decode URI:', e);
+                    }
+
+                    // 相対パスの記号を削除 (./ や ../ など)
+                    const uriWithoutRelative = uri.replace(/^\.+\//g, '');
+                    const decodedUriWithoutRelative = decodedUri.replace(/^\.+\//g, '');
+
+                    console.log('URI without ./:', uriWithoutRelative);
+                    console.log('Decoded URI without ./:', decodedUriWithoutRelative);
+
+                    // パス区切り文字を正規化
+                    decodedUri = decodedUri.replace(/\\/g, '/');
+                    uri = uri.replace(/\\/g, '/');
+
+                    // ファイル名のみ抽出
+                    const fileName = decodedUri.split('/').pop();
+                    const fileNameEncoded = uri.split('/').pop();
+                    const fileNameWithoutRelative = decodedUriWithoutRelative.split('/').pop();
+
+                    console.log('Decoded URI (normalized):', decodedUri);
+                    console.log('File name (decoded):', fileName);
+                    console.log('File name (encoded):', fileNameEncoded);
+                    console.log('File name (without relative path):', fileNameWithoutRelative);
+
+                    // ZIP内のファイル名を全て表示（デバッグ用）
+                    console.log('--- Checking against cached files ---');
+                    console.log('Available files in cache:');
+                    Array.from(zipFileCache.keys()).forEach(key => {
+                        console.log('  - "' + key + '"');
+                    });
+
+                    // キャッシュから検索(複数パターンで試行)
+                    let cachedFile = null;
+                    let matchedKey = null;
+
+                    const searchPatterns = [
+                        uri,                                    // フルパス(エンコード済み)
+                        uriWithoutRelative,                     // ./ なしエンコード済み
+                        decodedUri,                             // フルパス(デコード済み)
+                        decodedUriWithoutRelative,              // ./ なしデコード済み
+                        fileName,                               // ファイル名のみ(デコード済み)
+                        fileNameEncoded,                        // ファイル名のみ(エンコード済み)
+                        fileNameWithoutRelative,                // ファイル名(相対パスなし)
+                        fileName.toLowerCase(),                 // 小文字
+                        fileNameEncoded.toLowerCase(),
+                        // 拡張子の大文字小文字バリエーション
+                        fileName.replace(/\.[^.]+$/, m => m.toLowerCase()),
+                        fileName.replace(/\.[^.]+$/, m => m.toUpperCase()),
+                        // エンコード済みファイル名のデコード版
+                        decodeURIComponent(fileNameEncoded),
+                        decodeURIComponent(fileNameEncoded.replace(/^\.+\//g, ''))
+                    ];
+
+                    console.log('Search patterns:', searchPatterns);
+
+                    // 完全一致を試す
+                    for (const pattern of searchPatterns) {
+                        console.log('Trying exact match for pattern:', pattern);
+                        if (zipFileCache.has(pattern)) {
+                            cachedFile = zipFileCache.get(pattern);
+                            matchedKey = pattern;
+                            console.log('✓ Exact match found:', pattern);
+                            break;
+                        }
+                    }
+
+                    // 部分一致を試す
+                    if (!cachedFile) {
+                        console.log('No exact match, trying partial match...');
+                        for (const pattern of searchPatterns) {
+                            for (const [cachedName, cachedData] of zipFileCache.entries()) {
+                                const cachedLower = cachedName.toLowerCase();
+                                const patternLower = pattern.toLowerCase();
+
+                                // ファイル名部分だけを取り出して比較
+                                const cachedFileName = cachedName.split('/').pop().split('\\').pop();
+                                const cachedFileNameLower = cachedFileName.toLowerCase();
+
+                                if (cachedName.endsWith(pattern) ||
+                                    cachedLower.endsWith(patternLower) ||
+                                    cachedName === pattern ||
+                                    cachedLower === patternLower ||
+                                    cachedFileName === pattern ||
+                                    cachedFileNameLower === patternLower) {
+                                    cachedFile = cachedData;
+                                    matchedKey = cachedName;
+                                    console.log('✓ Partial match found:', cachedName, 'for pattern:', pattern);
+                                    break;
+                                }
+                            }
+                            if (cachedFile) break;
+                        }
+                    }
+
+                    if (!cachedFile) {
+                        console.warn('✗ File not found in cache for URI:', uri);
+                        console.log('Available files in cache:', Array.from(zipFileCache.keys()));
+                        continue;
+                    }
+
+                    console.log('Matched file:', matchedKey);
+
+                    // ファイル形式を判定
+                    const ext = cachedFile.ext;
+                    const imageExts = ['jpg', 'jpeg', 'png', 'bmp', 'tif', 'tiff', 'gif'];
+                    const textExts = ['txt', 'log', 'md', 'xml', 'json'];  // XMLとJSONをテキスト形式に追加
+                    const csvExts = ['csv'];
+
+                    let format = 'text'; // デフォルト
+                    if (imageExts.includes(ext)) {
+                        format = 'image';
+                    } else if (csvExts.includes(ext)) {
+                        format = 'table';
+                    } else if (textExts.includes(ext)) {
+                        format = 'text';  // XML、JSON、TXT等はテキスト形式として扱う
+                    }
+
+                    console.log('Determined format:', format, 'for extension:', ext);
+
+                    try {
+                        // Fileオブジェクトまたは互換オブジェクトを作成
+                        if (format === 'image') {
+                            // 画像の場合
+                            if (ext === 'tif' || ext === 'tiff') {
+                                // TIFFはArrayBufferのまま
+                                insertionFiles.set(insertion.id, {
+                                    file: { name: fileName, type: 'image/tiff' },
+                                    fileData: { type: 'tiff', data: cachedFile.data, name: fileName },
+                                    format: format,
+                                    preview: '<p>TIFF image loaded from ZIP</p>'
+                                });
+                            } else {
+                                // 他の画像形式はBlob/URLに変換
+                                const blob = new Blob([cachedFile.data], {
+                                    type: `image/${ext === 'jpg' ? 'jpeg' : ext}`
+                                });
+                                const url = URL.createObjectURL(blob);
+
+                                insertionFiles.set(insertion.id, {
+                                    file: { name: fileName, type: blob.type },
+                                    fileData: { type: 'image', data: url, name: fileName },
+                                    format: format,
+                                    preview: `<img src="${url}" style="max-width:100%; height:auto;" />`
+                                });
+                            }
+                        } else {
+                            // テキスト系ファイル（XML、JSON、TXT等）
+                            // MIMEタイプを拡張子に応じて設定
+                            let mimeType = 'text/plain';
+                            if (ext === 'xml') {
+                                mimeType = 'application/xml';
+                            } else if (ext === 'json') {
+                                mimeType = 'application/json';
+                            } else if (ext === 'csv') {
+                                mimeType = 'text/csv';
+                            }
+
+                            const fileObj = new File([cachedFile.data], fileName, {
+                                type: mimeType
+                            });
+
+                            insertionFiles.set(insertion.id, {
+                                file: fileObj,
+                                fileData: { type: 'file', data: fileObj, name: fileName },
+                                format: format,
+                                preview: `<pre style="white-space:pre-wrap; max-height:200px; overflow:auto;">${String(cachedFile.data).substring(0, 500)
+                                    }${String(cachedFile.data).length > 500 ? '...' : ''}</pre>`
+                            });
+                        }
+
+                        matchCount++;
+                        console.log('✓ Successfully registered file for insertion:', insertion.id);
+
+                    } catch (err) {
+                        console.error('✗ Failed to register file for insertion:', insertion.id, err);
+                    }
+                }
+
+                console.log('=== Auto-match complete: ' + matchCount + ' file(s) matched ===');
+                console.log('insertionFiles Map size after matching:', insertionFiles.size);
+                console.log('insertionFiles keys:', Array.from(insertionFiles.keys()));
+
+                // UI更新: ボタンの状態を更新
+                if (matchCount > 0) {
+                    console.log('Updating UI buttons...');
+                    document.querySelectorAll('[data-insertion-id]').forEach(btn => {
+                        const insertionId = btn.dataset.insertionId;
+                        if (insertionFiles.has(insertionId)) {
+                            btn.classList.add('has-file');
+                            btn.textContent = '🔎 Show File';
+                            console.log('Updated button for:', insertionId);
+                        }
+                    });
+
+                    // 詳細パネルが表示されている場合は再描画
+                    try {
+                        const selectedNodes = gNodes.selectAll('g.node.selected');
+                        if (selectedNodes && !selectedNodes.empty()) {
+                            const selectedNode = selectedNodes.datum();
+                            if (selectedNode) {
+                                console.log('Refreshing details panel for selected node:', selectedNode.id);
+                                showDetails(selectedNode);
+                            }
+                        }
+                    } catch (err) {
+                        console.log('Could not refresh details panel (no node selected):', err.message);
+                    }
+                }
+                return matchCount; // ← この行を追加
             }
 
             function extractDocumentMetadata(xmlText) {
@@ -1673,6 +2261,16 @@
                         }
 
                         closeModal();
+
+                        // --- 【追加】手動アップロード時に詳細パネルをリフレッシュしてプレビューを表示する ---
+                        const selectedNodes = gNodes.selectAll('g.node.selected');
+                        if (!selectedNodes.empty()) {
+                            const selectedNode = selectedNodes.datum();
+                            if (selectedNode) {
+                                showDetails(selectedNode);
+                            }
+                        }
+                        // -----------------------------------------------------------------------
                     });
                 }
             });
@@ -1713,7 +2311,7 @@
                 const ac = links.length;
                 const tplCount = templateById.size;
                 const instCount = instances.length;
-                $stats.textContent = `PLACE: ${pc} / program(TRANSITION): ${tc} / ARC: ${ac} / Templates: ${tplCount} / Instances: ${instCount} (Saved Key: ${layoutKey()})`;
+                $stats.textContent = `PLACE: ${pc} / TRANSITION: ${tc} / Templates: ${tplCount} / Instances: ${instCount} (Saved Key: ${layoutKey()})`;
             }
 
             function parseMaiML(xml) {
@@ -1980,7 +2578,15 @@
                         const l = local(e);
                         if (l === 'property') props.push(readProperty(e));
                         else if (l === 'content') conts.push(readContent(e));
-                        else if (l === 'insertion') insertions.push({ raw: e.outerHTML, id: genId('ins') });
+                        else if (l === 'insertion') {
+                            // insertion要素のIDを保持(なければ生成)
+                            const insId = e.getAttribute('id') || e.getAttribute('ID') || e.getAttribute('Id') || genId('ins');
+                            insertions.push({
+                                raw: e.outerHTML,
+                                id: insId,
+                                element: e  // 元のXML要素も保持
+                            });
+                        }
                     }
 
                     return { properties: props, contents: conts, insertions, uuid, name, description, annotation, templateRefs, instanceRefs };
@@ -2245,7 +2851,10 @@
                             p.textContent = 'No templates referenced by placeRef found.';
                             $meta.appendChild(p);
                         }
-                        tpls.forEach((tpl, i) => $meta.appendChild(renderTemplateDetails(tpl, i + 1)));
+                        tpls.forEach((tpl, i) => {
+                            // renderEntryDetailsを使用
+                            $meta.appendChild(renderEntryDetails(tpl, i + 1, 'template'));
+                        });
                     }
                     if (metaMode !== 'template') {
                         const hi = document.createElement('h3');
@@ -2258,7 +2867,10 @@
                             p.textContent = 'No instances referencing templates corresponding to this PLACE were found.';
                             $meta.appendChild(p);
                         }
-                        insts.forEach((ins, i) => $meta.appendChild(renderInstanceDetails(ins, i + 1)));
+                        insts.forEach((ins, i) => {
+                            // renderEntryDetailsを使用
+                            $meta.appendChild(renderEntryDetails(ins, i + 1, 'instance'));
+                        });
                     }
                 } else if (node.type === 'transition') {
                     // --- 【修正】テンプレート表示ロジックの変更 ---
@@ -2288,6 +2900,7 @@
 
                             const det = document.createElement('details');
                             det.className = 'meta';
+                            det.open = true;
                             const sum = document.createElement('summary');
                             sum.innerHTML = `<span class="badge">#${idx + 1}</span> [Instruction]  ${esc(instr.id)}`;
                             det.appendChild(sum);
@@ -2358,247 +2971,394 @@
                 }
             }
 
-            function renderTemplateDetails(tpl, idx) {
+            /**
+             * Template と Instance の詳細表示を共通で行う関数（修正版）
+             */
+            function renderEntryDetails(item, index, mode) {
+                const isTemplate = mode === 'template';
                 const det = document.createElement('details');
                 det.className = 'meta';
+                if (!isTemplate) det.open = true;
+
                 const sum = document.createElement('summary');
-                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(tpl.role)}]  ${esc(tpl.id || '')}`;
+                const badgeStyle = isTemplate ? '' : 'style="background:var(--accent2); color:#fff;"';
+                const label = isTemplate ? 'Template' : 'Instance';
+                sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.id || '')} ${isTemplate ? `(${esc(item.role || '')})` : ''}`;
+
+                // --- AI要約ボタンを追加 ---
+                const aiBtn = document.createElement('button');
+                aiBtn.textContent = 'AI Summary';
+                aiBtn.className = 'btn';
+                aiBtn.style.marginLeft = '8px';
+                aiBtn.style.fontSize = '11px';
+                aiBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // detailsの開閉を防ぐ
+
+                    const obj = item;
+                    let parts = [];
+                    ['id', 'role', 'name', 'description', 'annotation'].forEach(k => {
+                        if (obj[k]) parts.push(k.toUpperCase() + ": " + obj[k]);
+                    });
+
+                    // 階層構造を再帰的に処理する関数
+                    function flattenProperties(items, prefix = '') {
+                        const result = [];
+                        items.forEach(item => {
+                            const key = prefix ? `${prefix}.${item.key || item.name}` : (item.key || item.name);
+                            const info = [];
+                            if (item.type) info.push(`type=${item.type}`);
+                            if (item.description) info.push(`desc="${item.description}"`);
+                            if (item.value) info.push(`value="${item.value}"`);
+                            if (item.units) info.push(`units=${item.units}`);
+
+                            result.push(`${key}: ${info.join(', ')}`);
+
+                            // 子要素があれば再帰的に処理
+                            if (item.children && item.children.length > 0) {
+                                result.push(...flattenProperties(item.children, key));
+                            }
+                        });
+                        return result;
+                    }
+
+                    if (obj.properties && obj.properties.length > 0) {
+                        parts.push("Properties:");
+                        parts.push(...flattenProperties(obj.properties));
+                    }
+                    if (obj.contents && obj.contents.length > 0) {
+                        parts.push("Contents:");
+                        parts.push(...flattenProperties(obj.contents));
+                    }
+                    const text = parts.join("\n");
+                    window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
+                });
+                sum.appendChild(aiBtn);
+                // --- AI要約ボタン追加ここまで ---
+
                 det.appendChild(sum);
 
-                (function () {
-                    const aiBtn = document.createElement('button');
-                    aiBtn.textContent = 'AI Summary';
-                    aiBtn.className = 'btn';
-                    aiBtn.style.marginLeft = '8px';
-                    aiBtn.style.fontSize = '11px';
-                    aiBtn.addEventListener('click', () => {
-                        const obj = tpl;
-                        let parts = [];
-                        ['id', 'role', 'name', 'description', 'annotation'].forEach(k => {
-                            if (obj[k]) parts.push(k.toUpperCase() + ": " + obj[k]);
-                        });
+                // --- 1. 基本情報テーブル ---
+                const infoTable = document.createElement('table');
+                infoTable.className = 'kv';
+                infoTable.style.marginTop = '0.5rem';
 
-                        // 階層構造を再帰的に処理する関数
-                        function flattenProperties(items, prefix = '') {
-                            const result = [];
-                            items.forEach(item => {
-                                const key = prefix ? `${prefix}.${item.key || item.name}` : (item.key || item.name);
-                                const info = [];
-                                if (item.type) info.push(`type=${item.type}`);
-                                if (item.description) info.push(`desc="${item.description}"`);
-                                if (item.value) info.push(`value="${item.value}"`);
-                                if (item.units) info.push(`units=${item.units}`);
+                let infoHtml = '';
 
-                                result.push(`${key}: ${info.join(', ')}`);
+                if (item.uuid) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">UUID</th><td>${esc(item.uuid)}</td></tr>`;
+                if (item.name) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Name</th><td>${esc(item.name)}</td></tr>`;
+                if (item.description) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Description</th><td>${esc(item.description)}</td></tr>`;
+                if (item.annotation) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Annotation</th><td>${esc(item.annotation)}</td></tr>`;
+                if (isTemplate && item.placeRef) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Place Ref</th><td>${esc(item.placeRef)}</td></tr>`;
+                if (!isTemplate && item.templateRef) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Template Ref</th><td>${esc(item.templateRef)}</td></tr>`;
+                if (!isTemplate && item.instanceOf) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Instance Of</th><td>${esc(item.instanceOf)}</td></tr>`;
 
-                                // 子要素があれば再帰的に処理
-                                if (item.children && item.children.length > 0) {
-                                    result.push(...flattenProperties(item.children, key));
-                                }
-                            });
-                            return result;
-                        }
-
-                        if (obj.properties && obj.properties.length > 0) {
-                            parts.push("Properties:");
-                            parts.push(...flattenProperties(obj.properties));
-                        }
-                        if (obj.contents && obj.contents.length > 0) {
-                            parts.push("Contents:");
-                            parts.push(...flattenProperties(obj.contents));
-                        }
-                        const text = parts.join("\n");
-                        window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
-                    });
-                    sum.appendChild(aiBtn);
-                })();
-
-                if (tpl.programId) {
-                    const p2 = document.createElement('p');
-                    p2.className = 'hint';
-                    p2.textContent = `[program] - ${tpl.programId}`;
-                    det.appendChild(p2);
-                }
-
-                if (tpl.uuid || tpl.name || tpl.description || tpl.annotation || tpl.placeRef || (tpl.templateRefs && tpl.templateRefs.length > 0)) {
-                    const infoTable = document.createElement('table');
-                    infoTable.className = 'kv';
-                    infoTable.style.marginTop = '0.5rem';
-                    let html = '';
-                    if (tpl.uuid) html += `<tr><th>UUID</th><td>${esc(tpl.uuid)}</td></tr>`;
-                    if (tpl.name) html += `<tr><th>Name</th><td>${esc(tpl.name)}</td></tr>`;
-                    if (tpl.description) html += `<tr><th>Description</th><td>${esc(tpl.description)}</td></tr>`;
-                    if (tpl.annotation) html += `<tr><th>Annotation</th><td>${esc(tpl.annotation)}</td></tr>`;
-                    if (tpl.placeRef) html += `<tr><th>Ref. Place</th><td>${esc(tpl.placeRef)}</td></tr>`;
-                    if (tpl.templateRefs && tpl.templateRefs.length > 0) {
-                        html += `<tr><th>Ref. Template</th><td>${tpl.templateRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
-                    }
-                    infoTable.innerHTML = html;
+                if (infoHtml) {
+                    infoTable.innerHTML = infoHtml;
                     det.appendChild(infoTable);
                 }
 
-                // propertyとcontentを統合して表示
-                const allItems = [...tpl.properties, ...tpl.contents]; // 修正: contentsを追加
-
-                if (allItems.length) {
-                    det.appendChild(renderPropertiesTable(allItems));
-                } else {
-                    const p = document.createElement('p');
-                    p.className = 'hint';
-                    p.textContent = 'No properties available.';
-                    det.appendChild(p);
-                }
-                if ((tpl.insertions || []).length) {
+                // --- 2. Insertion の表示 ---
+                const insertions = item.insertions || [];
+                if (insertions.length) {
                     const h = document.createElement('h4');
                     h.textContent = 'insertion';
                     det.appendChild(h);
-                    tpl.insertions.forEach(x => {
+                    insertions.forEach(x => {
                         const container = document.createElement('div');
                         container.className = 'insertion-container';
 
+                        // A. テーブル部分（insertionIdを渡して画像プレビューを表示可能にする）
+                        const contentDiv = document.createElement('div');
+                        contentDiv.innerHTML = formatInsertionAsTable(x.raw || '', x.id);
+                        container.appendChild(contentDiv);
+
+                        // B. ボタン部分 (å³å¯„ã›é…ç½®)
+                        const btnWrapper = document.createElement('div');
+                        btnWrapper.style.cssText = "display:flex; justify-content:flex-end; margin-top:0.3rem;";
+
                         const btn = document.createElement('button');
                         btn.className = 'insertion-upload-btn';
+
+                        // ★重要: CSS の absolute 配置を打ち消して static にする
+                        btn.style.position = 'static';
+
                         btn.textContent = insertionFiles.has(x.id) ? '🔎 Show File' : '📤 Upload';
                         btn.dataset.insertionId = x.id;
                         if (insertionFiles.has(x.id)) btn.classList.add('has-file');
 
                         btn.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            if (insertionFiles.has(x.id)) {
-                                showStoredFile(x.id);
-                            } else {
-                                openUploadModal(x.id);
-                            }
+                            if (insertionFiles.has(x.id)) showStoredFile(x.id);
+                            else openUploadModal(x.id);
                         });
 
-                        const pre = document.createElement('pre');
-                        pre.className = 'xml-snip';
-                        pre.textContent = x.raw || '';
+                        btnWrapper.appendChild(btn);
+                        container.appendChild(btnWrapper);
 
-                        container.appendChild(btn);
-                        container.appendChild(pre);
                         det.appendChild(container);
                     });
                 }
+
+                // --- 3. Properties / Content テーブル ---
+                const allProps = (item.properties || []).concat(item.contents || []);
+
+                if (allProps.length > 0) {
+                    const h = document.createElement('h4');
+                    h.textContent = 'Properties / Content';
+                    det.appendChild(h);
+                    const propsTableElement = renderPropertiesTable(allProps);
+                    det.appendChild(propsTableElement);
+                } else {
+                    const p = document.createElement('p');
+                    p.className = 'hint';
+                    p.textContent = 'No properties available.';
+                    det.appendChild(p);
+                }
+
                 return det;
             }
 
-            function renderInstanceDetails(ins, idx) {
-                const det = document.createElement('details');
-                det.className = 'meta';
-                const sum = document.createElement('summary');
-                sum.innerHTML = `<span class="badge">#${idx}</span> [${esc(ins.role)}]  ${esc(ins.id || '')}`;
-                det.appendChild(sum);
+            /**
+             * Insertion XMLをテーブル化する関数
+             * @param {string} xmlString - XML文字列
+             * @param {string} insertionId - insertion要素のID（画像プレビュー用）
+             */
+            function formatInsertionAsTable(xmlString, insertionId) {
+                if (!xmlString) return '';
+                try {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+                    const root = xmlDoc.documentElement;
+                    if (root.getElementsByTagName("parsererror").length > 0) return `<pre class="xml-snip">${esc(xmlString)}</pre>`;
 
-                (function () {
-                    const aiBtn = document.createElement('button');
-                    aiBtn.textContent = 'AI Summary';
-                    aiBtn.className = 'btn';
-                    aiBtn.style.marginLeft = '8px';
-                    aiBtn.style.fontSize = '11px';
-                    aiBtn.addEventListener('click', () => {
-                        const obj = ins;
-                        let parts = [];
-                        ['id', 'role', 'name', 'description', 'annotation'].forEach(k => {
-                            if (obj[k]) parts.push(k.toUpperCase() + ": " + obj[k]);
-                        });
+                    // 画像ファイルが登録されているかチェック
+                    const hasImage = insertionId && insertionFiles.has(insertionId);
+                    const storedFile = hasImage ? insertionFiles.get(insertionId) : null;
+                    const isImage = storedFile && storedFile.format === 'image';
 
-                        // 階層構造を再帰的に処理する関数
-                        function flattenProperties(items, prefix = '') {
-                            const result = [];
-                            items.forEach(item => {
-                                const key = prefix ? `${prefix}.${item.key || item.name}` : (item.key || item.name);
-                                const info = [];
-                                if (item.type) info.push(`type=${item.type}`);
-                                if (item.description) info.push(`desc="${item.description}"`);
-                                if (item.value) info.push(`value="${item.value}"`);
-                                if (item.units) info.push(`units=${item.units}`);
+                    // 子要素の数をカウント
+                    const children = Array.from(root.children);
+                    const rowCount = children.length || (root.textContent.trim() ? 1 : 0);
 
-                                result.push(`${key}: ${info.join(', ')}`);
+                    let html = `<table class="kv" style="margin-top: 0.5rem; background: rgba(0,0,0,0.02); width: 100%;">
+            <tbody>`;
 
-                                // 子要素があれば再帰的に処理
-                                if (item.children && item.children.length > 0) {
-                                    result.push(...flattenProperties(item.children, key));
-                                }
-                            });
-                            return result;
-                        }
-
-                        if (obj.properties && obj.properties.length > 0) {
-                            parts.push("Properties:");
-                            parts.push(...flattenProperties(obj.properties));
-                        }
-                        if (obj.contents && obj.contents.length > 0) {
-                            parts.push("Contents:");
-                            parts.push(...flattenProperties(obj.contents));
-                        }
-                        const text = parts.join("\n");
-                        window.openAISummaryDialog ? window.openAISummaryDialog(text) : alert("AI summary feature is not initialized");
-                    });
-                    sum.appendChild(aiBtn);
-                })();
-
-                if (ins.uuid || ins.name || ins.description || ins.annotation || ins.templateRef || (ins.instanceRefs && ins.instanceRefs.length > 0)) {
-                    const infoTable = document.createElement('table');
-                    infoTable.className = 'kv';
-                    infoTable.style.marginTop = '0.5rem';
-                    let html = '';
-                    if (ins.uuid) html += `<tr><th>UUID</th><td>${esc(ins.uuid)}</td></tr>`;
-                    if (ins.name) html += `<tr><th>Name</th><td>${esc(ins.name)}</td></tr>`;
-                    if (ins.description) html += `<tr><th>Description</th><td>${esc(ins.description)}</td></tr>`;
-                    if (ins.annotation) html += `<tr><th>Annotation</th><td>${esc(ins.annotation)}</td></tr>`;
-                    if (ins.templateRef) html += `<tr><th>Ref. Template</th><td>${esc(ins.templateRef)}</td></tr>`;
-                    if (ins.instanceRefs && ins.instanceRefs.length > 0) {
-                        html += `<tr><th>Ref. Instance</th><td>${ins.instanceRefs.map(ref => esc(ref)).join(', ')}</td></tr>`;
-                    }
-                    infoTable.innerHTML = html;
-                    det.appendChild(infoTable);
-                }
-
-                // propertyとcontentを統合して表示
-                const allItems = [...ins.properties, ...ins.contents]; // 修正: contentsを追加
-
-                if (allItems.length) {
-                    det.appendChild(renderPropertiesTable(allItems));
-                } else {
-                    const p = document.createElement('p');
-                    p.className = 'hint';
-                    p.textContent = 'No properties available.';
-                    det.appendChild(p);
-                }
-                if ((ins.insertions || []).length) {
-                    const h = document.createElement('h4');
-                    h.textContent = 'insertion';
-                    det.appendChild(h);
-                    ins.insertions.forEach(x => {
-                        const container = document.createElement('div');
-                        container.className = 'insertion-container';
-
-                        const btn = document.createElement('button');
-                        btn.className = 'insertion-upload-btn';
-                        btn.textContent = insertionFiles.has(x.id) ? '🔎 Show File' : '📤 Upload';
-                        btn.dataset.insertionId = x.id;
-                        if (insertionFiles.has(x.id)) btn.classList.add('has-file');
-
-                        btn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (insertionFiles.has(x.id)) {
-                                showStoredFile(x.id);
+                    // 子要素がある場合
+                    if (children.length > 0) {
+                        children.forEach((child, index) => {
+                            const val = child.children.length > 0 ? child.innerHTML : child.textContent;
+                            if (index === 0 && isImage) {
+                                // 最初の行に画像プレビューを表示（rowspanで複数行にまたがる）
+                                html += `<tr>
+                                    <th style="width:1%; white-space:nowrap;">${esc(child.tagName)}</th>
+                                    <td>${esc(val)}</td>
+                                    <td style="text-align:center; vertical-align:middle; padding:2px;" rowspan="${rowCount}">${getImagePreview(insertionId, storedFile)}</td>
+                                </tr>`;
                             } else {
-                                openUploadModal(x.id);
+                                html += `<tr>
+                                    <th style="width:1%; white-space:nowrap;">${esc(child.tagName)}</th>
+                                    <td>${esc(val)}</td>
+                                </tr>`;
                             }
                         });
+                    } else if (root.textContent.trim()) {
+                        // 属性も子要素もなく、テキストだけの場合
+                        const previewCell = isImage ? `<td style="text-align:center; vertical-align:middle; padding:2px;">${getImagePreview(insertionId, storedFile)}</td>` : '';
+                        html += `<tr>
+                            <th style="width:1%; white-space:nowrap;">Value</th>
+                            <td>${esc(root.textContent)}</td>
+                            ${previewCell}
+                        </tr>`;
+                    }
 
-                        const pre = document.createElement('pre');
-                        pre.className = 'xml-snip';
-                        pre.textContent = x.raw || '';
-
-                        container.appendChild(btn);
-                        container.appendChild(pre);
-                        det.appendChild(container);
-                    });
+                    html += `</tbody></table>`;
+                    return html;
+                } catch (e) {
+                    return `<pre class="xml-snip">${esc(xmlString)}</pre>`;
                 }
-                return det;
+            }
+
+            /**
+                         * 画像プレビューを生成する関数
+                         * @param {string} insertionId - insertion要素のID
+                         * @param {object} storedFile - 保存されたファイル情報
+                         */
+            function getImagePreview(insertionId, storedFile) {
+                if (!storedFile || storedFile.format !== 'image') return '';
+
+                try {
+                    let imageUrl = '';
+
+                    if (storedFile.fileData.type === 'tiff') {
+                        // TIFFの場合はプレビュー用のdivを返し、後で非同期で描画
+                        const previewId = `tiff-preview-${insertionId}`;
+                        // 非同期でTIFF画像を描画
+                        setTimeout(() => {
+                            renderTiffPreview(previewId, insertionId, storedFile.fileData.data);
+                        }, 100);
+                        // margin: 0 auto を追加して中央寄せにする
+                        return `<div id="${previewId}" style="width:70px; height:48px; margin: 0 auto; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:4px; background:var(--bg); font-size:9px; color:var(--muted); cursor:pointer;" 
+                            onclick="event.stopPropagation(); document.querySelector('[data-insertion-id=\\'${esc(insertionId)}\\']').click();"
+                            title="Click to view full size">Loading...</div>`;
+                    } else if (storedFile.fileData.type === 'image') {
+                        imageUrl = storedFile.fileData.data;
+                    } else if (storedFile.file && storedFile.file instanceof File) {
+                        imageUrl = URL.createObjectURL(storedFile.file);
+                    }
+
+                    if (imageUrl) {
+                        // event.stopPropagation() を追加してイベントの伝播を防ぐ
+                        return `<img src="${esc(imageUrl)}" 
+                            style="max-width:70px; max-height:48px; object-fit:contain; border:1px solid var(--border); border-radius:4px; cursor:pointer;" 
+                            onclick="event.stopPropagation(); document.querySelector('[data-insertion-id=\\'${esc(insertionId)}\\']').click();"
+                            title="Click to view full size" />`;
+                    }
+                } catch (e) {
+                    console.error('Error generating image preview:', e);
+                }
+
+                return '';
+            }
+
+            /**
+                         * TIFF画像のプレビューを非同期で描画する関数
+                         * @param {string} previewId - プレビュー用divのID
+                         * @param {string} insertionId - insertion要素のID
+                         * @param {ArrayBuffer} tiffData - TIFF画像のデータ
+                         */
+            async function renderTiffPreview(previewId, insertionId, tiffData) {
+                try {
+                    const previewDiv = document.getElementById(previewId);
+                    if (!previewDiv) return;
+
+                    if (typeof UTIF === 'undefined') {
+                        previewDiv.textContent = 'UTIF not loaded';
+                        return;
+                    }
+
+                    const uint8Array = new Uint8Array(tiffData);
+                    const ifds = UTIF.decode(uint8Array);
+
+                    if (!ifds || ifds.length === 0) {
+                        previewDiv.textContent = 'Parse error';
+                        return;
+                    }
+
+                    const ifd = ifds[0];
+                    UTIF.decodeImage(uint8Array, ifd);
+
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(70 / ifd.width, 48 / ifd.height, 1);
+                    canvas.width = Math.floor(ifd.width * scale);
+                    canvas.height = Math.floor(ifd.height * scale);
+                    const ctx = canvas.getContext('2d');
+
+                    const rgba = UTIF.toRGBA8(ifd);
+                    const imageData = new ImageData(new Uint8ClampedArray(rgba), ifd.width, ifd.height);
+
+                    // 一時的なcanvasでフルサイズの画像を描画
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = ifd.width;
+                    tempCanvas.height = ifd.height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.putImageData(imageData, 0, 0);
+
+                    // スケールダウンして描画
+                    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+
+                    // --- スタイル設定 ---
+                    canvas.style.maxWidth = '70px';
+                    canvas.style.maxHeight = '48px';
+                    canvas.style.objectFit = 'contain';
+                    canvas.style.cursor = 'pointer';
+                    canvas.style.borderRadius = '4px';
+                    // 中央寄せ
+                    canvas.style.display = 'block';
+                    canvas.style.margin = '0 auto';
+
+                    // 【修正】Canvas自体に枠線を設定（他の画像形式と合わせる）
+                    canvas.style.border = '1px solid var(--border)';
+
+                    canvas.onclick = function (e) {
+                        // イベントの伝播を止めて二重起動を防ぐ
+                        e.stopPropagation();
+                        const btn = document.querySelector(`[data-insertion-id="${insertionId}"]`);
+                        if (btn) btn.click();
+                    };
+
+                    // 【修正】親divの枠線と背景を削除（Canvasに枠を移譲したため）
+                    previewDiv.style.border = 'none';
+                    previewDiv.style.background = 'transparent';
+
+                    previewDiv.innerHTML = '';
+                    previewDiv.appendChild(canvas);
+                } catch (e) {
+                    console.error('TIFF preview error:', e);
+                    const previewDiv = document.getElementById(previewId);
+                    if (previewDiv) previewDiv.textContent = 'Error';
+                }
+                try {
+                    const previewDiv = document.getElementById(previewId);
+                    if (!previewDiv) return;
+
+                    if (typeof UTIF === 'undefined') {
+                        previewDiv.textContent = 'UTIF not loaded';
+                        return;
+                    }
+
+                    const uint8Array = new Uint8Array(tiffData);
+                    const ifds = UTIF.decode(uint8Array);
+
+                    if (!ifds || ifds.length === 0) {
+                        previewDiv.textContent = 'Parse error';
+                        return;
+                    }
+
+                    const ifd = ifds[0];
+                    UTIF.decodeImage(uint8Array, ifd);
+
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(70 / ifd.width, 48 / ifd.height, 1);
+                    canvas.width = Math.floor(ifd.width * scale);
+                    canvas.height = Math.floor(ifd.height * scale);
+                    const ctx = canvas.getContext('2d');
+
+                    const rgba = UTIF.toRGBA8(ifd);
+                    const imageData = new ImageData(new Uint8ClampedArray(rgba), ifd.width, ifd.height);
+
+                    // 一時的なcanvasでフルサイズの画像を描画
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = ifd.width;
+                    tempCanvas.height = ifd.height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.putImageData(imageData, 0, 0);
+
+                    // スケールダウンして描画
+                    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+
+                    canvas.style.maxWidth = '70px';
+                    canvas.style.maxHeight = '48px';
+                    canvas.style.objectFit = 'contain';
+                    canvas.style.cursor = 'pointer';
+                    canvas.style.borderRadius = '4px';
+                    // 中央寄せを確実にする
+                    canvas.style.display = 'block';
+                    canvas.style.margin = '0 auto';
+
+                    canvas.onclick = function (e) {
+                        // --- 【修正】イベントの伝播を止めて二重起動を防ぐ ---
+                        e.stopPropagation();
+                        const btn = document.querySelector(`[data-insertion-id="${insertionId}"]`);
+                        if (btn) btn.click();
+                    };
+
+                    previewDiv.innerHTML = '';
+                    previewDiv.appendChild(canvas);
+                } catch (e) {
+                    console.error('TIFF preview error:', e);
+                    const previewDiv = document.getElementById(previewId);
+                    if (previewDiv) previewDiv.textContent = 'Error';
+                }
             }
 
             function showStoredFile(insertionId) {
@@ -2696,14 +3456,104 @@
                             container.appendChild(img);
                         }
                     } else if (stored.format === 'chart') {
-                        await renderChart(stored.fileData.data);
-                        container.innerHTML = $previewContent.innerHTML;
+                        // ★ Chart形式の修正
+                        container.innerHTML = '<p>Loading chart...</p>';
+
+                        const text = await stored.fileData.data.text();
+                        const parsed = Papa.parse(text, { header: true, dynamicTyping: true });
+
+                        if (parsed.errors.length > 0) {
+                            throw new Error('CSV parsing error');
+                        }
+
+                        const data = parsed.data.filter(row => Object.values(row).some(v => v !== null && v !== ''));
+                        const headers = Object.keys(data[0] || {});
+
+                        if (headers.length < 2) {
+                            throw new Error('Insufficient data (at least 2 columns required)');
+                        }
+
+                        // canvasを作成してcontainerに追加
+                        const canvas = document.createElement('canvas');
+                        canvas.style.width = '100%';
+                        canvas.style.height = '400px';
+                        container.innerHTML = '';
+                        container.appendChild(canvas);
+
+                        new Chart(canvas, {
+                            type: 'line',
+                            data: {
+                                labels: data.map(row => row[headers[0]]),
+                                datasets: headers.slice(1).map((header, i) => ({
+                                    label: header,
+                                    data: data.map(row => row[header]),
+                                    borderColor: `hsl(${i * 60}, 70%, 50%)`,
+                                    backgroundColor: `hsla(${i * 60}, 70%, 50%, 0.1)`,
+                                    tension: 0.3
+                                }))
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true }
+                                }
+                            }
+                        });
+
                     } else if (stored.format === 'table') {
-                        await renderTable(stored.fileData.data);
-                        container.innerHTML = $previewContent.innerHTML;
+                        // ★ Table形式の修正
+                        container.innerHTML = '<p>Loading table...</p>';
+
+                        const file = stored.fileData.data;
+                        const name = file.name.toLowerCase();
+                        let data;
+
+                        if (name.endsWith('.xlsx') || name.endsWith('.xls') ||
+                            file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                            file.type === 'application/vnd.ms-excel') {
+
+                            const arrayBuffer = await file.arrayBuffer();
+                            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+                            data = XLSX.utils.sheet_to_json(worksheet);
+
+                        } else if (name.endsWith('.json')) {
+                            const text = await file.text();
+                            data = JSON.parse(text);
+                            if (!Array.isArray(data)) data = [data];
+                        } else {
+                            const text = await file.text();
+                            const parsed = Papa.parse(text, { header: true });
+                            data = parsed.data.filter(row => Object.values(row).some(v => v !== null && v !== ''));
+                        }
+
+                        if (data.length === 0) {
+                            throw new Error('Data is empty');
+                        }
+
+                        const headers = Object.keys(data[0]);
+                        let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+                        html += '<thead><tr>';
+                        headers.forEach(h => html += `<th style="border:1px solid var(--border); padding:0.5rem; background:var(--table-head);">${h}</th>`);
+                        html += '</tr></thead><tbody>';
+
+                        data.slice(0, 100).forEach(row => {
+                            html += '<tr>';
+                            headers.forEach(h => html += `<td style="border:1px solid var(--border); padding:0.5rem;">${row[h] ?? ''}</td>`);
+                            html += '</tr>';
+                        });
+
+                        html += '</tbody></table>';
+                        if (data.length > 100) html += `<p style="margin-top:0.5rem; color:var(--muted);">(Displaying only the first 100 rows)</p>`;
+
+                        container.innerHTML = html;
+
                     } else if (stored.format === 'text') {
-                        await renderText(stored.fileData.data);
-                        container.innerHTML = $previewContent.innerHTML;
+                        // ★ Text形式の修正
+                        const text = await stored.fileData.data.text();
+                        container.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${text}</pre>`;
                     } else {
                         container.innerHTML = stored.preview;
                     }
@@ -2712,6 +3562,7 @@
                     container.innerHTML = `<p style="color:var(--warn);">Failed to display file: ${err.message}</p>`;
                 }
             }
+
 
             function renderPropertiesTable(props) {
                 const wrapper = document.createElement('div');
@@ -2761,7 +3612,7 @@
                     }
 
                     rows += `<tr data-idx="${isContent ? contentIndex - 1 : ''}">
-            <td>${esc(indent + (pr.key || ''))}</td>
+            <td title="${esc(pr.key || '')}">${esc(indent + (pr.key || ''))}</td>
             <td>${esc(pr.type || '')}</td>
             <td>${esc(pr.units || '')}</td>
             <td>${esc(pr.fstring || '')}</td>
@@ -3022,7 +3873,12 @@
                 runAutoLayout(true);
                 updateStats();
             })();
-
+            window.nodes = nodes;
+            window.links = links;
+            window.templateById = templateById;
+            window.instances = instances;
+            window.placeToTemplates = placeToTemplates;
+            window.templateToInstances = templateToInstances;
         })();
     </script>
 
@@ -3323,6 +4179,1101 @@
                 }
             }
         })();
+    </script>
+
+    <script>
+        // =============================================================================
+        // MaiMLViewer メタデータExport機能追加コード (修正版)
+        // =============================================================================
+
+        // デバッグ用：変数が公開されているか確認
+        console.log('Checking global variables...');
+        console.log('window.nodes:', window.nodes);
+        console.log('window.templateById:', window.templateById);
+        console.log('window.instances:', window.instances);
+
+        // 1. ツールバーにExportボタンを追加
+        (function addExportButton() {
+            const toolbar = document.getElementById('toolbar');
+            const themeBtn = document.getElementById('themeBtn');
+
+            if (!toolbar || !themeBtn) {
+                console.error('Toolbar or theme button not found!');
+                return;
+            }
+
+            const exportBtn = document.createElement('button');
+            exportBtn.className = 'btn';
+            exportBtn.id = 'exportMetadataBtn';
+            exportBtn.textContent = '📊 Export Metadata';
+            themeBtn.before(exportBtn);
+
+            exportBtn.addEventListener('click', function () {
+                console.log('Export button clicked!');
+                openExportModal();
+            });
+
+            console.log('Export button added successfully');
+        })();
+
+        // 2. Exportモーダルダイアログを追加
+        (function createExportModal() {
+            const modalHtml = `
+        <div class="modal-overlay" id="exportModal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>📊 Export Metadata</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 1rem; line-height: 1.5;">
+                        Export all metadata (properties and contents) from the loaded MaiML file.
+                    </p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                            Select Export Format:
+                        </label>
+<div class="format-selector" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem;">
+    <div class="format-option" data-format="excel" style="cursor: pointer; border: 2px solid var(--border); padding: 1rem; border-radius: 8px; text-align: center; background: var(--surface); color: var(--ink); transition: all 0.2s;">
+        <div style="font-size: 32px; margin-bottom: 0.5rem;">📗</div>
+        <div>Excel (.xlsx)</div>
+    </div>
+    <div class="format-option selected" data-format="json" style="cursor: pointer; border: 2px solid var(--accent); padding: 1rem; border-radius: 8px; text-align: center; background: var(--accent); color: #fff; transition: all 0.2s;">
+        <div style="font-size: 32px; margin-bottom: 0.5rem;">📄</div>
+        <div>JSON (.json)</div>
+    </div>
+    <div class="format-option" data-format="csv" style="cursor: pointer; border: 2px solid var(--border); padding: 1rem; border-radius: 8px; text-align: center; background: var(--surface); color: var(--ink); transition: all 0.2s;">
+        <div style="font-size: 32px; margin-bottom: 0.5rem;">📊</div>
+        <div>CSV (.csv)</div>
+    </div>
+</div>
+                    </div>
+                    
+                    <div id="exportStatus" style="padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; display: none;"></div>
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                        <button class="btn" id="cancelExportBtn">Cancel</button>
+                        <button class="btn primary" id="executeExportBtn">📥 Export</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            const modal = document.getElementById('exportModal');
+            const closeBtn = modal.querySelector('.modal-close');
+            const cancelBtn = document.getElementById('cancelExportBtn');
+            const exportBtn = document.getElementById('executeExportBtn');
+            const formatOptions = modal.querySelectorAll('.format-option');
+
+            let selectedFormat = 'json';  // デフォルトをJSONに変更
+
+            formatOptions.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    formatOptions.forEach(o => {
+                        o.style.border = '2px solid var(--border)';
+                        o.style.background = 'var(--surface)';
+                        o.style.color = 'var(--ink)';  // テーマ対応の色
+                        o.classList.remove('selected');
+                    });
+                    opt.style.border = '2px solid var(--accent)';
+                    opt.style.background = 'var(--accent)';
+                    opt.style.color = '#fff';
+                    opt.classList.add('selected');
+                    selectedFormat = opt.dataset.format;
+                    console.log('Selected format:', selectedFormat);
+                });
+            });
+
+            closeBtn.addEventListener('click', closeExportModal);
+            cancelBtn.addEventListener('click', closeExportModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeExportModal();
+            });
+
+            exportBtn.addEventListener('click', () => {
+                console.log('Execute export with format:', selectedFormat);
+                executeExport(selectedFormat);
+            });
+
+            console.log('Export modal created successfully');
+        })();
+
+        // 3. モーダル開閉関数
+        function openExportModal() {
+            console.log('Opening export modal...');
+            const modal = document.getElementById('exportModal');
+            const statusDiv = document.getElementById('exportStatus');
+
+            if (!modal) {
+                console.error('Export modal not found!');
+                return;
+            }
+
+            // MaiMLファイルが読み込まれているかチェック
+            console.log('Checking if MaiML is loaded...');
+            console.log('templateById:', window.templateById);
+            console.log('templateById size:', window.templateById ? window.templateById.size : 'undefined');
+
+            if (!window.templateById || window.templateById.size === 0) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = 'var(--warn)';
+                statusDiv.style.color = '#fff';
+                statusDiv.textContent = '⚠️ No MaiML file loaded. Please load a file first.';
+                modal.classList.add('show');
+                return;
+            }
+
+            statusDiv.style.display = 'none';
+            modal.classList.add('show');
+            console.log('Modal opened successfully');
+        }
+
+        function closeExportModal() {
+            const modal = document.getElementById('exportModal');
+            if (modal) {
+                modal.classList.remove('show');
+                console.log('Modal closed');
+            }
+        }
+
+        // 4. insertion要素から情報を抽出する関数
+        function extractInsertionInfo(insertion) {
+            const result = {
+                id: insertion.id || '',
+                uri: '',
+                hash: '',
+                hashMethod: '',
+                format: ''
+            };
+
+            // elementが存在する場合は直接XML要素から取得
+            if (insertion.element) {
+                const uriEl = insertion.element.querySelector('uri') ||
+                    Array.from(insertion.element.children).find(c => c.tagName.toLowerCase() === 'uri');
+                if (uriEl) {
+                    result.uri = uriEl.textContent.trim();
+                }
+
+                const hashEl = insertion.element.querySelector('hash') ||
+                    Array.from(insertion.element.children).find(c => c.tagName.toLowerCase() === 'hash');
+                if (hashEl) {
+                    result.hash = hashEl.textContent.trim();
+                    result.hashMethod = hashEl.getAttribute('method') || '';
+                }
+
+                const formatEl = insertion.element.querySelector('format') ||
+                    Array.from(insertion.element.children).find(c => c.tagName.toLowerCase() === 'format');
+                if (formatEl) {
+                    result.format = formatEl.textContent.trim();
+                }
+            }
+
+            // elementがない場合はraw XML文字列から正規表現で抽出
+            if (!result.uri && insertion.raw) {
+                const uriMatch = insertion.raw.match(/<uri[^>]*>(.*?)<\/uri>/is);
+                if (uriMatch) {
+                    result.uri = uriMatch[1].trim();
+                }
+            }
+
+            if (!result.hash && insertion.raw) {
+                const hashMatch = insertion.raw.match(/<hash[^>]*method\s*=\s*["']([^"']+)["'][^>]*>(.*?)<\/hash>/is) ||
+                    insertion.raw.match(/<hash[^>]*>(.*?)<\/hash>/is);
+                if (hashMatch) {
+                    if (hashMatch[2]) {
+                        result.hash = hashMatch[2].trim();
+                        result.hashMethod = hashMatch[1] || '';
+                    } else {
+                        result.hash = hashMatch[1].trim();
+                    }
+                }
+            }
+
+            if (!result.format && insertion.raw) {
+                const formatMatch = insertion.raw.match(/<format[^>]*>(.*?)<\/format>/is);
+                if (formatMatch) {
+                    result.format = formatMatch[1].trim();
+                }
+            }
+
+            return result;
+        }
+
+        // 4. メタデータ収集関数 (修正版)
+        function collectAllMetadata() {
+            console.log('Starting metadata collection...');
+
+            const metadata = {
+                document: {},
+                places: [],
+                transitions: [],
+                templates: [],
+                instances: []
+            };
+
+            // ドキュメント情報を収集
+            const docInfo = document.getElementById('document-info');
+            if (docInfo) {
+                const tables = docInfo.querySelectorAll('table');
+                tables.forEach(table => {
+                    const rows = table.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const th = row.querySelector('th');
+                        const td = row.querySelector('td');
+                        if (th && td) {
+                            metadata.document[th.textContent] = td.textContent;
+                        }
+                    });
+                });
+            }
+            console.log('Document info collected:', Object.keys(metadata.document).length, 'items');
+
+            // ノード情報を収集
+            if (window.nodes) {
+                window.nodes.forEach(node => {
+                    const nodeData = {
+                        id: node.id,
+                        type: node.type,
+                        label: node.label
+                    };
+
+                    if (node.type === 'place') {
+                        metadata.places.push(nodeData);
+                    } else if (node.type === 'transition') {
+                        metadata.transitions.push(nodeData);
+                    }
+                });
+            }
+            console.log('Places:', metadata.places.length, 'Transitions:', metadata.transitions.length);
+
+            // テンプレート情報を収集 (修正: propertiesとcontentsを統合、insertionsを追加)
+            if (window.templateById) {
+                window.templateById.forEach(tpl => {
+                    const tplData = {
+                        id: tpl.id,
+                        role: tpl.role,
+                        programId: tpl.programId,
+                        uuid: tpl.uuid,
+                        name: tpl.name,
+                        description: tpl.description,
+                        annotation: tpl.annotation,
+                        placeRef: tpl.placeRef,
+                        // ★修正: propertiesとcontentsを統合してフラット化（順序を保持）
+                        properties: flattenPropertiesForExport(tpl.properties || []),
+                        contents: flattenPropertiesForExport(tpl.contents || []),
+                        // ★追加: insertions情報を抽出
+                        insertions: (tpl.insertions || []).map(ins => extractInsertionInfo(ins))
+                    };
+                    metadata.templates.push(tplData);
+                });
+            }
+            console.log('Templates collected:', metadata.templates.length);
+
+            // インスタンス情報を収集 (修正: propertiesとcontentsを統合、insertionsを追加)
+            if (window.instances) {
+                window.instances.forEach(inst => {
+                    const instData = {
+                        id: inst.id,
+                        role: inst.role,
+                        templateRef: inst.templateRef,
+                        uuid: inst.uuid,
+                        name: inst.name,
+                        description: inst.description,
+                        annotation: inst.annotation,
+                        // ★修正: propertiesとcontentsを統合してフラット化（順序を保持）
+                        properties: flattenPropertiesForExport(inst.properties || []),
+                        contents: flattenPropertiesForExport(inst.contents || []),
+                        // ★追加: insertions情報を抽出
+                        insertions: (inst.insertions || []).map(ins => extractInsertionInfo(ins))
+                    };
+                    metadata.instances.push(instData);
+                });
+            }
+            console.log('Instances collected:', metadata.instances.length);
+
+            return metadata;
+        }
+
+        // 5. 階層構造を維持したプロパティのフラット化 (修正版: kindフィールドを保持)
+        function flattenPropertiesForExport(items, parentPath = '', level = 0) {
+            const result = [];
+
+            items.forEach(item => {
+                const currentPath = parentPath ? `${parentPath}.${item.key || item.name}` : (item.key || item.name);
+
+                const flatItem = {
+                    kind: item.kind || 'property',  // ★追加: kindフィールドを保持
+                    level: level,
+                    path: currentPath,
+                    key: item.key || '',
+                    name: item.name || '',
+                    type: item.type || '',
+                    description: item.description || '',
+                    value: formatValue(item.value),
+                    units: item.units || '',
+                    formatString: item.fstring || ''
+                };
+
+                result.push(flatItem);
+
+                // 子要素を再帰的に処理
+                if (item.children && item.children.length > 0) {
+                    result.push(...flattenPropertiesForExport(item.children, currentPath, level + 1));
+                }
+            });
+
+            return result;
+        }
+
+        function formatValue(value) {
+            if (Array.isArray(value)) {
+                return value.join(', ');
+            }
+            return value ? String(value) : '';
+        }
+
+        // 5-2. データの文字数チェック関数
+        function checkDataLengthLimits(metadata) {
+            const MAX_CELL_LENGTH = 32767;
+            const violations = [];
+
+            // ドキュメント情報チェック
+            Object.entries(metadata.document).forEach(([key, value]) => {
+                const keyStr = String(key);
+                const valStr = String(value);
+                if (keyStr.length > MAX_CELL_LENGTH) {
+                    violations.push({ location: 'Document Info (Key)', value: keyStr.substring(0, 100) + '...', length: keyStr.length });
+                }
+                if (valStr.length > MAX_CELL_LENGTH) {
+                    violations.push({ location: 'Document Info (Value)', value: valStr.substring(0, 100) + '...', length: valStr.length });
+                }
+            });
+
+            // Places/Transitionsチェック
+            [...metadata.places, ...metadata.transitions].forEach((node, idx) => {
+                ['id', 'type', 'label'].forEach(field => {
+                    const val = String(node[field] || '');
+                    if (val.length > MAX_CELL_LENGTH) {
+                        violations.push({
+                            location: `${node.type === 'place' ? 'Place' : 'Transition'} #${idx + 1} (${field})`,
+                            value: val.substring(0, 100) + '...',
+                            length: val.length
+                        });
+                    }
+                });
+            });
+
+            // Templatesチェック
+            metadata.templates.forEach((tpl, idx) => {
+                ['id', 'role', 'programId', 'uuid', 'name', 'description', 'annotation', 'placeRef'].forEach(field => {
+                    const val = String(tpl[field] || '');
+                    if (val.length > MAX_CELL_LENGTH) {
+                        violations.push({
+                            location: `Template #${idx + 1} "${tpl.id}" (${field})`,
+                            value: val.substring(0, 100) + '...',
+                            length: val.length
+                        });
+                    }
+                });
+
+                // Template Propertiesチェック
+                tpl.properties.forEach((prop, pIdx) => {
+                    ['path', 'key', 'name', 'type', 'description', 'value', 'units', 'formatString'].forEach(field => {
+                        const val = String(prop[field] || '');
+                        if (val.length > MAX_CELL_LENGTH) {
+                            violations.push({
+                                location: `Template "${tpl.id}" Property #${pIdx + 1} (${field})`,
+                                value: val.substring(0, 100) + '...',
+                                length: val.length
+                            });
+                        }
+                    });
+                });
+
+                // Template Contentsチェック
+                tpl.contents.forEach((cont, cIdx) => {
+                    ['path', 'key', 'name', 'type', 'description', 'value', 'units', 'formatString'].forEach(field => {
+                        const val = String(cont[field] || '');
+                        if (val.length > MAX_CELL_LENGTH) {
+                            violations.push({
+                                location: `Template "${tpl.id}" Content #${cIdx + 1} (${field})`,
+                                value: val.substring(0, 100) + '...',
+                                length: val.length
+                            });
+                        }
+                    });
+                });
+
+                // Template Insertionsチェック
+                (tpl.insertions || []).forEach((ins, insIdx) => {
+                    ['id', 'uri', 'hash', 'hashMethod', 'format'].forEach(field => {
+                        const val = String(ins[field] || '');
+                        if (val.length > MAX_CELL_LENGTH) {
+                            violations.push({
+                                location: `Template "${tpl.id}" Insertion #${insIdx + 1} (${field})`,
+                                value: val.substring(0, 100) + '...',
+                                length: val.length
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Instancesチェック
+            metadata.instances.forEach((inst, idx) => {
+                ['id', 'role', 'templateRef', 'uuid', 'name', 'description', 'annotation'].forEach(field => {
+                    const val = String(inst[field] || '');
+                    if (val.length > MAX_CELL_LENGTH) {
+                        violations.push({
+                            location: `Instance #${idx + 1} "${inst.id}" (${field})`,
+                            value: val.substring(0, 100) + '...',
+                            length: val.length
+                        });
+                    }
+                });
+
+                // Instance Propertiesチェック
+                inst.properties.forEach((prop, pIdx) => {
+                    ['path', 'key', 'name', 'type', 'description', 'value', 'units', 'formatString'].forEach(field => {
+                        const val = String(prop[field] || '');
+                        if (val.length > MAX_CELL_LENGTH) {
+                            violations.push({
+                                location: `Instance "${inst.id}" Property #${pIdx + 1} (${field})`,
+                                value: val.substring(0, 100) + '...',
+                                length: val.length
+                            });
+                        }
+                    });
+                });
+
+                // Instance Contentsチェック
+                inst.contents.forEach((cont, cIdx) => {
+                    ['path', 'key', 'name', 'type', 'description', 'value', 'units', 'formatString'].forEach(field => {
+                        const val = String(cont[field] || '');
+                        if (val.length > MAX_CELL_LENGTH) {
+                            violations.push({
+                                location: `Instance "${inst.id}" Content #${cIdx + 1} (${field})`,
+                                value: val.substring(0, 100) + '...',
+                                length: val.length
+                            });
+                        }
+                    });
+                });
+
+                // Instance Insertionsチェック
+                (inst.insertions || []).forEach((ins, insIdx) => {
+                    ['id', 'uri', 'hash', 'hashMethod', 'format'].forEach(field => {
+                        const val = String(ins[field] || '');
+                        if (val.length > MAX_CELL_LENGTH) {
+                            violations.push({
+                                location: `Instance "${inst.id}" Insertion #${insIdx + 1} (${field})`,
+                                value: val.substring(0, 100) + '...',
+                                length: val.length
+                            });
+                        }
+                    });
+                });
+            });
+
+            return violations;
+        }
+
+        // 6. Excel出力関数（文字数超過時はエクスポート中止版）
+        // 6. Excel出力関数(property+content統合版)
+        function exportToExcel(metadata) {
+            console.log('Starting Excel export with length validation...');
+
+            if (typeof XLSX === 'undefined') {
+                alert('Excel library (XLSX) is not loaded.');
+                console.error('XLSX library not found!');
+                return;
+            }
+
+            // データの文字数チェック
+            console.log('Checking data length limits...');
+            const violations = checkDataLengthLimits(metadata);
+
+            if (violations.length > 0) {
+                console.error('Data length violations found:', violations.length);
+
+                // 詳細なエラーメッセージを生成
+                let errorMessage = `❌ Excel Export Failed\n\n`;
+                errorMessage += `Excel has a limit of 32,767 characters per cell.\n`;
+                errorMessage += `Found ${violations.length} field(s) exceeding this limit:\n\n`;
+
+                // 最初の5件を表示
+                violations.slice(0, 5).forEach((v, idx) => {
+                    errorMessage += `${idx + 1}. ${v.location}\n`;
+                    errorMessage += `   Length: ${v.length.toLocaleString()} characters\n`;
+                    errorMessage += `   Preview: ${v.value}\n\n`;
+                });
+
+                if (violations.length > 5) {
+                    errorMessage += `... and ${violations.length - 5} more violation(s)\n\n`;
+                }
+
+                errorMessage += `Suggestion: Try exporting to JSON format instead, which has no such limitation.`;
+
+                // アラートで表示
+                alert(errorMessage);
+
+                // コンソールにも詳細を出力
+                console.error('=== Data Length Violations ===');
+                violations.forEach(v => {
+                    console.error(`Location: ${v.location}`);
+                    console.error(`Length: ${v.length} characters`);
+                    console.error(`Preview: ${v.value}`);
+                    console.error('---');
+                });
+
+                throw new Error(`Cannot export to Excel: ${violations.length} field(s) exceed 32,767 character limit`);
+            }
+
+            console.log('✓ All data within Excel cell length limits');
+
+            const wb = XLSX.utils.book_new();
+            const MAX_ROWS_PER_SHEET = 50000;
+
+            try {
+                // ドキュメント情報シート
+                const docData = Object.entries(metadata.document).map(([key, value]) => ({
+                    'Item': key,
+                    'Value': value
+                }));
+                if (docData.length > 0) {
+                    console.log('Adding Document Info sheet...');
+                    const wsDoc = XLSX.utils.json_to_sheet(docData);
+                    XLSX.utils.book_append_sheet(wb, wsDoc, 'Document Info');
+                }
+
+                // Placesシート
+                if (metadata.places.length > 0) {
+                    console.log('Adding Places sheet:', metadata.places.length, 'rows');
+                    const wsPlaces = XLSX.utils.json_to_sheet(metadata.places);
+                    XLSX.utils.book_append_sheet(wb, wsPlaces, 'Places');
+                }
+
+                // Transitionsシート
+                if (metadata.transitions.length > 0) {
+                    console.log('Adding Transitions sheet:', metadata.transitions.length, 'rows');
+                    const wsTrans = XLSX.utils.json_to_sheet(metadata.transitions);
+                    XLSX.utils.book_append_sheet(wb, wsTrans, 'Transitions');
+                }
+
+                // Templatesシート (基本情報)
+                const templatesBasic = metadata.templates.map(t => ({
+                    'ID': t.id,
+                    'Role': t.role,
+                    'Program ID': t.programId || '',
+                    'UUID': t.uuid || '',
+                    'Name': t.name || '',
+                    'Description': t.description || '',
+                    'Place Ref': t.placeRef || ''
+                }));
+                if (templatesBasic.length > 0) {
+                    console.log('Adding Templates sheet:', templatesBasic.length, 'rows');
+                    const wsTplBasic = XLSX.utils.json_to_sheet(templatesBasic);
+                    XLSX.utils.book_append_sheet(wb, wsTplBasic, 'Templates');
+                }
+
+                // ★修正: Template Properties + Contents を統合 (順序を保持)
+                const allTemplateData = [];
+                metadata.templates.forEach(tpl => {
+                    // propertiesとcontentsを統合して順序を保持
+                    const combined = [...tpl.properties, ...tpl.contents];
+                    combined.forEach(item => {
+                        allTemplateData.push({
+                            'Template ID': tpl.id,
+                            'Kind': item.kind === 'property' ? 'Property' : 'Content',  // 種別を追加
+                            'Level': item.level,
+                            'Path': item.path,
+                            'Key': item.key,
+                            // 'Name': item.name,
+                            'Description': item.description,
+                            'Type': item.type,
+                            'Value': item.value,
+                            'Units': item.units,
+                            'FormatString': item.formatString
+                        });
+                    });
+                });
+
+                if (allTemplateData.length > 0) {
+                    console.log('Adding Template Data (Properties+Contents) sheet:', allTemplateData.length, 'rows');
+
+                    if (allTemplateData.length > MAX_ROWS_PER_SHEET) {
+                        console.warn('Template Data exceeds max rows, splitting...');
+                        const numSheets = Math.ceil(allTemplateData.length / MAX_ROWS_PER_SHEET);
+
+                        for (let i = 0; i < numSheets; i++) {
+                            const start = i * MAX_ROWS_PER_SHEET;
+                            const end = Math.min((i + 1) * MAX_ROWS_PER_SHEET, allTemplateData.length);
+                            const chunk = allTemplateData.slice(start, end);
+                            const ws = XLSX.utils.json_to_sheet(chunk);
+                            XLSX.utils.book_append_sheet(wb, ws, `TplData_${i + 1}`);
+                        }
+                    } else {
+                        const wsTplData = XLSX.utils.json_to_sheet(allTemplateData);
+                        XLSX.utils.book_append_sheet(wb, wsTplData, 'Template Data');
+                    }
+                }
+
+                // ★追加: Template Insertionsシート
+                const templateInsertions = [];
+                metadata.templates.forEach(tpl => {
+                    (tpl.insertions || []).forEach(ins => {
+                        templateInsertions.push({
+                            'Template ID': tpl.id,
+                            'Insertion ID': ins.id || '',
+                            'URI': ins.uri || '',
+                            'Hash': ins.hash || '',
+                            'Hash Method': ins.hashMethod || '',
+                            'Format': ins.format || ''
+                        });
+                    });
+                });
+                if (templateInsertions.length > 0) {
+                    console.log('Adding Template Insertions sheet:', templateInsertions.length, 'rows');
+                    const wsTplIns = XLSX.utils.json_to_sheet(templateInsertions);
+                    XLSX.utils.book_append_sheet(wb, wsTplIns, 'Template Insertions');
+                }
+
+                // Instancesシート
+                const instancesBasic = metadata.instances.map(i => ({
+                    'ID': i.id,
+                    'Role': i.role,
+                    'Template Ref': i.templateRef || '',
+                    'UUID': i.uuid || '',
+                    'Name': i.name || '',
+                    'Description': i.description || ''
+                }));
+                if (instancesBasic.length > 0) {
+                    console.log('Adding Instances sheet:', instancesBasic.length, 'rows');
+                    const wsInstBasic = XLSX.utils.json_to_sheet(instancesBasic);
+                    XLSX.utils.book_append_sheet(wb, wsInstBasic, 'Instances');
+                }
+
+                // ★修正: Instance Properties + Contents を統合 (順序を保持)
+                const allInstanceData = [];
+                metadata.instances.forEach(inst => {
+                    // propertiesとcontentsを統合して順序を保持
+                    const combined = [...inst.properties, ...inst.contents];
+                    combined.forEach(item => {
+                        allInstanceData.push({
+                            'Instance ID': inst.id,
+                            'Kind': item.kind === 'property' ? 'Property' : 'Content',  // 種別を追加
+                            'Level': item.level,
+                            'Path': item.path,
+                            'Key': item.key,
+                            // 'Name': item.name,
+                            'Description': item.description,
+                            'Type': item.type,
+                            'Value': item.value,
+                            'Units': item.units,
+                            'FormatString': item.formatString
+                        });
+                    });
+                });
+
+                if (allInstanceData.length > 0) {
+                    console.log('Adding Instance Data (Properties+Contents) sheet:', allInstanceData.length, 'rows');
+
+                    if (allInstanceData.length > MAX_ROWS_PER_SHEET) {
+                        console.warn('Instance Data exceeds max rows, splitting...');
+                        const numSheets = Math.ceil(allInstanceData.length / MAX_ROWS_PER_SHEET);
+
+                        for (let i = 0; i < numSheets; i++) {
+                            const start = i * MAX_ROWS_PER_SHEET;
+                            const end = Math.min((i + 1) * MAX_ROWS_PER_SHEET, allInstanceData.length);
+                            const chunk = allInstanceData.slice(start, end);
+                            const ws = XLSX.utils.json_to_sheet(chunk);
+                            XLSX.utils.book_append_sheet(wb, ws, `InstData_${i + 1}`);
+                        }
+                    } else {
+                        const wsInstData = XLSX.utils.json_to_sheet(allInstanceData);
+                        XLSX.utils.book_append_sheet(wb, wsInstData, 'Instance Data');
+                    }
+                }
+
+                // ★追加: Instance Insertionsシート
+                const instanceInsertions = [];
+                metadata.instances.forEach(inst => {
+                    (inst.insertions || []).forEach(ins => {
+                        instanceInsertions.push({
+                            'Instance ID': inst.id,
+                            'Insertion ID': ins.id || '',
+                            'URI': ins.uri || '',
+                            'Hash': ins.hash || '',
+                            'Hash Method': ins.hashMethod || '',
+                            'Format': ins.format || ''
+                        });
+                    });
+                });
+                if (instanceInsertions.length > 0) {
+                    console.log('Adding Instance Insertions sheet:', instanceInsertions.length, 'rows');
+                    const wsInstIns = XLSX.utils.json_to_sheet(instanceInsertions);
+                    XLSX.utils.book_append_sheet(wb, wsInstIns, 'Instance Insertions');
+                }
+
+                // ファイル名生成
+                const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+                console.log('Writing Excel file:', fileName);
+                console.log('Total sheets:', wb.SheetNames.length);
+
+                // ダウンロード
+                XLSX.writeFile(wb, fileName);
+                console.log('Excel file successfully created!');
+
+            } catch (error) {
+                console.error('Error during Excel generation:', error);
+                throw error;
+            }
+        }
+
+        // 7. JSON出力関数
+        function exportToJSON(metadata) {
+            console.log('Starting JSON export...');
+
+            // 階層構造を復元したJSONを作成
+            const output = {
+                document: metadata.document,
+                places: metadata.places,
+                transitions: metadata.transitions,
+                templates: metadata.templates.map(tpl => ({
+                    id: tpl.id,
+                    role: tpl.role,
+                    programId: tpl.programId,
+                    uuid: tpl.uuid,
+                    name: tpl.name,
+                    description: tpl.description,
+                    annotation: tpl.annotation,
+                    placeRef: tpl.placeRef,
+                    properties: reconstructHierarchy(tpl.properties),
+                    contents: reconstructHierarchy(tpl.contents),
+                    // ★追加: insertions情報
+                    insertions: tpl.insertions || []
+                })),
+                instances: metadata.instances.map(inst => ({
+                    id: inst.id,
+                    role: inst.role,
+                    templateRef: inst.templateRef,
+                    uuid: inst.uuid,
+                    name: inst.name,
+                    description: inst.description,
+                    annotation: inst.annotation,
+                    properties: reconstructHierarchy(inst.properties),
+                    contents: reconstructHierarchy(inst.contents),
+                    // ★追加: insertions情報
+                    insertions: inst.insertions || []
+                }))
+            };
+
+            const jsonStr = JSON.stringify(output, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.json`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+
+            URL.revokeObjectURL(url);
+            console.log('JSON file downloaded:', fileName);
+        }
+
+        // CSV出力関数
+        function exportToCSV(metadata) {
+            console.log('Starting CSV export...');
+
+            const CSV_BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+            let csvContent = CSV_BOM;
+
+            // Helper function: CSVセルのエスケープ
+            function escapeCSV(value) {
+                if (value == null) return '';
+                const str = String(value);
+                // ダブルクォート、カンマ、改行を含む場合はクォートで囲む
+                if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+                    return '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            }
+
+            // Helper function: 配列をCSV行に変換
+            function arrayToCSVRow(arr) {
+                return arr.map(escapeCSV).join(',') + '\n';
+            }
+
+            // 1. Document Info
+            csvContent += '\n=== Document Info ===\n';
+            csvContent += arrayToCSVRow(['Item', 'Value']);
+            Object.entries(metadata.document).forEach(([key, value]) => {
+                csvContent += arrayToCSVRow([key, value]);
+            });
+
+            // 2. Places
+            if (metadata.places.length > 0) {
+                csvContent += '\n=== Places ===\n';
+                csvContent += arrayToCSVRow(['ID', 'Type', 'Label']);
+                metadata.places.forEach(p => {
+                    csvContent += arrayToCSVRow([p.id, p.type, p.label]);
+                });
+            }
+
+            // 3. Transitions
+            if (metadata.transitions.length > 0) {
+                csvContent += '\n=== Transitions ===\n';
+                csvContent += arrayToCSVRow(['ID', 'Type', 'Label']);
+                metadata.transitions.forEach(t => {
+                    csvContent += arrayToCSVRow([t.id, t.type, t.label]);
+                });
+            }
+
+            // 4. Templates (Basic)
+            if (metadata.templates.length > 0) {
+                csvContent += '\n=== Templates ===\n';
+                csvContent += arrayToCSVRow(['ID', 'Role', 'Program ID', 'UUID', 'Name', 'Description', 'Place Ref']);
+                metadata.templates.forEach(t => {
+                    csvContent += arrayToCSVRow([
+                        t.id, t.role, t.programId || '', t.uuid || '',
+                        t.name || '', t.description || '', t.placeRef || ''
+                    ]);
+                });
+            }
+
+            // 5. Template Data (Properties + Contents)
+            const allTemplateData = [];
+            metadata.templates.forEach(tpl => {
+                const combined = [...tpl.properties, ...tpl.contents];
+                combined.forEach(item => {
+                    allTemplateData.push([
+                        tpl.id,
+                        item.kind === 'property' ? 'Property' : 'Content',
+                        item.level,
+                        item.path,
+                        item.key,
+                        item.name,
+                        item.type,
+                        item.description,
+                        item.value,
+                        item.units,
+                        item.formatString
+                    ]);
+                });
+            });
+
+            if (allTemplateData.length > 0) {
+                csvContent += '\n=== Template Data (Properties + Contents) ===\n';
+                csvContent += arrayToCSVRow([
+                    'Template ID', 'Kind', 'Level', 'Path', 'Key', 'Name',
+                    'Type', 'Description', 'Value', 'Units', 'Format'
+                ]);
+                allTemplateData.forEach(row => {
+                    csvContent += arrayToCSVRow(row);
+                });
+            }
+
+            // 5-2. Template Insertions
+            const templateInsertions = [];
+            metadata.templates.forEach(tpl => {
+                (tpl.insertions || []).forEach(ins => {
+                    templateInsertions.push([
+                        tpl.id,
+                        ins.id || '',
+                        ins.uri || '',
+                        ins.hash || '',
+                        ins.hashMethod || '',
+                        ins.format || ''
+                    ]);
+                });
+            });
+            if (templateInsertions.length > 0) {
+                csvContent += '\n=== Template Insertions ===\n';
+                csvContent += arrayToCSVRow([
+                    'Template ID', 'Insertion ID', 'URI', 'Hash', 'Hash Method', 'Format'
+                ]);
+                templateInsertions.forEach(row => {
+                    csvContent += arrayToCSVRow(row);
+                });
+            }
+
+            // 6. Instances (Basic)
+            if (metadata.instances.length > 0) {
+                csvContent += '\n=== Instances ===\n';
+                csvContent += arrayToCSVRow(['ID', 'Role', 'Template Ref', 'UUID', 'Name', 'Description']);
+                metadata.instances.forEach(i => {
+                    csvContent += arrayToCSVRow([
+                        i.id, i.role, i.templateRef || '', i.uuid || '',
+                        i.name || '', i.description || ''
+                    ]);
+                });
+            }
+
+            // 7. Instance Data (Properties + Contents)
+            const allInstanceData = [];
+            metadata.instances.forEach(inst => {
+                const combined = [...inst.properties, ...inst.contents];
+                combined.forEach(item => {
+                    allInstanceData.push([
+                        inst.id,
+                        item.kind === 'property' ? 'Property' : 'Content',
+                        item.level,
+                        item.path,
+                        item.key,
+                        item.name,
+                        item.type,
+                        item.description,
+                        item.value,
+                        item.units,
+                        item.formatString
+                    ]);
+                });
+            });
+
+            if (allInstanceData.length > 0) {
+                csvContent += '\n=== Instance Data (Properties + Contents) ===\n';
+                csvContent += arrayToCSVRow([
+                    'Instance ID', 'Kind', 'Level', 'Path', 'Key', 'Name',
+                    'Type', 'Description', 'Value', 'Units', 'Format'
+                ]);
+                allInstanceData.forEach(row => {
+                    csvContent += arrayToCSVRow(row);
+                });
+            }
+
+            // 7-2. Instance Insertions
+            const instanceInsertions = [];
+            metadata.instances.forEach(inst => {
+                (inst.insertions || []).forEach(ins => {
+                    instanceInsertions.push([
+                        inst.id,
+                        ins.id || '',
+                        ins.uri || '',
+                        ins.hash || '',
+                        ins.hashMethod || '',
+                        ins.format || ''
+                    ]);
+                });
+            });
+            if (instanceInsertions.length > 0) {
+                csvContent += '\n=== Instance Insertions ===\n';
+                csvContent += arrayToCSVRow([
+                    'Instance ID', 'Insertion ID', 'URI', 'Hash', 'Hash Method', 'Format'
+                ]);
+                instanceInsertions.forEach(row => {
+                    csvContent += arrayToCSVRow(row);
+                });
+            }
+
+            // ダウンロード
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.csv`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+
+            URL.revokeObjectURL(url);
+            console.log('CSV file downloaded:', fileName);
+        }
+
+        // 8. 階層構造の復元
+        function reconstructHierarchy(flatItems) {
+            if (!flatItems || flatItems.length === 0) return [];
+
+            const root = [];
+            const stack = [{ level: -1, children: root }];
+
+            flatItems.forEach(item => {
+                const newItem = {
+                    'key': item.key,
+                    // name: item.name,
+                    description: item.description,
+                    'type': item.type,
+                    value: item.value,
+                    'units': item.units,
+                    'formatString': item.formatString,
+                    children: []
+                };
+
+                // スタックを調整して適切な親を見つける
+                while (stack.length > 0 && stack[stack.length - 1].level >= item.level) {
+                    stack.pop();
+                }
+
+                // 現在の親の子として追加
+                const parent = stack[stack.length - 1];
+                parent.children.push(newItem);
+
+                // 新しいアイテムをスタックに追加
+                stack.push({ level: item.level, children: newItem.children });
+            });
+
+            return root;
+        }
+
+        // 9. Export実行関数
+        function executeExport(format) {
+            console.log('Executing export with format:', format);
+            const statusDiv = document.getElementById('exportStatus');
+
+            try {
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = 'var(--accent)';
+                statusDiv.style.color = '#fff';
+                statusDiv.textContent = '⏳ Collecting metadata...';
+
+                const metadata = collectAllMetadata();
+
+                if (format === 'excel') {
+                    statusDiv.textContent = '⏳ Generating Excel file...';
+                    setTimeout(() => {
+                        exportToExcel(metadata);
+                        statusDiv.style.background = 'var(--accent2)';
+                        statusDiv.textContent = '✅ Excel file exported successfully!';
+                        setTimeout(closeExportModal, 1500);
+                    }, 100);
+                } else if (format === 'json') {
+                    statusDiv.textContent = '⏳ Generating JSON file...';
+                    setTimeout(() => {
+                        exportToJSON(metadata);
+                        statusDiv.style.background = 'var(--accent2)';
+                        statusDiv.textContent = '✅ JSON file exported successfully!';
+                        setTimeout(closeExportModal, 1500);
+                    }, 100);
+                } else if (format === 'csv') {
+                    statusDiv.textContent = '⏳ Generating CSV file...';
+                    setTimeout(() => {
+                        try {
+                            exportToCSV(metadata);
+                            statusDiv.style.background = 'var(--accent2)';
+                            statusDiv.textContent = '✅ CSV file exported successfully!';
+                            setTimeout(closeExportModal, 1500);
+                        } catch (error) {
+                            console.error('CSV export error:', error);
+                            statusDiv.style.background = 'var(--warn)';
+                            statusDiv.textContent = '❌ CSV export failed: ' + error.message;
+                        }
+                    }, 200);
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                statusDiv.style.background = 'var(--warn)';
+                statusDiv.style.color = '#fff';
+                statusDiv.textContent = '❌ Export failed: ' + error.message;
+            }
+        }
+
+        console.log('✅ MaiML Metadata Export feature loaded successfully!');
     </script>
 
 </body>
