@@ -37,7 +37,7 @@ Simply open the HTML file and drag & drop a `.maiml` or `.maiml.zip` file to exp
 
 ---
 
-##　🆙 Added
+## 🆙 Added
 - Support for uploading multiple MaiML files and `.maiml.zip` archives
 - Ability to select the level of summarization
 - Feature to display reference relationships within a MaiML file
