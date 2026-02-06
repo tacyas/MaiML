@@ -5,50 +5,51 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title>MaiMLStandaloneViewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --toolbar-h: 56px;
-            --bg: #fffdfc;
-            --surface: #fffdfc;
-            --ink: #222;
-            --muted: #666;
-            --border: #c5c5c5;
-            --accent: #1976d2;
-            --accent2: #2a7;
-            --warn: #e91e63;
-            --table-head: #eef4f9;
-            --table-border: #e0e0e0;
-            --chip: #ffe699;
-            --chip-ink: #222;
-            --code-bg: #efeceb;
-            --code-ink: #25252f;
-            --link: #25252f;
-            --btn-bg: #f5f5f5;
-            --btn-ink: #222;
-            --btn-border: #ccc;
-            --btn-hover-bg: #328bff;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --ink: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #4f46e5;
+            --accent2: #14b8a6;
+            --warn: #e11d48;
+            --table-head: #f1f5f9;
+            --table-border: #cbd5e1;
+            --chip: #eef2ff;
+            --chip-ink: #4f46e5;
+            --code-bg: #f1f5f9;
+            --code-ink: #475569;
+            --link: #4f46e5;
+            --btn-bg: #f1f5f9;
+            --btn-ink: #475569;
+            --btn-border: #cbd5e1;
+            --btn-hover-bg: #e2e8f0;
         }
 
         :root[data-theme="dark"] {
-            --bg: #25252f;
-            --surface: #2c2c36;
-            --ink: #e8edf2;
-            --muted: #9aa4b2;
-            --border: #4a4f5a;
-            --accent: #5aa3ff;
-            --accent2: #3ddc97;
-            --warn: #ff5c93;
-            --table-head: #4a4a58;
-            --table-border: #5f6677;
-            --chip: #f6d65b;
-            --chip-ink: #222;
-            --code-bg: #15151f;
-            --code-ink: #e8edf2;
-            --link: #5aa3ff;
-            --btn-bg: #51515a;
-            --btn-ink: #e8edf2;
-            --btn-border: #767688;
-            --btn-hover-bg: #5aa3ff;
+            --bg: #020617;
+            --surface: #0f172a;
+            --ink: #f1f5f9;
+            --muted: #94a3b8;
+            --border: #1e293b;
+            --accent: #818cf8;
+            --accent2: #2dd4bf;
+            --warn: #fb7185;
+            --table-head: #1e293b;
+            --table-border: #334155;
+            --chip: #312e81;
+            --chip-ink: #c7d2fe;
+            --code-bg: #1e293b;
+            --code-ink: #cbd5e1;
+            --link: #818cf8;
+            --btn-bg: #1e293b;
+            --btn-ink: #cbd5e1;
+            --btn-border: #334155;
+            --btn-hover-bg: #334155;
         }
 
         * {
@@ -63,11 +64,12 @@
         }
 
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             color: var(--ink);
             background: var(--bg);
             display: flex;
             flex-direction: column;
+            transition: background 0.2s, color 0.2s;
         }
 
         header#toolbar {
@@ -199,7 +201,17 @@
         svg#stage {
             width: 100%;
             height: 100%;
-            background: var(--bg)
+            background: var(--bg);
+            transition: background 0.2s;
+        }
+
+        /* Petri Net Background Pattern from MaiML Studio */
+        .bg-pattern-light {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNjYmQ1ZTEiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9zdmc+');
+        }
+
+        .bg-pattern-dark {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiM2NDc0OGIiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9zdmc+');
         }
 
         #grid {
@@ -1202,7 +1214,18 @@
             }
 
             function applyTheme(mode) {
-                document.documentElement.setAttribute('data-theme', mode === 'dark' ? 'dark' : 'light');
+                const isDark = mode === 'dark';
+                document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                const $stg = document.getElementById('stage');
+                if ($stg) {
+                    if (isDark) {
+                        $stg.classList.add('bg-pattern-dark');
+                        $stg.classList.remove('bg-pattern-light');
+                    } else {
+                        $stg.classList.add('bg-pattern-light');
+                        $stg.classList.remove('bg-pattern-dark');
+                    }
+                }
             }
 
             // Resizers
