@@ -706,10 +706,10 @@
         }
 
         #aiSummaryModal .modal-content {
-            width: 650px;
-            max-width: 90vw;
-            height: 70vh;
-            max-height: 90vh;
+            width: 750px;
+            max-width: 95vw;
+            height: 80vh;
+            max-height: 95vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -745,6 +745,7 @@
             background: var(--bg);
             border-radius: 4px;
             white-space: pre-wrap;
+            min-height: 300px; /* 最小高さを確保 */
         }
 
         .markdown-content h1,
@@ -872,6 +873,33 @@
             border-radius: 4px;
             font-size: 13px;
         }
+
+        /* Input Text Details の折りたたみスタイル */
+#inputTextDetails {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    background: var(--surface);
+}
+
+#inputTextDetails summary {
+    list-style: none;
+    outline: none;
+}
+
+#inputTextDetails summary::-webkit-details-marker {
+    display: none;
+}
+
+#inputTextDetails summary:hover {
+    color: var(--accent2);
+}
+
+#inputTextDetails[open] summary {
+    margin-bottom: 0.3rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--border);
+}
     </style>
 </head>
 
@@ -975,23 +1003,41 @@
                 <button class="modal-close" id="aiSummaryClose">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="prompt-selector">
-                    <!-- AIモデル編集 -->
-                    <label>Gemini API Model:</label>
-                    <input id="modelName" type="text" value="gemini-2.5-flash-lite" />
-                    <!-- 要約レベル選択 -->
-                    <label>Summary Type:</label>
-                    <select id="promptTemplate">
+                <div style="display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 0.5rem; align-items: center; margin-bottom: 0.8rem;">
+                    <label style="font-size: 12px; font-weight: 600; white-space: nowrap;">AI Agent Model:</label>
+                    <input id="modelName" type="text" value="gemini-2.5-flash-lite" style="padding: 0.3rem; font-size: 12px;" />
+                    <label style="font-size: 12px; font-weight: 600; white-space: nowrap;">Prompt Template:</label>
+                    <select id="promptTemplate" style="padding: 0.3rem; font-size: 12px;">
                         <option value="quick" selected>Quick Summary</option>
-                        <option value="standard">Standard Summary</option>
-                        <option value="detailed">Detailed Analysis</option>
+                        <option value="standard ">Standard Summary</option>
+                        <option value="detailed">Detailed Report</option>
+                        <option value="custom">Custom Prompt</option>
                     </select>
                 </div>
 
-                <h4>Input Text (to be summarized)</h4>
-                <pre id="aiSummaryTarget"
-                    style="max-height:100px; overflow-y:auto; padding:.5rem; border:1px solid var(--border); background:var(--bg); border-radius:4px;"></pre>
+                <details id="inputTextDetails" style="margin-bottom: 0.5rem;">
+                    <summary style="cursor: pointer; font-weight: 600; font-size: 13px; padding: 0.3rem 0; color: var(--accent); user-select: none;">
+                        📄 Input Text{TEXT} (click to expand/collapse)
+                    </summary>
+                    <pre id="aiSummaryTarget"
+                        style="max-height: 150px; overflow-y: auto; padding: 0.5rem; margin-top: 0.3rem; border: 1px solid var(--border); background: var(--bg); border-radius: 4px; font-size: 11px;"></pre>
+                </details>
 
+                <!-- カスタムプロンプト入力欄 -->
+                <div id="customPromptArea" style="display:none; margin-top:0.8rem;">
+                    <label style="font-weight:600; font-size:13px;">Custom Prompt:</label>
+                    <textarea id="customPromptInput"
+                        style="width:100%; min-height:80px;  max-height:120px; margin-top:0.3rem; padding:0.5rem; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--ink); font-family:monospace; font-size:12px; resize:vertical;"
+                        placeholder="Example: Analyze the following data and create a technical report in {LANG} language:&#10;{TEXT}&#10;&#10;Please include:&#10;- Key findings&#10;- Statistical analysis&#10;- Recommendations"></textarea>
+                    <p style="font-size:11px; color:var(--muted); margin:0.3rem 0 0 0;">
+                        Tip: The input text <code>{TEXT}</code> will be added after the custom prompt.
+                    </p>
+                </div>
+
+                <!-- Generateボタン -->
+                <div style="display:flex; justify-content:flex-end; margin-top:0.8rem;">
+                    <button class="btn primary" id="generateSummaryBtn">🚀 Generate</button>
+                </div>
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:0.5rem;">
                     <h4>AI Summary Result</h4>
                     <div style="display:flex; gap: 5px;">
@@ -4018,47 +4064,241 @@
             const resultDiv = document.getElementById("aiSummaryResult");
             const copyBtn = document.getElementById("copySummaryBtn");
             const promptTemplateSel = document.getElementById("promptTemplate");
+            const customPromptArea = document.getElementById("customPromptArea");
+            const customPromptInput = document.getElementById("customPromptInput");
+            const generateBtn = document.getElementById("generateSummaryBtn");
 
             let rawTextContent = '';
             let currentText = ''; // 現在の入力テキストを保持
 
             const promptTemplates = {
-                quick: {  // デフォルト、軽量
-                    ja: "以下の情報を2〜3文程度で簡潔にまとめ、箇条書きとMarkdown形式で示してください：\n{TEXT}",
+                quick: {
+                    ja: "以下の情報を2~3文程度で簡潔にまとめ、箇条書きとMarkdown形式で示してください:\n{TEXT}",
                     en: "Summarize the following information in 2-3 sentences using bullet points in Markdown. Focus on key points:\n{TEXT}",
                     other: "Summarize the following information in 2-3 sentences using bullet points in Markdown. Please respond in {LANG} and focus on key points:\n{TEXT}"
                 },
-                standard: {  // 標準要約
-                    ja: "以下の内容を5〜7文程度で要約し、必要に応じて表を使用したMarkdown形式のレポートを生成してください：\n{TEXT}",
+                standard: {
+                    ja: "以下の内容を5~7文程度で要約し、必要に応じて表を使用したMarkdown形式のレポートを生成してください:\n{TEXT}",
                     en: "Summarize the following text in approximately 5-7 sentences and generate a Markdown report using tables if appropriate:\n{TEXT}",
                     other: "Summarize the following text in approximately 5-7 sentences and generate a Markdown report using tables if appropriate. Please respond in {LANG}:\n{TEXT}"
                 },
-                detailed: {  // 詳細分析・報告書
-                    ja: "以下の内容について10〜15文程度で詳細な分析レポートを作成し、見出し、表、強調を用いたMarkdown形式で出力してください：\n{TEXT}",
+                detailed: {
+                    ja: "以下の内容について10~15文程度で詳細な分析レポートを作成し、見出し、表、強調を用いたMarkdown形式で出力してください:\n{TEXT}",
                     en: "Create a detailed analytical report of the following content in approximately 10-15 sentences, using headings, tables, and emphasis in Markdown format:\n{TEXT}",
                     other: "Create a detailed analytical report of the following content in approximately 10-15 sentences, using headings, tables, and emphasis in Markdown format. Please respond in {LANG}:\n{TEXT}"
                 }
             };
 
-            // Summary Typeが変更されたら再要約
+            // プロンプトテンプレート選択時の処理
             promptTemplateSel.addEventListener("change", () => {
-                if (currentText && modal.classList.contains("show")) {
-                    resultDiv.textContent = "Regenerating summary...";
-                    resultDiv.classList.add("markdown-content");
-                    runGemini(currentText);
+                if (promptTemplateSel.value === "custom") {
+                    customPromptArea.style.display = "block";
+                } else {
+                    customPromptArea.style.display = "none";
                 }
             });
 
-            window.openAISummaryDialog = function (text) {
-                currentText = text; // テキストを保存
-                modal.classList.add("show");
-                targetDiv.style.display = "block";
-                targetDiv.textContent = text;
+            // Generateボタンのクリックイベント
+            generateBtn.addEventListener("click", async () => {
+                if (!currentText) {
+                    alert("No input text available.");
+                    return;
+                }
+
+                // カスタムプロンプトが選択されているが入力されていない場合
+                if (promptTemplateSel.value === "custom" && !customPromptInput.value.trim()) {
+                    alert("Please enter a custom prompt.");
+                    customPromptInput.focus();
+                    return;
+                }
+
                 resultDiv.textContent = "Generating summary...";
                 resultDiv.classList.add("markdown-content");
                 copyBtn.textContent = '📋 Copy';
-                runGemini(text);
-            };
+
+                // 少し遅延を入れてUIが更新されるのを待つ
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                runGemini(currentText);
+            });
+
+            window.openAISummaryDialog = function (text) {
+    currentText = text; // テキストを保存
+    modal.classList.add("show");
+    targetDiv.style.display = "block";
+    targetDiv.textContent = text;
+    
+    // 入力テキストエリアをデフォルトで閉じる
+    const inputTextDetails = document.getElementById("inputTextDetails");
+    if (inputTextDetails) {
+        inputTextDetails.open = false; // 折りたたみ状態にする
+    }
+    
+    // 初期状態では結果をクリア（自動生成しない）
+    resultDiv.innerHTML = '<p style="color:var(--muted); font-style:italic;">Click "Generate" to create a summary.</p>';
+    resultDiv.classList.remove("markdown-content");
+    copyBtn.textContent = '📋 Copy';
+    
+    // カスタムプロンプトエリアの表示/非表示
+    if (promptTemplateSel.value === "custom") {
+        customPromptArea.style.display = "block";
+    } else {
+        customPromptArea.style.display = "none";
+    }
+};
+
+            closeBtn.addEventListener("click", () => {
+                modal.classList.remove("show");
+                currentText = ''; // モーダルを閉じたらクリア
+            });
+
+            copyBtn.addEventListener("click", async () => {
+                const textToCopy = rawTextContent || resultDiv.textContent;
+                if (!textToCopy || textToCopy === 'Generating summary...' || textToCopy === 'Click "Generate" to create a summary.' || textToCopy === 'API Key not set' || textToCopy.startsWith('Network error')) {
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    copyBtn.textContent = '✅ Copied!';
+                    setTimeout(() => copyBtn.textContent = '📋 Copy', 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                    copyBtn.textContent = '❌ Copy failed';
+                    setTimeout(() => copyBtn.textContent = '📋 Copy', 2000);
+                    alert('Failed to write to clipboard. Please check your browser permissions.');
+                }
+            });
+
+            document.getElementById("saveSummaryBtn").addEventListener("click", () => {
+                const textToSave = rawTextContent || resultDiv.textContent;
+
+                if (!textToSave) {
+                    alert("No summary to save.");
+                    return;
+                }
+
+                const blob = new Blob([textToSave], { type: "text/markdown" });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "AIsummary.md";
+                a.click();
+
+                URL.revokeObjectURL(url);
+            });
+
+            function getPrompt(text, lang) {
+                const template = promptTemplateSel.value;
+
+                // カスタムプロンプトの場合
+                if (template === 'custom') {
+                    const customPrompt = customPromptInput.value.trim();
+                    if (!customPrompt) {
+                        alert("Please enter a custom prompt.");
+                        return null; // プロンプトが空の場合はnullを返す
+                    }
+                    // {TEXT}プレースホルダーを実際のテキストに置換
+                    let finalPrompt = customPrompt.replace(/{TEXT}/g, text);
+                    // {LANG}プレースホルダーも置換（もし使われていれば）
+                    finalPrompt = finalPrompt.replace(/{LANG}/g, lang);
+
+                    console.log('Custom prompt generated:', finalPrompt.substring(0, 200) + '...');
+                    return finalPrompt;
+                }
+
+                // プリセットプロンプトの場合
+                const promptSet = promptTemplates[template] || promptTemplates.quick;
+                const langKey = lang === 'ja' ? 'ja' : lang === 'en' ? 'en' : 'other';
+
+                const finalPrompt = promptSet[langKey]
+                    .replace('{TEXT}', text)
+                    .replace('{LANG}', lang);
+
+                console.log('Preset prompt generated:', finalPrompt.substring(0, 200) + '...');
+                return finalPrompt;
+            }
+
+            async function runGemini(text) {
+                const key = localStorage.getItem("geminiApiKey");
+                if (!key) {
+                    resultDiv.textContent = "API Key not set";
+                    resultDiv.classList.remove("markdown-content");
+                    return;
+                }
+
+                const modelName = document.getElementById("modelName")?.value?.trim() || "gemini-2.5-flash";
+
+                if (!/^[\w\.\-:]+$/.test(modelName)) {
+                    resultDiv.textContent = "Invalid model name (contains illegal characters).";
+                    resultDiv.classList.remove("markdown-content");
+                    return;
+                }
+
+                const browserLang = navigator.language || navigator.userLanguage;
+                const langCode = browserLang.split('-')[0];
+                const prompt = getPrompt(text, langCode);
+
+                // プロンプトが空の場合は処理を中断
+                if (!prompt) {
+                    resultDiv.textContent = "Please enter a valid prompt.";
+                    resultDiv.classList.remove("markdown-content");
+                    return;
+                }
+
+                const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${key}`;
+
+                const body = { contents: [{ parts: [{ text: prompt }] }] };
+
+                console.log('Sending request to Gemini API...');
+                console.log('Model:', modelName);
+                console.log('Prompt length:', prompt.length);
+
+                try {
+                    const res = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+
+                    console.log('Response status:', res.status);
+
+                    const data = await res.json();
+                    console.log('Response data:', data);
+
+                    if (data.error) {
+                        rawTextContent = `API Error: ${data.error.message}`;
+                        resultDiv.textContent = rawTextContent;
+                        resultDiv.classList.remove("markdown-content");
+                        console.error('API Error:', data.error);
+                    } else {
+                        rawTextContent = data.candidates[0].content.parts[0].text.trim();
+                        console.log('Summary generated successfully, length:', rawTextContent.length);
+
+                        if (typeof marked !== 'undefined') {
+                            resultDiv.innerHTML = marked.parse(rawTextContent);
+                            resultDiv.classList.add("markdown-content");
+
+                            const disclaimer = document.createElement('div');
+                            disclaimer.className = 'ai-disclaimer';
+                            if (langCode === 'ja') {
+                                disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
+                            } else {
+                                disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
+                            }
+                            resultDiv.appendChild(disclaimer);
+                        } else {
+                            resultDiv.textContent = rawTextContent;
+                            resultDiv.classList.remove("markdown-content");
+                        }
+                    }
+                } catch (e) {
+                    rawTextContent = `Network error or API call failed: ${e.message}`;
+                    resultDiv.textContent = rawTextContent;
+                    resultDiv.classList.remove("markdown-content");
+                    console.error('Network error:', e);
+                }
+            }
 
             closeBtn.addEventListener("click", () => {
                 modal.classList.remove("show");
@@ -4105,80 +4345,166 @@
 
             function getPrompt(text, lang) {
                 const template = promptTemplateSel.value;
-                const promptSet = promptTemplates[template] || promptTemplates.default;
-                const langKey = lang === 'ja' ? 'ja' : lang === 'en' ? 'en' : 'other';
 
-                return promptSet[langKey]
+                console.log('getPrompt called with template:', template);
+
+                // カスタムプロンプトの場合
+                if (template === 'custom') {
+                    const customPrompt = customPromptInput.value.trim();
+                    if (!customPrompt) {
+                        alert("Please enter a custom prompt.");
+                        return null;
+                    }
+
+                    let finalPrompt;
+
+                    // {TEXT}プレースホルダーが含まれているかチェック
+                    if (customPrompt.includes('{TEXT}')) {
+                        // プレースホルダーがある場合は置換
+                        finalPrompt = customPrompt.replace(/{TEXT}/g, text);
+                        console.log('Custom prompt with {TEXT} placeholder');
+                    } else {
+                        // プレースホルダーがない場合は自動的に末尾に追加
+                        finalPrompt = customPrompt + '\n\n' + text;
+                        console.log('Custom prompt without {TEXT} placeholder, auto-appending text');
+                    }
+
+                    // {LANG}プレースホルダーも置換（もし使われていれば）
+                    finalPrompt = finalPrompt.replace(/{LANG}/g, lang);
+
+                    console.log('Custom prompt generated, length:', finalPrompt.length);
+                    console.log('Preview:', finalPrompt.substring(0, 300) + '...');
+                    return finalPrompt;
+                }
+
+                // プリセットプロンプトの場合
+                const promptSet = promptTemplates[template];
+
+                if (!promptSet) {
+                    console.warn('Template not found:', template, 'Using quick as default');
+                    const defaultPrompt = promptTemplates.quick;
+                    const langKey = lang === 'ja' ? 'ja' : lang === 'en' ? 'en' : 'other';
+                    return defaultPrompt[langKey]
+                        .replace('{TEXT}', text)
+                        .replace('{LANG}', lang);
+                }
+
+                const langKey = lang === 'ja' ? 'ja' : lang === 'en' ? 'en' : 'other';
+                const finalPrompt = promptSet[langKey]
+                    .replace('{TEXT}', text)
+                    .replace('{LANG}', lang);
+
+                console.log('Preset prompt generated, length:', finalPrompt.length);
+                return finalPrompt;
+            }
+            const template = promptTemplateSel.value;
+
+            console.log('getPrompt called with template:', template);
+
+            // カスタムプロンプトの場合
+            if (template === 'custom') {
+                const customPrompt = customPromptInput.value.trim();
+                if (!customPrompt) {
+                    alert("Please enter a custom prompt.");
+                    return null; // プロンプトが空の場合はnullを返す
+                }
+                // {TEXT}プレースホルダーを実際のテキストに置換
+                let finalPrompt = customPrompt.replace(/{TEXT}/g, text);
+                // {LANG}プレースホルダーも置換（もし使われていれば）
+                finalPrompt = finalPrompt.replace(/{LANG}/g, lang);
+
+                console.log('Custom prompt generated:', finalPrompt.substring(0, 200) + '...');
+                return finalPrompt;
+            }
+
+            // プリセットプロンプトの場合
+            const promptSet = promptTemplates[template];
+
+            // テンプレートが見つからない場合はquickをデフォルトとして使用
+            if (!promptSet) {
+                console.warn('Template not found:', template, 'Using quick as default');
+                const defaultPrompt = promptTemplates.quick;
+                const langKey = lang === 'ja' ? 'ja' : lang === 'en' ? 'en' : 'other';
+                return defaultPrompt[langKey]
                     .replace('{TEXT}', text)
                     .replace('{LANG}', lang);
             }
 
+            const langKey = lang === 'ja' ? 'ja' : lang === 'en' ? 'en' : 'other';
+            const finalPrompt = promptSet[langKey]
+                .replace('{TEXT}', text)
+                .replace('{LANG}', lang);
+
+            console.log('Preset prompt generated:', finalPrompt.substring(0, 200) + '...');
+            return finalPrompt;
+        
+
             async function runGemini(text) {
-                const key = localStorage.getItem("geminiApiKey");
-                if (!key) {
-                    resultDiv.textContent = "API Key not set";
-                    resultDiv.classList.remove("markdown-content");
-                    return;
-                }
+            const key = localStorage.getItem("geminiApiKey");
+            if (!key) {
+                resultDiv.textContent = "API Key not set";
+                resultDiv.classList.remove("markdown-content");
+                return;
+            }
 
-                // --- ここでモデル名を取得（未入力時はデフォルト） ---
-                const modelName = document.getElementById("modelName")?.value?.trim() || "gemini-2.5-flash";
+            // --- ここでモデル名を取得（未入力時はデフォルト） ---
+            const modelName = document.getElementById("modelName")?.value?.trim() || "gemini-2.5-flash";
 
-                // --- 簡単なバリデーション（英数字、ハイフン、ドット、アンダースコアのみ）---
-                if (!/^[\w\.\-:]+$/.test(modelName)) {
-                    resultDiv.textContent = "Invalid model name (contains illegal characters).";
-                    resultDiv.classList.remove("markdown-content");
-                    return;
-                }
+            // --- 簡単なバリデーション（英数字、ハイフン、ドット、アンダースコアのみ）---
+            if (!/^[\w\.\-:]+$/.test(modelName)) {
+                resultDiv.textContent = "Invalid model name (contains illegal characters).";
+                resultDiv.classList.remove("markdown-content");
+                return;
+            }
 
-                const browserLang = navigator.language || navigator.userLanguage;
-                const langCode = browserLang.split('-')[0];
-                const prompt = getPrompt(text, langCode);
+            const browserLang = navigator.language || navigator.userLanguage;
+            const langCode = browserLang.split('-')[0];
+            const prompt = getPrompt(text, langCode);
 
-                const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${key}`;
+            const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${key}`;
 
-                const body = { contents: [{ parts: [{ text: prompt }] }] };
+            const body = { contents: [{ parts: [{ text: prompt }] }] };
 
-                try {
-                    const res = await fetch(url, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(body)
-                    });
-                    const data = await res.json();
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
 
-                    if (data.error) {
-                        rawTextContent = `API Error: ${data.error.message}`;
-                        resultDiv.textContent = rawTextContent;
-                        resultDiv.classList.remove("markdown-content");
-                    } else {
-                        rawTextContent = data.candidates[0].content.parts[0].text.trim();
-
-                        if (typeof marked !== 'undefined') {
-                            resultDiv.innerHTML = marked.parse(rawTextContent);
-                            resultDiv.classList.add("markdown-content");
-
-                            // 注意書きを追加
-                            const disclaimer = document.createElement('div');
-                            disclaimer.className = 'ai-disclaimer';
-                            if (langCode === 'ja') {
-                                disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
-                            } else {
-                                disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
-                            }
-                            resultDiv.appendChild(disclaimer);
-                        } else {
-                            resultDiv.textContent = rawTextContent;
-                            resultDiv.classList.remove("markdown-content");
-                        }
-                    }
-                } catch (e) {
-                    rawTextContent = `Network error or API call failed: ${e.message}`;
+                if (data.error) {
+                    rawTextContent = `API Error: ${data.error.message}`;
                     resultDiv.textContent = rawTextContent;
                     resultDiv.classList.remove("markdown-content");
+                } else {
+                    rawTextContent = data.candidates[0].content.parts[0].text.trim();
+
+                    if (typeof marked !== 'undefined') {
+                        resultDiv.innerHTML = marked.parse(rawTextContent);
+                        resultDiv.classList.add("markdown-content");
+
+                        // 注意書きを追加
+                        const disclaimer = document.createElement('div');
+                        disclaimer.className = 'ai-disclaimer';
+                        if (langCode === 'ja') {
+                            disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
+                        } else {
+                            disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
+                        }
+                        resultDiv.appendChild(disclaimer);
+                    } else {
+                        resultDiv.textContent = rawTextContent;
+                        resultDiv.classList.remove("markdown-content");
+                    }
                 }
+            } catch (e) {
+                rawTextContent = `Network error or API call failed: ${e.message}`;
+                resultDiv.textContent = rawTextContent;
+                resultDiv.classList.remove("markdown-content");
             }
-        })();
+        }
+        }) ();
     </script>
 
     <script>
