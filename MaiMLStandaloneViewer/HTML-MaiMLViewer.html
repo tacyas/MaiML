@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <title>MaiML Viewer</title>
+    <title>MaiMLStandaloneViewer</title>
     <style>
         :root {
             --toolbar-h: 56px;
@@ -190,7 +190,6 @@
         }
 
         #stageWrap {
-            /* flex: 1; */
             flex: 1 1 50%;
             position: relative;
             overflow: hidden;
@@ -277,30 +276,24 @@
             border-radius: 6px;
         }
 
-        /* 1. パネル自体のスクロールを止め、中身を縦並びにする */
         #detailsPanel {
             background: var(--surface);
             padding: 0;
-            /* ツールバーを端まで広げるため一旦 0 にし、中身で調整します */
             overflow: hidden;
-            /* 全体のスクロールを禁止 */
             border-top: 1px solid var(--border);
             height: 100%;
             display: flex;
             flex-direction: column;
         }
 
-        /* 2. Stats（Not Loadedなど）とツールバーを固定エリアにする */
         #stats {
             font-size: 12px;
             color: var(--muted);
             margin: .8rem .8rem .6rem .8rem;
-            /* paddingの代わりにmarginで余白調整 */
             padding: .5rem .6rem;
             background: var(--bg);
             border-radius: 6px;
             flex-shrink: 0;
-            /* 潰れないように固定 */
         }
 
         #detailsPanel .toolbar {
@@ -309,21 +302,16 @@
             background: var(--surface);
             z-index: 10;
             padding: 0 .8rem .8rem .8rem;
-            /* 下のコンテンツとの間隔 */
             margin: 0;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
-            /* 潰れないように固定 */
         }
 
-        /* 3. 詳細が表示される #meta だけをスクロールさせる */
         #meta {
             flex-grow: 1;
             overflow-y: auto;
-            /* ここにスクロールバーを出す */
             overflow-x: hidden;
             padding: .8rem;
-            /* ここで元々のパネルの余白を再現 */
         }
 
 
@@ -421,6 +409,10 @@
         }
 
         .node.selected :is(circle, rect) {
+            stroke: var(--warn)
+        }
+
+        rect.group-box.selected {
             stroke: var(--warn)
         }
 
@@ -693,16 +685,57 @@
             padding-bottom: .3rem;
         }
 
-        line.link {
+
+        path.link {
             stroke: var(--muted);
-            stroke-width: 1.5
+            stroke-width: 1.5;
+            fill: none;
         }
 
-        line.link.ref-link {
+        path.link.ref-link {
             stroke: var(--muted);
             stroke-width: 1.2;
             stroke-dasharray: 5, 3;
             opacity: 0.4;
+            fill: none;
+        }
+
+        path.link.same-uuid {
+            stroke-dasharray: 5, 3;
+            stroke: var(--accent);
+            opacity: 0.7;
+            fill: none;
+        }
+
+        path.link.templateRef {
+            stroke: #f6d65b;
+            stroke-width: 1.5;
+            stroke-dasharray: 5, 3;
+            opacity: 0.7;
+            fill: none;
+        }
+
+        path.link.instanceRef {
+            stroke: #3ddc97;
+            stroke-width: 1.5;
+            stroke-dasharray: 5, 3;
+            opacity: 0.7;
+            fill: none;
+        }
+
+        text.ref-label {
+            font-size: 10px;
+            fill: var(--ink);
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        text.ref-label.templateRef {
+            fill: #d4a800;
+        }
+
+        text.ref-label.instanceRef {
+            fill: #2a9;
         }
 
         #aiSummaryModal .modal-content {
@@ -745,7 +778,7 @@
             background: var(--bg);
             border-radius: 4px;
             white-space: pre-wrap;
-            min-height: 300px; /* 最小高さを確保 */
+            min-height: 300px;
         }
 
         .markdown-content h1,
@@ -874,32 +907,31 @@
             font-size: 13px;
         }
 
-        /* Input Text Details の折りたたみスタイル */
-#inputTextDetails {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.4rem 0.6rem;
-    background: var(--surface);
-}
+        #inputTextDetails {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+            background: var(--surface);
+        }
 
-#inputTextDetails summary {
-    list-style: none;
-    outline: none;
-}
+        #inputTextDetails summary {
+            list-style: none;
+            outline: none;
+        }
 
-#inputTextDetails summary::-webkit-details-marker {
-    display: none;
-}
+        #inputTextDetails summary::-webkit-details-marker {
+            display: none;
+        }
 
-#inputTextDetails summary:hover {
-    color: var(--accent2);
-}
+        #inputTextDetails summary:hover {
+            color: var(--accent2);
+        }
 
-#inputTextDetails[open] summary {
-    margin-bottom: 0.3rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--border);
-}
+        #inputTextDetails[open] summary {
+            margin-bottom: 0.3rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--border);
+        }
     </style>
 </head>
 
@@ -1003,9 +1035,11 @@
                 <button class="modal-close" id="aiSummaryClose">&times;</button>
             </div>
             <div class="modal-body">
-                <div style="display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 0.5rem; align-items: center; margin-bottom: 0.8rem;">
+                <div
+                    style="display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 0.5rem; align-items: center; margin-bottom: 0.8rem;">
                     <label style="font-size: 12px; font-weight: 600; white-space: nowrap;">AI Agent Model:</label>
-                    <input id="modelName" type="text" value="gemini-2.5-flash-lite" style="padding: 0.3rem; font-size: 12px;" />
+                    <input id="modelName" type="text" value="gemini-2.5-flash-lite"
+                        style="padding: 0.3rem; font-size: 12px;" />
                     <label style="font-size: 12px; font-weight: 600; white-space: nowrap;">Prompt Template:</label>
                     <select id="promptTemplate" style="padding: 0.3rem; font-size: 12px;">
                         <option value="quick" selected>Quick Summary</option>
@@ -1016,7 +1050,8 @@
                 </div>
 
                 <details id="inputTextDetails" style="margin-bottom: 0.5rem;">
-                    <summary style="cursor: pointer; font-weight: 600; font-size: 13px; padding: 0.3rem 0; color: var(--accent); user-select: none;">
+                    <summary
+                        style="cursor: pointer; font-weight: 600; font-size: 13px; padding: 0.3rem 0; color: var(--accent); user-select: none;">
                         📄 Input Text{TEXT} (click to expand/collapse)
                     </summary>
                     <pre id="aiSummaryTarget"
@@ -1065,10 +1100,12 @@
         ; (function () {
             const svg = d3.select('#stage');
             const gRoot = svg.append('g');
+            const gGroups = gRoot.append('g').attr('class', 'groups');
             const gLinks = gRoot.append('g').attr('class', 'links');
             const gNodes = gRoot.append('g').attr('class', 'nodes');
             svg.call(d3.zoom().scaleExtent([0.25, 6]).on('zoom', (e) => gRoot.attr('transform', e.transform)));
 
+            //
             svg.append('defs').append('marker')
                 .attr('id', 'arrow')
                 .attr('viewBox', '0 -5 10 10')
@@ -1081,6 +1118,32 @@
                 .attr('d', 'M0,-5L10,0L0,5')
                 .attr('fill', '#888');
 
+            // templateRef
+            svg.select('defs').append('marker')
+                .attr('id', 'arrow-templateRef')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 24)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#f6d65b');
+
+            // instanceRef
+            svg.select('defs').append('marker')
+                .attr('id', 'arrow-instanceRef')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 24)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#3ddc97');
+
             let nodes = [], links = [];
             let byId = new Map();
             let simulation = null, netKey = 'default';
@@ -1090,6 +1153,9 @@
             const templateToInstances = new Map();
             const instances = [];
             const insertionFiles = new Map();
+            const documentMetadataMap = new Map();
+            // ★Export用: ドキュメント情報を構造化して保持するマップ
+            window.documentInfoMap = new Map();
 
             // トランジション関連のデータ
             const instructionById = new Map();
@@ -1250,7 +1316,7 @@
                             <div class="upload-area" id="maimlUploadArea">
                                 <div style="font-size:48px; margin-bottom:1rem;">📂</div>
                                 <p>Drag & drop MaiML files (.maiml or .maiml.zip)<br />or<br />click to select</p>
-                                <input accept=".xml,.maiml,.mai,.zip,application/xml,application/zip" id="maimlFileInput" style="display:none;" type="file" />
+                                <input accept=".xml,.maiml,.mai,.zip,application/xml,application/zip" id="maimlFileInput" style="display:none;" type="file" multiple />
                             </div>
                             <div id="zipProgress" style="display:none; margin-top:1rem; padding:0.8rem; background:var(--bg); border-radius:6px;">
                                 <div style="font-size:12px; color:var(--muted); margin-bottom:0.5rem;">Processing ZIP archive...</div>
@@ -1275,8 +1341,8 @@
                 uploadArea.addEventListener('click', () => fileInput.click());
 
                 fileInput.addEventListener('change', async (e) => {
-                    if (e.target.files[0]) {
-                        await handleMaiMLFile(e.target.files[0]);
+                    if (e.target.files && e.target.files.length > 0) {
+                        await handleFiles(Array.from(e.target.files));
                         document.body.removeChild(modal);
                     }
                 });
@@ -1293,8 +1359,8 @@
                 uploadArea.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     uploadArea.classList.remove('dragover');
-                    if (e.dataTransfer.files[0]) {
-                        await handleMaiMLFile(e.dataTransfer.files[0]);
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        await handleFiles(Array.from(e.dataTransfer.files));
                         document.body.removeChild(modal);
                     }
                 });
@@ -1309,23 +1375,47 @@
             // グローバル変数として追加
             let zipFileCache = new Map(); // ZIPから展開したファイルをキャッシュ
 
-            async function handleMaiMLFile(file) {
+            async function handleFiles(files) {
+                resetData();
+                for (const file of files) {
+                    if (file.name.toLowerCase().endsWith('.zip') || file.name.toLowerCase().endsWith('.maiml.zip')) {
+                        await handleMaiMLZipFile(file, true, false);
+                    } else {
+                        await handleMaiMLFile(file, true);
+                    }
+                }
+                // ã€è¿½åŠ ã€'å‚ç…§é–¢ä¿‚ã‚'æ§‹ç¯‰
+                connectTemplateRefs();
+                connectInstanceRefs();
+                connectSameUuidInstances();
+                render();
+                runAutoLayout(true);
+                updateStats();
+            }
+
+            async function handleMaiMLFile(file, append = false) {
                 const fileName = file.name.toLowerCase();
 
                 // ZIPファイルかどうか判定
                 if (fileName.endsWith('.zip') || fileName.endsWith('.maiml.zip')) {
-                    await handleMaiMLZipFile(file);
+                    await handleMaiMLZipFile(file, append);
                 } else {
                     // 単独のMaiMLファイル
-                    netKey = file.name.replace(/\.[^.]+$/, '');
-                    document.title = `${file.name}`;
+                    const key = file.name.replace(/\.[^.]+$/, '');
+                    if (!append) {
+                        netKey = key;
+                        document.title = `${file.name}`;
+                    } else {
+                        netKey += '+' + key;
+                    }
+
                     const text = await file.text();
-                    loadXml(text);
-                    extractDocumentMetadata(text);
+                    loadXml(text, append, key);
+                    extractDocumentMetadata(text, append, key);
                 }
             }
 
-            async function handleMaiMLZipFile(file) {
+            async function handleMaiMLZipFile(file, append = false, closeModal = true) {
                 const modal = document.querySelector('.modal-overlay.show');
                 const progressDiv = modal?.querySelector('#zipProgress');
                 const progressBar = modal?.querySelector('#zipProgressBar');
@@ -1372,13 +1462,18 @@
                     const maimlText = await maimlFile.async('text');
 
                     // ファイル名からnetKeyを設定
-                    netKey = maimlFileName.replace(/\.[^.]+$/, '');
-                    document.title = maimlFileName;
+                    const key = maimlFileName.replace(/\.[^.]+$/, '');
+                    if (!append) {
+                        netKey = key;
+                        document.title = maimlFileName;
+                    } else {
+                        netKey += '+' + key;
+                    }
 
                     if (progressBar) progressBar.style.width = '60%';
 
                     // ZIP内の全ファイルをキャッシュに格納
-                    zipFileCache.clear();
+                    if (!append) zipFileCache.clear();
                     const totalFiles = Object.keys(zip.files).length;
                     let processedFiles = 0;
 
@@ -1454,8 +1549,8 @@
                     if (progressBar) progressBar.style.width = '85%';
 
                     // MaiMLファイルをパース
-                    loadXml(maimlText);
-                    extractDocumentMetadata(maimlText);
+                    loadXml(maimlText, append, key);
+                    extractDocumentMetadata(maimlText, append, key);
 
                     if (progressBar) progressBar.style.width = '95%';
 
@@ -1483,11 +1578,13 @@
                 `;
                         }, 300);
 
-                        setTimeout(() => {
-                            if (modal && modal.parentElement) {
-                                document.body.removeChild(modal);
-                            }
-                        }, 1500);
+                        if (closeModal) {
+                            setTimeout(() => {
+                                if (modal && modal.parentElement) {
+                                    document.body.removeChild(modal);
+                                }
+                            }, 1500);
+                        }
                     }
 
                 } catch (error) {
@@ -1505,8 +1602,10 @@
                     </div>
                 `;
                             setTimeout(() => {
-                                if (modal && modal.parentElement) {
-                                    document.body.removeChild(modal);
+                                if (closeModal) {
+                                    if (modal && modal.parentElement) {
+                                        document.body.removeChild(modal);
+                                    }
                                 }
                             }, 2000);
                             return; // alertを出さない
@@ -1839,17 +1938,71 @@
                 return matchCount; // ← この行を追加
             }
 
-            function extractDocumentMetadata(xmlText) {
+            function connectSameIdPlaces() {
+                const groups = new Map();
+                nodes.forEach(n => {
+                    if (n.type === 'place' && n.originalId) {
+                        if (!groups.has(n.originalId)) groups.set(n.originalId, []);
+                        groups.get(n.originalId).push(n);
+                    }
+                });
+                for (const list of groups.values()) {
+                    if (list.length > 1) {
+                        for (let i = 0; i < list.length - 1; i++) {
+                            links.push({
+                                source: list[i].id,
+                                target: list[i + 1].id,
+                                type: 'same-uuid'
+                            });
+                        }
+                    }
+                }
+            }
+
+            function connectSameUuidInstances() {
+                const uuidGroups = new Map();
+                instances.forEach(inst => {
+                    if (inst.uuid && inst.templateRef) {
+                        const tpl = templateById.get(inst.templateRef);
+                        if (tpl && tpl.placeRef) {
+                            const placeNode = byId.get(tpl.placeRef);
+                            if (placeNode) {
+                                if (!uuidGroups.has(inst.uuid)) uuidGroups.set(inst.uuid, new Set());
+                                uuidGroups.get(inst.uuid).add(placeNode);
+                            }
+                        }
+                    }
+                });
+                for (const [uuid, placeSet] of uuidGroups.entries()) {
+                    const list = Array.from(placeSet);
+                    if (list.length > 1) {
+                        for (let i = 0; i < list.length - 1; i++) {
+                            links.push({
+                                source: list[i].id,
+                                target: list[i + 1].id,
+                                type: 'same-uuid'
+                            });
+                        }
+                    }
+                }
+            }
+
+            function extractDocumentMetadata(xmlText, append = false, key = null) {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlText, "application/xml");
 
                 const documentElement = xmlDoc.getElementsByTagNameNS("http://www.maiml.org/schemas", "document")[0];
                 if (!documentElement) {
-                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No Document Metadata found</div>';
+                    if (!append) {
+                        $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No Document Metadata found</div>';
+                    }
                     return;
                 }
 
-                let html = '<h3>📄 Document Metadata</h3><table>';
+                let html = '';
+                const header = '<h3>📄 Document Metadata</h3>';
+                if (!append) html += header;
+                html += '<table>';
                 let rowCount = 0;
 
                 const uuidEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "uuid")[0];
@@ -1953,10 +2106,50 @@
                     html += '</table>';
                 }
 
+                if (key) {
+                    // ★Export用に構造化データを保存
+                    if (window.documentInfoMap) {
+                        const infoObj = {
+                            uuid: uuidEl ? uuidEl.textContent : '',
+                            name: nameEl ? nameEl.textContent : '',
+                            description: descriptionEl ? descriptionEl.textContent : '',
+                            annotation: annotationEl ? annotationEl.textContent : '',
+                            others: [],
+                            properties: []
+                        };
+
+                        tags.forEach(tag => {
+                            const elements = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", tag);
+                            for (let el of elements) {
+                                const n = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "name")[0];
+                                const d = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "description")[0];
+                                infoObj.others.push({
+                                    tag: tag,
+                                    name: n ? n.textContent : '',
+                                    description: d ? d.textContent : ''
+                                });
+                            }
+                        });
+
+                        if (directProperties.length > 0) {
+                            directProperties.forEach(prop => {
+                                infoObj.properties.push(parsePropertyRecursive(prop, 0));
+                            });
+                        }
+                        window.documentInfoMap.set(key, infoObj);
+                    }
+
+                    const saveHtml = append ? (header + html) : html;
+                    documentMetadataMap.set(key, saveHtml);
+                }
+
                 if (rowCount === 0 && directProperties.length === 0) {
-                    $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No metadata found</div>';
+                    if (!append) {
+                        $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3><div class="empty-state">No metadata found</div>';
+                    }
                 } else {
-                    $documentInfo.innerHTML = html;
+                    if (append) $documentInfo.innerHTML += html;
+                    else $documentInfo.innerHTML = html;
                 }
             }
 
@@ -2321,7 +2514,7 @@
                 }
             });
 
-            function loadXml(text) {
+            function resetData() {
                 nodes = [];
                 links = [];
                 byId.clear();
@@ -2333,22 +2526,32 @@
                 instructionById.clear();
                 transitionToInstructions.clear();
                 eventsByInstructionId.clear();
+                zipFileCache.clear();
+                documentMetadataMap.clear();
+                if (window.documentInfoMap) window.documentInfoMap.clear();
+                $meta.innerHTML = '';
+                $stats.textContent = 'Loading...';
+            }
+
+            function loadXml(text, append = false, sourceId = null) {
+                if (!append) resetData();
 
                 const xml = new DOMParser().parseFromString(text, 'application/xml');
                 if (xml.querySelector('parsererror')) {
                     alert('Failed to parse XML.');
                     return;
                 }
-                parseMaiML(xml);
+                parseMaiML(xml, sourceId);
 
-                // 下パネルの表示をクリア
-                $meta.innerHTML = '';
-                $stats.textContent = 'Loading...';
+                connectTemplateRefs();
+                connectInstanceRefs();
 
-                render();
-                if (!restoreLayout()) runAutoLayout(true);
-                else ticked();
-                updateStats();
+                if (!append) {
+                    render();
+                    if (!restoreLayout()) runAutoLayout(true);
+                    else ticked();
+                    updateStats();
+                }
             }
 
             function updateStats() {
@@ -2360,7 +2563,7 @@
                 $stats.textContent = `PLACE: ${pc} / TRANSITION: ${tc} / Templates: ${tplCount} / Instances: ${instCount} (Saved Key: ${layoutKey()})`;
             }
 
-            function parseMaiML(xml) {
+            function parseMaiML(xml, sourceId) {
                 const all = Array.from(xml.getElementsByTagName('*'));
                 const attr = (el, ...names) => {
                     for (const n of names) {
@@ -2394,27 +2597,35 @@
                     return null;
                 };
 
+                const resolve = (id) => sourceId ? `${sourceId}_${id}` : id;
+
                 for (const el of all) {
                     const l = local(el);
                     if (l === 'place') {
-                        const id = attr(el, 'id', 'ID', 'Id') || genId('p');
-                        const label = attr(el, 'name') || id;
-                        const x = num(attr(el, 'x', 'cx')),
-                            y = num(attr(el, 'y', 'cy'));
-                        const r = num(attr(el, 'r', 'radius')) || 16;
-                        const n = { id, type: 'place', label, r, x, y, rawEl: el };
-                        nodes.push(n);
-                        byId.set(id, n);
+                        const rawId = attr(el, 'id', 'ID', 'Id') || genId('p');
+                        const id = resolve(rawId);
+                        if (!byId.has(id)) {
+                            const label = attr(el, 'name') || rawId;
+                            const x = num(attr(el, 'x', 'cx')),
+                                y = num(attr(el, 'y', 'cy'));
+                            const r = num(attr(el, 'r', 'radius')) || 16;
+                            const n = { id, originalId: rawId, type: 'place', label, r, x, y, rawEl: el, sourceId };
+                            nodes.push(n);
+                            byId.set(id, n);
+                        }
                     } else if (l === 'transition') {
-                        const id = attr(el, 'id', 'ID', 'Id') || genId('t');
-                        const label = attr(el, 'name') || id;
-                        const x = num(attr(el, 'x')),
-                            y = num(attr(el, 'y'));
-                        const w = num(attr(el, 'w', 'width')) || 24,
-                            h = num(attr(el, 'h', 'height')) || 50;
-                        const n = { id, type: 'transition', label, w, h, x, y, rawEl: el };
-                        nodes.push(n);
-                        byId.set(id, n);
+                        const rawId = attr(el, 'id', 'ID', 'Id') || genId('t');
+                        const id = resolve(rawId);
+                        if (!byId.has(id)) {
+                            const label = attr(el, 'name') || rawId;
+                            const x = num(attr(el, 'x')),
+                                y = num(attr(el, 'y'));
+                            const w = num(attr(el, 'w', 'width')) || 24,
+                                h = num(attr(el, 'h', 'height')) || 50;
+                            const n = { id, originalId: rawId, type: 'transition', label, w, h, x, y, rawEl: el, sourceId };
+                            nodes.push(n);
+                            byId.set(id, n);
+                        }
                     }
                 }
 
@@ -2431,7 +2642,15 @@
                                 tg = tr;
                             }
                         }
-                        if (s && tg && byId.has(s) && byId.has(tg)) links.push({ source: s, target: tg, rawEl: el });
+                        if (s) s = resolve(s);
+                        if (tg) tg = resolve(tg);
+                        if (s && tg && byId.has(s) && byId.has(tg)) {
+                            const exists = links.some(link =>
+                                (link.source === s || link.source.id === s) &&
+                                (link.target === tg || link.target.id === tg)
+                            );
+                            if (!exists) links.push({ source: s, target: tg, rawEl: el });
+                        }
                     }
                 }
 
@@ -2445,13 +2664,17 @@
                     const prog = findAncestor(el, a => ['program', 'transition'].includes(local(a)));
                     const programId = prog ? (prog.getAttribute('id') || prog.getAttribute('ID') || prog.getAttribute('Id')) : null;
                     const tpl = extractTemplate(el, role, programId);
+                    tpl.id = resolve(tpl.id);
+                    if (tpl.programId) tpl.programId = resolve(tpl.programId);
+                    if (tpl.templateRefs) tpl.templateRefs = tpl.templateRefs.map(resolve);
                     templateById.set(tpl.id, tpl);
                     const refs = Array.from(el.getElementsByTagName('*')).filter(e => local(e) === 'placeref');
                     for (const r of refs) {
                         const refId = r.getAttribute('ref') || r.getAttribute('Ref') || r.getAttribute('REF');
                         if (refId) {
-                            tpl.placeRef = tpl.placeRef || refId;
-                            (placeToTemplates.get(refId) || placeToTemplates.set(refId, []).get(refId)).push(tpl);
+                            const resolvedRef = resolve(refId);
+                            tpl.placeRef = tpl.placeRef || resolvedRef;
+                            (placeToTemplates.get(resolvedRef) || placeToTemplates.set(resolvedRef, []).get(resolvedRef)).push(tpl);
                         }
                     }
                 }
@@ -2464,13 +2687,22 @@
                     else if (l === 'result') role = 'result';
                     if (!role) continue;
                     const tplRef = el.getAttribute('ref') || el.getAttribute('Ref') || el.getAttribute('REF') || el.getAttribute('templateRef') || el.getAttribute('classRef');
-                    const id = el.getAttribute('id') || el.getAttribute('ID') || el.getAttribute('Id') || genId(role[0]);
+                    const rawId = el.getAttribute('id') || el.getAttribute('ID') || el.getAttribute('Id') || genId(role[0]);
+                    const id = resolve(rawId);
+
+                    if (instances.some(i => i.id === id)) continue;
 
                     const meta = extractMetaBlock(el);
+                    // const rec = {
+                    //     id,
+                    //     role,
+                    //     templateRef: tplRef ? resolve(tplRef) : null,
                     const rec = {
                         id,
+                        originalId: rawId, // ★追加: 元のIDを保存
                         role,
-                        templateRef: tplRef || null,
+                        sourceId, // ★Export用: ソースID
+                        templateRef: tplRef ? resolve(tplRef) : null,
                         properties: meta.properties,
                         contents: meta.contents,
                         insertions: meta.insertions,
@@ -2478,57 +2710,21 @@
                         name: meta.name,
                         description: meta.description,
                         annotation: meta.annotation,
-                        instanceRefs: meta.instanceRefs,
+                        instanceRefs: meta.instanceRefs.map(resolve),
                         rawEl: el
                     };
                     instances.push(rec);
-                    if (tplRef) {
-                        (templateToInstances.get(tplRef) || templateToInstances.set(tplRef, []).get(tplRef)).push(rec);
-                    }
-                    for (const tpl of templateById.values()) {
-                        if (tpl.templateRefs && tpl.templateRefs.length > 0) {
-                            tpl.templateRefs.forEach(refId => {
-                                const refTpl = templateById.get(refId);
-                                if (refTpl && tpl.placeRef && refTpl.placeRef) {
-                                    links.push({
-                                        source: tpl.placeRef,
-                                        target: refTpl.placeRef,
-                                        type: 'templateRef',
-                                        rawEl: null
-                                    });
-                                }
-                            });
-                        }
-                    }
-
-                    for (const inst of instances) {
-                        if (inst.instanceRefs && inst.instanceRefs.length > 0) {
-                            inst.instanceRefs.forEach(refId => {
-                                const refInst = instances.find(i => i.id === refId);
-                                if (refInst) {
-                                    const srcTpl = templateById.get(inst.templateRef);
-                                    const tgtTpl = templateById.get(refInst.templateRef);
-                                    if (srcTpl && tgtTpl && srcTpl.placeRef && tgtTpl.placeRef) {
-                                        links.push({
-                                            source: srcTpl.placeRef,
-                                            target: tgtTpl.placeRef,
-                                            type: 'instanceRef',
-                                            rawEl: null
-                                        });
-                                    }
-                                }
-                            });
-                        }
+                    if (rec.templateRef) {
+                        (templateToInstances.get(rec.templateRef) || templateToInstances.set(rec.templateRef, []).get(rec.templateRef)).push(rec);
                     }
                 }
-
-                // ... 既存のループ処理の後 ...
 
                 // --- 【追加】instruction要素の解析 ---
                 for (const el of all) {
                     const l = local(el);
                     if (l === 'instruction') {
-                        const id = attr(el, 'id', 'ID', 'Id');
+                        const rawId = attr(el, 'id', 'ID', 'Id');
+                        const id = resolve(rawId);
                         if (!id) continue;
 
                         // トランジションへの参照を探す
@@ -2539,11 +2735,20 @@
 
                         // 2. 属性 ref="..." を探す (ユーザー様のケース)
                         if (!tRef) tRef = attr(el, 'ref', 'Ref', 'REF') || attr(el, 'transitionRef');
+                        if (tRef) tRef = resolve(tRef);
 
                         const meta = extractMetaBlock(el);
+                        // instructionById.set(id, {
+                        //     id,
+                        //     transitionRef: tRef,
+                        //     ...meta,
+                        //     rawEl: el
+                        // });
                         instructionById.set(id, {
                             id,
+                            originalId: rawId, // ★追加: 元のIDを保存
                             transitionRef: tRef,
+                            sourceId, // ★Export用: ソースID
                             ...meta,
                             rawEl: el
                         });
@@ -2559,7 +2764,8 @@
                 for (const el of all) {
                     const l = local(el);
                     if (l === 'event') {
-                        const ref = attr(el, 'ref', 'Ref', 'REF'); // instructionを参照
+                        let ref = attr(el, 'ref', 'Ref', 'REF'); // instructionを参照
+                        if (ref) ref = resolve(ref);
                         if (ref) {
                             const meta = extractMetaBlock(el);
                             if (!eventsByInstructionId.has(ref)) eventsByInstructionId.set(ref, []);
@@ -2574,13 +2780,22 @@
                     return prefix + '_' + Math.random().toString(36).slice(2, 8);
                 }
 
+                // function extractTemplate(tEl, role, programId) {
+                //     const id = tEl.getAttribute('id') || tEl.getAttribute('ID') || tEl.getAttribute('Id') || genId(role[0] + 'tpl');
+                //     const base = extractMetaBlock(tEl);
+                //     return {
+                //         id,
+                //         tag: tEl.tagName,
                 function extractTemplate(tEl, role, programId) {
-                    const id = tEl.getAttribute('id') || tEl.getAttribute('ID') || tEl.getAttribute('Id') || genId(role[0] + 'tpl');
+                    // id変数をrawIdに変更し、オブジェクト返却時に id と originalId の両方に設定
+                    const rawId = tEl.getAttribute('id') || tEl.getAttribute('ID') || tEl.getAttribute('Id') || genId(role[0] + 'tpl');
                     const base = extractMetaBlock(tEl);
                     return {
-                        id,
+                        id: rawId,
+                        originalId: rawId, // ★追加: 元のIDを保存
                         tag: tEl.tagName,
                         role,
+                        sourceId, // ★Export用: ソースID
                         programId,
                         properties: base.properties,
                         contents: base.contents,
@@ -2703,11 +2918,97 @@
                     return { kind: 'content', key, name, type, description, value, units, fstring, children };
                 }
             }
+            // templateRef
+            function connectTemplateRefs() {
+                for (const tpl of templateById.values()) {
+                    if (tpl.templateRefs && tpl.templateRefs.length > 0) {
+                        tpl.templateRefs.forEach(refId => {
+                            const refTpl = templateById.get(refId);
+                            if (refTpl && tpl.placeRef && refTpl.placeRef) {
+                                const exists = links.some(link =>
+                                    (link.source === tpl.placeRef || link.source.id === tpl.placeRef) &&
+                                    (link.target === refTpl.placeRef || link.target.id === refTpl.placeRef) &&
+                                    link.type === 'templateRef'
+                                );
+                                if (!exists) {
+                                    links.push({
+                                        source: tpl.placeRef,
+                                        target: refTpl.placeRef,
+                                        type: 'templateRef',
+                                        label: 'templateRef',
+                                        rawEl: null
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+            }
 
-            let selLinks, selNodes;
+            // instanceRef
+            function connectInstanceRefs() {
+                for (const inst of instances) {
+                    if (inst.instanceRefs && inst.instanceRefs.length > 0) {
+                        inst.instanceRefs.forEach(refId => {
+                            const refInst = instances.find(i => i.id === refId);
+                            if (refInst) {
+                                const srcTpl = templateById.get(inst.templateRef);
+                                const tgtTpl = templateById.get(refInst.templateRef);
+                                if (srcTpl && tgtTpl && srcTpl.placeRef && tgtTpl.placeRef) {
+                                    const exists = links.some(link =>
+                                        (link.source === srcTpl.placeRef || link.source.id === srcTpl.placeRef) &&
+                                        (link.target === tgtTpl.placeRef || link.target.id === tgtTpl.placeRef) &&
+                                        link.type === 'instanceRef'
+                                    );
+                                    if (!exists) {
+                                        links.push({
+                                            source: srcTpl.placeRef,
+                                            target: tgtTpl.placeRef,
+                                            type: 'instanceRef',
+                                            label: 'instanceRef',
+                                            rawEl: null
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            let selLinks, selLinkLabels, selNodes, selGroups, selGroupLabels;
 
             function render() {
-                selLinks = gLinks.selectAll('line.link').data(links, d => {
+                const sourceIds = Array.from(new Set(nodes.map(n => n.sourceId).filter(x => x)));
+                selGroups = gGroups.selectAll('rect.group-box').data(sourceIds, d => d);
+                selGroups.exit().remove();
+                selGroups = selGroups.enter().append('rect')
+                    .attr('class', 'group-box')
+                    .attr('fill', 'transparent')
+                    .attr('stroke', 'var(--muted)')
+                    .attr('stroke-dasharray', '5,5')
+                    .attr('stroke-width', 0.5)
+                    .attr('rx', 8)
+                    .merge(selGroups);
+
+                selGroupLabels = gGroups.selectAll('text.group-label').data(sourceIds, d => d);
+                selGroupLabels.exit().remove();
+                // selGroupLabels = selGroupLabels.enter().append('text')
+                //     .attr('class', 'group-label')
+                //     .attr('fill', 'var(--muted)')
+                //     .attr('font-size', '10px')
+                //     .text(d => d)
+                //     .merge(selGroupLabels);
+                selGroupLabels = selGroupLabels.enter().append('text')
+                    .attr('class', 'group-label')
+                    .attr('fill', 'var(--muted)')
+                    .attr('font-size', '10px')
+                    // ★修正: パス区切り文字で分割し、末尾(ファイル名)のみを表示
+                    .text(d => d ? d.split(/[/\\]/).pop() : '')
+                    .merge(selGroupLabels);
+
+
+                selLinks = gLinks.selectAll('path.link').data(links, d => {
                     const src = d.source.id || d.source;
                     const tgt = d.target.id || d.target;
                     const type = d.type || 'arc';
@@ -2715,10 +3016,53 @@
                 });
                 selLinks.exit().remove();
                 selLinks = selLinks.enter()
-                    .append('line')
-                    .attr('class', d => d.type ? `link ref-link` : 'link')
-                    .attr('marker-end', 'url(#arrow)')
+                    .append('path')
+                    .attr('class', d => {
+                        if (d.type === 'same-uuid') return 'link same-uuid';
+                        if (d.type === 'templateRef') return 'link templateRef';
+                        if (d.type === 'instanceRef') return 'link instanceRef';
+                        if (d.type) return 'link ref-link';
+                        return 'link';
+                    })
+                    .attr('fill', 'none')
+                    .attr('marker-end', d => {
+                        if (d.type === 'same-uuid') return null;
+                        if (d.type === 'templateRef') return 'url(#arrow-templateRef)';
+                        if (d.type === 'instanceRef') return 'url(#arrow-instanceRef)';
+                        return 'url(#arrow)';
+                    })
                     .merge(selLinks);
+
+                // same-uuid, templateRef, instanceRef
+                selLinkLabels = gLinks.selectAll('text.link-label').data(
+                    links.filter(d => d.type === 'same-uuid' || d.type === 'templateRef' || d.type === 'instanceRef'),
+                    d => {
+                        const src = d.source.id || d.source;
+                        const tgt = d.target.id || d.target;
+                        return `${src}->${tgt}-label`;
+                    }
+                );
+                selLinkLabels.exit().remove();
+                selLinkLabels = selLinkLabels.enter().append('text')
+                    .attr('class', d => {
+                        if (d.type === 'templateRef') return 'link-label ref-label templateRef';
+                        if (d.type === 'instanceRef') return 'link-label ref-label instanceRef';
+                        return 'link-label';
+                    })
+                    .attr('font-size', '10px')
+                    .attr('fill', d => {
+                        if (d.type === 'templateRef') return '#d4a800';
+                        if (d.type === 'instanceRef') return '#2a9';
+                        return 'var(--accent)';
+                    })
+                    .attr('text-anchor', 'middle')
+                    .text(d => {
+                        if (d.type === 'same-uuid') return '<same uuid>';
+                        if (d.type === 'templateRef') return '<templateRef>';
+                        if (d.type === 'instanceRef') return '<instanceRef>';
+                        return '';
+                    })
+                    .merge(selLinkLabels);
 
                 selNodes = gNodes.selectAll('g.node').data(nodes, d => d.id);
                 selNodes.exit().remove();
@@ -2741,6 +3085,7 @@
                 selNodes = enter.merge(selNodes);
                 selNodes.on('click', (e, d) => {
                     selNodes.classed('selected', n => n === d);
+                    if (selGroups) selGroups.classed('selected', g => g === d.sourceId);
                     showDetails(d);
                 });
                 enableDrag(true);
@@ -2773,26 +3118,122 @@
             function ticked() {
                 const W = svg.node().clientWidth,
                     H = svg.node().clientHeight;
+
+                if (selGroups) {
+                    const bounds = new Map();
+                    nodes.forEach(n => {
+                        if (!n.sourceId) return;
+                        if (!bounds.has(n.sourceId)) bounds.set(n.sourceId, { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity });
+                        const b = bounds.get(n.sourceId);
+                        const r = (n.type === 'place' ? (n.r || 16) : Math.max(n.w || 24, n.h || 50) / 2) + 10;
+                        b.x0 = Math.min(b.x0, n.x - r);
+                        b.x1 = Math.max(b.x1, n.x + r);
+                        b.y0 = Math.min(b.y0, n.y - r);
+                        b.y1 = Math.max(b.y1, n.y + r);
+                    });
+
+                    selGroups
+                        .attr('x', d => (bounds.get(d)?.x0 || 0))
+                        .attr('y', d => (bounds.get(d)?.y0 || 0))
+                        .attr('width', d => Math.max(0, (bounds.get(d)?.x1 || 0) - (bounds.get(d)?.x0 || 0)))
+                        .attr('height', d => Math.max(0, (bounds.get(d)?.y1 || 0) - (bounds.get(d)?.y0 || 0)))
+                        .style('display', d => bounds.has(d) ? null : 'none');
+
+                    selGroupLabels
+                        .attr('x', d => (bounds.get(d)?.x0 || 0))
+                        .attr('y', d => (bounds.get(d)?.y0 || 0) - 5)
+                        .style('display', d => bounds.has(d) ? null : 'none');
+                }
+
                 selNodes.attr('transform', d => {
-                    const m = 20,
-                        hw = (d.type === 'place') ? (d.r || 16) : (d.w || 28) / 2,
-                        hh = (d.type === 'place') ? (d.r || 16) : (d.h || 18) / 2;
-                    d.x = Math.max(m + hw, Math.min(W - m - hw, d.x));
-                    d.y = Math.max(m + hh, Math.min(H - m - hh, d.y));
                     return `translate(${d.x},${d.y})`;
                 });
-                selLinks.attr('x1', d => getN(d.source).x).attr('y1', d => getN(d.source).y)
-                    .attr('x2', d => getN(d.target).x).attr('y2', d => getN(d.target).y);
+
+                selLinks.attr('d', d => {
+                    const source = getN(d.source);
+                    const target = getN(d.target);
+
+                    if (d.type === 'templateRef' || d.type === 'instanceRef') {
+                        return linkArc(source, target, d.type);
+                    }
+
+                    return `M${source.x},${source.y} L${target.x},${target.y}`;
+                });
+
+                if (selLinkLabels) {
+                    selLinkLabels
+                        .attr('x', d => {
+                            const source = getN(d.source);
+                            const target = getN(d.target);
+
+                            if (d.type === 'templateRef' || d.type === 'instanceRef') {
+                                const midX = (source.x + target.x) / 2;
+                                const midY = (source.y + target.y) / 2;
+                                const dx = target.x - source.x;
+                                const dy = target.y - source.y;
+                                const len = Math.sqrt(dx * dx + dy * dy);
+
+                                const offset = len * 0.15;
+                                const perpX = -dy / len;
+                                const perpY = dx / len;
+
+                                if (d.type === 'templateRef') {
+                                    return midX + perpX * offset;
+                                } else {
+                                    return midX - perpX * offset;
+                                }
+                            }
+
+                            return (source.x + target.x) / 2;
+                        })
+                        .attr('y', d => {
+                            const source = getN(d.source);
+                            const target = getN(d.target);
+
+                            if (d.type === 'templateRef' || d.type === 'instanceRef') {
+                                const midX = (source.x + target.x) / 2;
+                                const midY = (source.y + target.y) / 2;
+                                const dx = target.x - source.x;
+                                const dy = target.y - source.y;
+                                const len = Math.sqrt(dx * dx + dy * dy);
+
+                                const offset = len * 0.15;
+                                const perpX = -dy / len;
+                                const perpY = dx / len;
+
+                                if (d.type === 'templateRef') {
+                                    return midY + perpY * offset;
+                                } else {
+                                    return midY - perpY * offset;
+                                }
+                            }
+
+                            return (source.y + target.y) / 2;
+                        });
+                }
             }
 
             function getN(idOrObj) {
                 return (typeof idOrObj === 'object') ? idOrObj : nodes.find(n => n.id === idOrObj);
             }
 
+
+            function linkArc(source, target, type) {
+                const dx = target.x - source.x;
+                const dy = target.y - source.y;
+                const dr = Math.sqrt(dx * dx + dy * dy);
+
+                const sweep = type === 'templateRef' ? 0 : 1;
+
+                const radius = dr * 1.5;
+
+                return `M${source.x},${source.y} A${radius},${radius} 0 0,${sweep} ${target.x},${target.y}`;
+            }
+
             const gridSize = 10;
 
             function enableDrag(enabled) {
-                selNodes.call(enabled ? d3.drag()
+                const nodeDrag = d3.drag()
                     .on('start', (event, d) => {
                         if (simulation) simulation.alphaTarget(0.3).restart();
                         d.fx = d.x;
@@ -2812,7 +3253,44 @@
                         }
                         if (simulation) simulation.alphaTarget(0);
                         saveLayout();
-                    }) : null);
+                    });
+
+                if (selNodes) selNodes.call(enabled ? nodeDrag : null);
+
+                if (selGroups) {
+                    const groupDrag = d3.drag()
+                        .on('start', (event, d) => {
+                            if (simulation) simulation.alphaTarget(0.3).restart();
+                            nodes.filter(n => n.sourceId === d).forEach(n => {
+                                n.fx = n.x;
+                                n.fy = n.y;
+                            });
+                        })
+                        .on('drag', (event, d) => {
+                            nodes.filter(n => n.sourceId === d).forEach(n => {
+                                n.fx += event.dx;
+                                n.fy += event.dy;
+                                n.x += event.dx;
+                                n.y += event.dy;
+                            });
+                            ticked();
+                        })
+                        .on('end', (event, d) => {
+                            if (document.getElementById('snapGrid').checked) {
+                                nodes.filter(n => n.sourceId === d).forEach(n => {
+                                    n.fx = Math.round(n.fx / gridSize) * gridSize;
+                                    n.fy = Math.round(n.fy / gridSize) * gridSize;
+                                    n.x = n.fx;
+                                    n.y = n.fy;
+                                });
+                                ticked();
+                            }
+                            if (simulation) simulation.alphaTarget(0);
+                            saveLayout();
+                        });
+                    selGroups.call(enabled ? groupDrag : null);
+                    selGroups.style("cursor", enabled ? "move" : "default");
+                }
             }
 
             function layoutKey() {
@@ -2868,14 +3346,27 @@
                 });
             }
 
+            //     function showDetails(node) {
+            //         $meta.innerHTML = '';
+            //         const basic = document.createElement('table');
+            //         basic.className = 'kv';
+            //         basic.innerHTML = `
+            // <tr><th>ID</th><td>${esc(node.id)}</td></tr>
+            // <tr><th>Type</th><td>${esc(node.type)}</td></tr>`;
+            //         $meta.appendChild(basic);
             function showDetails(node) {
                 $meta.innerHTML = '';
                 const basic = document.createElement('table');
                 basic.className = 'kv';
+                // ★修正: node.originalId があればそれを使い、なければ node.id を使う
                 basic.innerHTML = `
-        <tr><th>ID</th><td>${esc(node.id)}</td></tr>
+        <tr><th>ID</th><td>${esc(node.originalId || node.id)}</td></tr>
         <tr><th>Type</th><td>${esc(node.type)}</td></tr>`;
                 $meta.appendChild(basic);
+
+                if (node.sourceId && documentMetadataMap.has(node.sourceId)) {
+                    $documentInfo.innerHTML = documentMetadataMap.get(node.sourceId);
+                }
 
                 if (node.type === 'place') {
                     const tpls = placeToTemplates.get(node.id) || [];
@@ -2944,11 +3435,18 @@
                             const instr = instructionById.get(iid);
                             const events = eventsByInstructionId.get(iid) || [];
 
+                            // const det = document.createElement('details');
+                            // det.className = 'meta';
+                            // det.open = true;
+                            // const sum = document.createElement('summary');
+                            // sum.innerHTML = `<span class="badge">#${idx + 1}</span> [Instruction]  ${esc(instr.id)}`;
+                            // det.appendChild(sum);
                             const det = document.createElement('details');
                             det.className = 'meta';
                             det.open = true;
                             const sum = document.createElement('summary');
-                            sum.innerHTML = `<span class="badge">#${idx + 1}</span> [Instruction]  ${esc(instr.id)}`;
+                            // ★修正: instr.originalId があればそれを、なければ instr.id を使用
+                            sum.innerHTML = `<span class="badge">#${idx + 1}</span> [Instruction]  ${esc(instr.originalId || instr.id)}`;
                             det.appendChild(sum);
                             // Instructionのメタデータ表示
                             // UUID, Name, Description, Annotation, Reference Transition を表示
@@ -2967,7 +3465,16 @@
                                 // Annotation
                                 if (instr.annotation) html += `<tr><th>Annotation</th><td>${esc(instr.annotation)}</td></tr>`;
                                 // Reference Transition (このInstructionが参照しているトランジションID)
-                                if (instr.transitionRef) html += `<tr><th>Ref. Transition</th><td>${esc(instr.transitionRef)}</td></tr>`;
+                                // if (instr.transitionRef) html += `<tr><th>Ref. Transition</th><td>${esc(instr.transitionRef)}</td></tr>`;
+
+                                // tbl.innerHTML = html;
+                                // Reference Transition (このInstructionが参照しているトランジションID)
+                                if (instr.transitionRef) {
+                                    // ★修正: Transitionノードを検索して originalId を取得
+                                    const trNode = byId.get(instr.transitionRef);
+                                    const trLabel = trNode ? (trNode.originalId || trNode.id) : instr.transitionRef;
+                                    html += `<tr><th>ref -> transition</th><td>${esc(trLabel)}</td></tr>`;
+                                }
 
                                 tbl.innerHTML = html;
                                 det.appendChild(tbl);
@@ -3026,10 +3533,21 @@
                 det.className = 'meta';
                 if (!isTemplate) det.open = true;
 
+                // const sum = document.createElement('summary');
+                // const badgeStyle = isTemplate ? '' : 'style="background:var(--accent2); color:#fff;"';
+                // const label = isTemplate ? 'Template' : 'Instance';
+                // sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.id || '')} ${isTemplate ? `(${esc(item.role || '')})` : ''}`;
+                // const sum = document.createElement('summary');
+                // const badgeStyle = isTemplate ? '' : 'style="background:var(--accent2); color:#fff;"';
+                // const label = isTemplate ? 'Template' : 'Instance';
+                // // ★修正: item.originalId があればそれを、なければ item.id を使用
+                // sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.originalId || item.id || '')} ${isTemplate ? `(${esc(item.role || '')})` : ''}`;
                 const sum = document.createElement('summary');
                 const badgeStyle = isTemplate ? '' : 'style="background:var(--accent2); color:#fff;"';
                 const label = isTemplate ? 'Template' : 'Instance';
-                sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.id || '')} ${isTemplate ? `(${esc(item.role || '')})` : ''}`;
+                // ★修正: isTemplate の判定を外し、item.role があれば常に表示するように変更
+                const roleLabel = item.role ? `(${esc(item.role)})` : '';
+                sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.originalId || item.id || '')} ${roleLabel}`;
 
                 // --- AI要約ボタンを追加 ---
                 const aiBtn = document.createElement('button');
@@ -3093,10 +3611,56 @@
                 if (item.uuid) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">UUID</th><td>${esc(item.uuid)}</td></tr>`;
                 if (item.name) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Name</th><td>${esc(item.name)}</td></tr>`;
                 if (item.description) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Description</th><td>${esc(item.description)}</td></tr>`;
+                // if (item.annotation) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Annotation</th><td>${esc(item.annotation)}</td></tr>`;
+                // if (isTemplate && item.placeRef) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Place Ref</th><td>${esc(item.placeRef)}</td></tr>`;
+                // if (!isTemplate && item.templateRef) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Template Ref</th><td>${esc(item.templateRef)}</td></tr>`;
+                // if (!isTemplate && item.instanceOf) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Instance Of</th><td>${esc(item.instanceOf)}</td></tr>`;
+
+                // // templateRefs
+                // if (isTemplate && item.templateRefs && item.templateRefs.length > 0) {
+                //     infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Template Refs</th><td>${esc(item.templateRefs.join(', '))}</td></tr>`;
+                // }
+
+                // // instanceRefs
+                // if (!isTemplate && item.instanceRefs && item.instanceRefs.length > 0) {
+                //     infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Instance Refs</th><td>${esc(item.instanceRefs.join(', '))}</td></tr>`;
+                // }
                 if (item.annotation) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Annotation</th><td>${esc(item.annotation)}</td></tr>`;
-                if (isTemplate && item.placeRef) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Place Ref</th><td>${esc(item.placeRef)}</td></tr>`;
-                if (!isTemplate && item.templateRef) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Template Ref</th><td>${esc(item.templateRef)}</td></tr>`;
+
+                // ★修正: Place Ref (byIdから検索)
+                if (isTemplate && item.placeRef) {
+                    const p = byId.get(item.placeRef);
+                    const pLabel = p ? (p.originalId || p.id) : item.placeRef;
+                    infoHtml += `<tr><th style="width:1%; white-space:nowrap;">placeRef</th><td>${esc(pLabel)}</td></tr>`;
+                }
+
+                // ★修正: Template Ref (templateByIdから検索)
+                if (!isTemplate && item.templateRef) {
+                    const t = templateById.get(item.templateRef);
+                    const tLabel = t ? (t.originalId || t.id) : item.templateRef;
+                    infoHtml += `<tr><th style="width:1%; white-space:nowrap;">ref</th><td>${esc(tLabel)}</td></tr>`;
+                }
+
                 if (!isTemplate && item.instanceOf) infoHtml += `<tr><th style="width:1%; white-space:nowrap;">Instance Of</th><td>${esc(item.instanceOf)}</td></tr>`;
+
+                // ★修正: Template Refs (配列をマップして変換)
+                if (isTemplate && item.templateRefs && item.templateRefs.length > 0) {
+                    const tLabels = item.templateRefs.map(ref => {
+                        const t = templateById.get(ref);
+                        return t ? (t.originalId || t.id) : ref;
+                    }).join(', ');
+                    infoHtml += `<tr><th style="width:1%; white-space:nowrap;">templateRef</th><td>${esc(tLabels)}</td></tr>`;
+                }
+
+                // ★修正: Instance Refs (配列をマップして変換)
+                if (!isTemplate && item.instanceRefs && item.instanceRefs.length > 0) {
+                    const iLabels = item.instanceRefs.map(ref => {
+                        // instancesは配列なのでfindで検索
+                        const i = instances.find(ins => ins.id === ref);
+                        return i ? (i.originalId || i.id) : ref;
+                    }).join(', ');
+                    infoHtml += `<tr><th style="width:1%; white-space:nowrap;">instanceRef</th><td>${esc(iLabels)}</td></tr>`;
+                }
 
                 if (infoHtml) {
                     infoTable.innerHTML = infoHtml;
@@ -4123,29 +4687,29 @@
             });
 
             window.openAISummaryDialog = function (text) {
-    currentText = text; // テキストを保存
-    modal.classList.add("show");
-    targetDiv.style.display = "block";
-    targetDiv.textContent = text;
-    
-    // 入力テキストエリアをデフォルトで閉じる
-    const inputTextDetails = document.getElementById("inputTextDetails");
-    if (inputTextDetails) {
-        inputTextDetails.open = false; // 折りたたみ状態にする
-    }
-    
-    // 初期状態では結果をクリア（自動生成しない）
-    resultDiv.innerHTML = '<p style="color:var(--muted); font-style:italic;">Click "Generate" to create a summary.</p>';
-    resultDiv.classList.remove("markdown-content");
-    copyBtn.textContent = '📋 Copy';
-    
-    // カスタムプロンプトエリアの表示/非表示
-    if (promptTemplateSel.value === "custom") {
-        customPromptArea.style.display = "block";
-    } else {
-        customPromptArea.style.display = "none";
-    }
-};
+                currentText = text; // テキストを保存
+                modal.classList.add("show");
+                targetDiv.style.display = "block";
+                targetDiv.textContent = text;
+
+                // 入力テキストエリアをデフォルトで閉じる
+                const inputTextDetails = document.getElementById("inputTextDetails");
+                if (inputTextDetails) {
+                    inputTextDetails.open = false; // 折りたたみ状態にする
+                }
+
+                // 初期状態では結果をクリア（自動生成しない）
+                resultDiv.innerHTML = '<p style="color:var(--muted); font-style:italic;">Click "Generate" to create a summary.</p>';
+                resultDiv.classList.remove("markdown-content");
+                copyBtn.textContent = '📋 Copy';
+
+                // カスタムプロンプトエリアの表示/非表示
+                if (promptTemplateSel.value === "custom") {
+                    customPromptArea.style.display = "block";
+                } else {
+                    customPromptArea.style.display = "none";
+                }
+            };
 
             closeBtn.addEventListener("click", () => {
                 modal.classList.remove("show");
@@ -4437,74 +5001,74 @@
 
             console.log('Preset prompt generated:', finalPrompt.substring(0, 200) + '...');
             return finalPrompt;
-        
+
 
             async function runGemini(text) {
-            const key = localStorage.getItem("geminiApiKey");
-            if (!key) {
-                resultDiv.textContent = "API Key not set";
-                resultDiv.classList.remove("markdown-content");
-                return;
-            }
-
-            // --- ここでモデル名を取得（未入力時はデフォルト） ---
-            const modelName = document.getElementById("modelName")?.value?.trim() || "gemini-2.5-flash";
-
-            // --- 簡単なバリデーション（英数字、ハイフン、ドット、アンダースコアのみ）---
-            if (!/^[\w\.\-:]+$/.test(modelName)) {
-                resultDiv.textContent = "Invalid model name (contains illegal characters).";
-                resultDiv.classList.remove("markdown-content");
-                return;
-            }
-
-            const browserLang = navigator.language || navigator.userLanguage;
-            const langCode = browserLang.split('-')[0];
-            const prompt = getPrompt(text, langCode);
-
-            const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${key}`;
-
-            const body = { contents: [{ parts: [{ text: prompt }] }] };
-
-            try {
-                const res = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
-
-                if (data.error) {
-                    rawTextContent = `API Error: ${data.error.message}`;
-                    resultDiv.textContent = rawTextContent;
+                const key = localStorage.getItem("geminiApiKey");
+                if (!key) {
+                    resultDiv.textContent = "API Key not set";
                     resultDiv.classList.remove("markdown-content");
-                } else {
-                    rawTextContent = data.candidates[0].content.parts[0].text.trim();
+                    return;
+                }
 
-                    if (typeof marked !== 'undefined') {
-                        resultDiv.innerHTML = marked.parse(rawTextContent);
-                        resultDiv.classList.add("markdown-content");
+                // --- ここでモデル名を取得（未入力時はデフォルト） ---
+                const modelName = document.getElementById("modelName")?.value?.trim() || "gemini-2.5-flash";
 
-                        // 注意書きを追加
-                        const disclaimer = document.createElement('div');
-                        disclaimer.className = 'ai-disclaimer';
-                        if (langCode === 'ja') {
-                            disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
-                        } else {
-                            disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
-                        }
-                        resultDiv.appendChild(disclaimer);
-                    } else {
+                // --- 簡単なバリデーション（英数字、ハイフン、ドット、アンダースコアのみ）---
+                if (!/^[\w\.\-:]+$/.test(modelName)) {
+                    resultDiv.textContent = "Invalid model name (contains illegal characters).";
+                    resultDiv.classList.remove("markdown-content");
+                    return;
+                }
+
+                const browserLang = navigator.language || navigator.userLanguage;
+                const langCode = browserLang.split('-')[0];
+                const prompt = getPrompt(text, langCode);
+
+                const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${key}`;
+
+                const body = { contents: [{ parts: [{ text: prompt }] }] };
+
+                try {
+                    const res = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+                    const data = await res.json();
+
+                    if (data.error) {
+                        rawTextContent = `API Error: ${data.error.message}`;
                         resultDiv.textContent = rawTextContent;
                         resultDiv.classList.remove("markdown-content");
+                    } else {
+                        rawTextContent = data.candidates[0].content.parts[0].text.trim();
+
+                        if (typeof marked !== 'undefined') {
+                            resultDiv.innerHTML = marked.parse(rawTextContent);
+                            resultDiv.classList.add("markdown-content");
+
+                            // 注意書きを追加
+                            const disclaimer = document.createElement('div');
+                            disclaimer.className = 'ai-disclaimer';
+                            if (langCode === 'ja') {
+                                disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
+                            } else {
+                                disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
+                            }
+                            resultDiv.appendChild(disclaimer);
+                        } else {
+                            resultDiv.textContent = rawTextContent;
+                            resultDiv.classList.remove("markdown-content");
+                        }
                     }
+                } catch (e) {
+                    rawTextContent = `Network error or API call failed: ${e.message}`;
+                    resultDiv.textContent = rawTextContent;
+                    resultDiv.classList.remove("markdown-content");
                 }
-            } catch (e) {
-                rawTextContent = `Network error or API call failed: ${e.message}`;
-                resultDiv.textContent = rawTextContent;
-                resultDiv.classList.remove("markdown-content");
             }
-        }
-        }) ();
+        })();
     </script>
 
     <script>
@@ -4555,6 +5119,21 @@
                     <p style="margin-bottom: 1rem; line-height: 1.5;">
                         Export all metadata (properties and contents) from the loaded MaiML file.
                     </p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                            Select Files to Export:
+                        </label>
+                        <div style="border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem; max-height: 150px; overflow-y: auto; background: var(--surface);">
+                            <div style="margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="exportSelectAll" style="cursor: pointer;">
+                                <label for="exportSelectAll" style="font-size: 12px; font-weight: 600; cursor: pointer;">Select All</label>
+                            </div>
+                            <div id="exportFileList" style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                <!-- Files will be populated here -->
+                            </div>
+                        </div>
+                    </div>
                     
                     <div style="margin-bottom: 1.5rem;">
                         <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
@@ -4621,18 +5200,29 @@
             });
 
             exportBtn.addEventListener('click', () => {
-                console.log('Execute export with format:', selectedFormat);
-                executeExport(selectedFormat);
+                const checkedCbs = document.querySelectorAll('.export-file-cb:checked');
+                const targetFiles = Array.from(checkedCbs).map(cb => cb.value);
+
+                if (targetFiles.length === 0) {
+                    alert('Please select at least one file to export.');
+                    return;
+                }
+
+                console.log('Execute export with format:', selectedFormat, 'Files:', targetFiles);
+                executeExport(selectedFormat, targetFiles);
             });
 
             console.log('Export modal created successfully');
         })();
 
         // 3. モーダル開閉関数
+        // 3. モーダル開閉関数
         function openExportModal() {
             console.log('Opening export modal...');
             const modal = document.getElementById('exportModal');
             const statusDiv = document.getElementById('exportStatus');
+            const fileListDiv = document.getElementById('exportFileList');
+            const selectAllCb = document.getElementById('exportSelectAll');
 
             if (!modal) {
                 console.error('Export modal not found!');
@@ -4640,11 +5230,7 @@
             }
 
             // MaiMLファイルが読み込まれているかチェック
-            console.log('Checking if MaiML is loaded...');
-            console.log('templateById:', window.templateById);
-            console.log('templateById size:', window.templateById ? window.templateById.size : 'undefined');
-
-            if (!window.templateById || window.templateById.size === 0) {
+            if ((!window.templateById || window.templateById.size === 0) && (!window.documentInfoMap || window.documentInfoMap.size === 0)) {
                 statusDiv.style.display = 'block';
                 statusDiv.style.background = 'var(--warn)';
                 statusDiv.style.color = '#fff';
@@ -4654,6 +5240,65 @@
             }
 
             statusDiv.style.display = 'none';
+
+            // ファイルリストの生成
+            fileListDiv.innerHTML = '';
+            if (window.documentInfoMap && window.documentInfoMap.size > 0) {
+                window.documentInfoMap.forEach((info, key) => {
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.gap = '0.5rem';
+
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.className = 'export-file-cb';
+                    cb.value = key;
+                    cb.checked = false; // デフォルトはオフ
+                    cb.id = `export-cb-${key}`;
+                    cb.style.cursor = 'pointer';
+
+                    const label = document.createElement('label');
+                    // ファイル名を表示 (keyはパスの場合もあるので簡易表示)
+                    const fileName = key.split(/[/\\]/).pop();
+                    label.textContent = `${info.name || 'Untitled'} (${fileName})`;
+                    label.htmlFor = `export-cb-${key}`;
+                    label.style.fontSize = '12px';
+                    label.style.cursor = 'pointer';
+                    label.style.overflow = 'hidden';
+                    label.style.textOverflow = 'ellipsis';
+                    label.style.whiteSpace = 'nowrap';
+                    label.title = key; // ホバーでフルパス表示
+
+                    row.appendChild(cb);
+                    row.appendChild(label);
+                    fileListDiv.appendChild(row);
+                });
+
+                // Select All Logic
+                if (selectAllCb) {
+                    selectAllCb.checked = false; // デフォルトはオフ
+                    selectAllCb.onclick = () => {
+                        const cbs = fileListDiv.querySelectorAll('.export-file-cb');
+                        cbs.forEach(cb => cb.checked = selectAllCb.checked);
+                    };
+
+                    const updateSelectAll = () => {
+                        const cbs = Array.from(fileListDiv.querySelectorAll('.export-file-cb'));
+                        const allChecked = cbs.every(cb => cb.checked);
+                        const someChecked = cbs.some(cb => cb.checked);
+                        selectAllCb.checked = allChecked;
+                        selectAllCb.indeterminate = someChecked && !allChecked;
+                    };
+
+                    fileListDiv.querySelectorAll('.export-file-cb').forEach(cb => {
+                        cb.addEventListener('change', updateSelectAll);
+                    });
+                }
+            } else {
+                fileListDiv.innerHTML = '<div style="color:var(--muted); font-size:12px; padding:0.5rem;">No files metadata found via map based tracking.</div>';
+            }
+
             modal.classList.add('show');
             console.log('Modal opened successfully');
         }
@@ -4729,12 +5374,12 @@
             return result;
         }
 
-        // 4. メタデータ収集関数 (修正版)
-        function collectAllMetadata() {
-            console.log('Starting metadata collection...');
+        // 4. メタデータ収集関数 (修正版: ファイル指定対応)
+        function collectAllMetadata(targetFiles = null) {
+            console.log('Starting metadata collection...', targetFiles ? `Targeting ${targetFiles.length} files` : 'All files');
 
             const metadata = {
-                document: {},
+                document: [], // 配列に変更
                 places: [],
                 transitions: [],
                 templates: [],
@@ -4742,29 +5387,30 @@
             };
 
             // ドキュメント情報を収集
-            const docInfo = document.getElementById('document-info');
-            if (docInfo) {
-                const tables = docInfo.querySelectorAll('table');
-                tables.forEach(table => {
-                    const rows = table.querySelectorAll('tr');
-                    rows.forEach(row => {
-                        const th = row.querySelector('th');
-                        const td = row.querySelector('td');
-                        if (th && td) {
-                            metadata.document[th.textContent] = td.textContent;
-                        }
-                    });
+            if (window.documentInfoMap) {
+                // targetFilesが指定されていればそれを使用、なければすべてのキーを使用
+                const keys = targetFiles || Array.from(window.documentInfoMap.keys());
+                keys.forEach(key => {
+                    if (window.documentInfoMap.has(key)) {
+                        const info = window.documentInfoMap.get(key);
+                        // ディープコピーしてfileIdを追加
+                        metadata.document.push({ fileId: key, ...JSON.parse(JSON.stringify(info)) });
+                    }
                 });
             }
-            console.log('Document info collected:', Object.keys(metadata.document).length, 'items');
+            console.log('Document info collected:', metadata.document.length, 'files');
 
             // ノード情報を収集
             if (window.nodes) {
                 window.nodes.forEach(node => {
+                    // ファイルフィルタリング
+                    if (targetFiles && !targetFiles.includes(node.sourceId)) return;
+
                     const nodeData = {
                         id: node.id,
                         type: node.type,
-                        label: node.label
+                        label: node.label,
+                        sourceId: node.sourceId // ソースIDを含める
                     };
 
                     if (node.type === 'place') {
@@ -4776,9 +5422,12 @@
             }
             console.log('Places:', metadata.places.length, 'Transitions:', metadata.transitions.length);
 
-            // テンプレート情報を収集 (修正: propertiesとcontentsを統合、insertionsを追加)
+            // テンプレート情報を収集
             if (window.templateById) {
                 window.templateById.forEach(tpl => {
+                    // ファイルフィルタリング
+                    if (targetFiles && !targetFiles.includes(tpl.sourceId)) return;
+
                     const tplData = {
                         id: tpl.id,
                         role: tpl.role,
@@ -4788,10 +5437,9 @@
                         description: tpl.description,
                         annotation: tpl.annotation,
                         placeRef: tpl.placeRef,
-                        // ★修正: propertiesとcontentsを統合してフラット化（順序を保持）
+                        sourceId: tpl.sourceId, // ソースIDを含める
                         properties: flattenPropertiesForExport(tpl.properties || []),
                         contents: flattenPropertiesForExport(tpl.contents || []),
-                        // ★追加: insertions情報を抽出
                         insertions: (tpl.insertions || []).map(ins => extractInsertionInfo(ins))
                     };
                     metadata.templates.push(tplData);
@@ -4799,9 +5447,12 @@
             }
             console.log('Templates collected:', metadata.templates.length);
 
-            // インスタンス情報を収集 (修正: propertiesとcontentsを統合、insertionsを追加)
+            // インスタンス情報を収集
             if (window.instances) {
                 window.instances.forEach(inst => {
+                    // ファイルフィルタリング
+                    if (targetFiles && !targetFiles.includes(inst.sourceId)) return;
+
                     const instData = {
                         id: inst.id,
                         role: inst.role,
@@ -4810,10 +5461,9 @@
                         name: inst.name,
                         description: inst.description,
                         annotation: inst.annotation,
-                        // ★修正: propertiesとcontentsを統合してフラット化（順序を保持）
+                        sourceId: inst.sourceId, // ソースIDを含める
                         properties: flattenPropertiesForExport(inst.properties || []),
                         contents: flattenPropertiesForExport(inst.contents || []),
-                        // ★追加: insertions情報を抽出
                         insertions: (inst.insertions || []).map(ins => extractInsertionInfo(ins))
                     };
                     metadata.instances.push(instData);
@@ -4868,16 +5518,27 @@
             const violations = [];
 
             // ドキュメント情報チェック
-            Object.entries(metadata.document).forEach(([key, value]) => {
-                const keyStr = String(key);
-                const valStr = String(value);
-                if (keyStr.length > MAX_CELL_LENGTH) {
-                    violations.push({ location: 'Document Info (Key)', value: keyStr.substring(0, 100) + '...', length: keyStr.length });
-                }
-                if (valStr.length > MAX_CELL_LENGTH) {
-                    violations.push({ location: 'Document Info (Value)', value: valStr.substring(0, 100) + '...', length: valStr.length });
-                }
-            });
+            if (Array.isArray(metadata.document)) {
+                metadata.document.forEach((doc, dIdx) => {
+                    ['uuid', 'name', 'description', 'annotation'].forEach(field => {
+                        const val = String(doc[field] || '');
+                        if (val.length > MAX_CELL_LENGTH) {
+                            violations.push({ location: `Document ${doc.fileId} (${field})`, value: val.substring(0, 100) + '...', length: val.length });
+                        }
+                    });
+                });
+            } else if (metadata.document) {
+                Object.entries(metadata.document).forEach(([key, value]) => {
+                    const keyStr = String(key);
+                    const valStr = String(value);
+                    if (keyStr.length > MAX_CELL_LENGTH) {
+                        violations.push({ location: 'Document Info (Key)', value: keyStr.substring(0, 100) + '...', length: keyStr.length });
+                    }
+                    if (valStr.length > MAX_CELL_LENGTH) {
+                        violations.push({ location: 'Document Info (Value)', value: valStr.substring(0, 100) + '...', length: valStr.length });
+                    }
+                });
+            }
 
             // Places/Transitionsチェック
             [...metadata.places, ...metadata.transitions].forEach((node, idx) => {
@@ -5066,13 +5727,44 @@
 
             try {
                 // ドキュメント情報シート
-                const docData = Object.entries(metadata.document).map(([key, value]) => ({
-                    'Item': key,
-                    'Value': value
-                }));
-                if (docData.length > 0) {
+                const docRows = [];
+                if (Array.isArray(metadata.document)) {
+                    metadata.document.forEach(doc => {
+                        docRows.push({ 'Item': '--- File Info ---', 'Value': '' });
+                        docRows.push({ 'Item': 'File Key', 'Value': doc.fileId || '' });
+                        docRows.push({ 'Item': 'UUID', 'Value': doc.uuid || '' });
+                        docRows.push({ 'Item': 'Name', 'Value': doc.name || '' });
+                        docRows.push({ 'Item': 'Description', 'Value': doc.description || '' });
+                        docRows.push({ 'Item': 'Annotation', 'Value': doc.annotation || '' });
+
+                        // Others (tags)
+                        if (doc.others) {
+                            doc.others.forEach(oth => {
+                                docRows.push({ 'Item': `Tag: ${oth.tag}`, 'Value': `${oth.name || ''} : ${oth.description || ''}` });
+                            });
+                        }
+
+                        // Properties
+                        if (doc.properties) {
+                            function addProps(props, path = '') {
+                                props.forEach(p => {
+                                    const pPath = path ? `${path}.${p.key}` : p.key;
+                                    docRows.push({ 'Item': `Prop: ${pPath}`, 'Value': p.value || '' });
+                                    if (p.children) addProps(p.children, pPath);
+                                });
+                            }
+                            addProps(doc.properties);
+                        }
+                    });
+                } else {
+                    Object.entries(metadata.document).forEach(([key, value]) => {
+                        docRows.push({ 'Item': key, 'Value': value });
+                    });
+                }
+
+                if (docRows.length > 0) {
                     console.log('Adding Document Info sheet...');
-                    const wsDoc = XLSX.utils.json_to_sheet(docData);
+                    const wsDoc = XLSX.utils.json_to_sheet(docRows);
                     XLSX.utils.book_append_sheet(wb, wsDoc, 'Document Info');
                 }
 
@@ -5340,9 +6032,36 @@
             // 1. Document Info
             csvContent += '\n=== Document Info ===\n';
             csvContent += arrayToCSVRow(['Item', 'Value']);
-            Object.entries(metadata.document).forEach(([key, value]) => {
-                csvContent += arrayToCSVRow([key, value]);
-            });
+
+            if (Array.isArray(metadata.document)) {
+                metadata.document.forEach(doc => {
+                    csvContent += arrayToCSVRow(['--- File Info ---', '']);
+                    csvContent += arrayToCSVRow(['File Key', doc.fileId || '']);
+                    csvContent += arrayToCSVRow(['UUID', doc.uuid || '']);
+                    csvContent += arrayToCSVRow(['Name', doc.name || '']);
+                    csvContent += arrayToCSVRow(['Description', doc.description || '']);
+                    csvContent += arrayToCSVRow(['Annotation', doc.annotation || '']);
+                    if (doc.others) {
+                        doc.others.forEach(oth => {
+                            csvContent += arrayToCSVRow([`Tag: ${oth.tag}`, `${oth.name || ''} : ${oth.description || ''}`]);
+                        });
+                    }
+                    if (doc.properties) {
+                        function addProps(props, path = '') {
+                            props.forEach(p => {
+                                const pPath = path ? `${path}.${p.key}` : p.key;
+                                csvContent += arrayToCSVRow([`Prop: ${pPath}`, p.value || '']);
+                                if (p.children) addProps(p.children, pPath);
+                            });
+                        }
+                        addProps(doc.properties);
+                    }
+                });
+            } else {
+                Object.entries(metadata.document).forEach(([key, value]) => {
+                    csvContent += arrayToCSVRow([key, value]);
+                });
+            }
 
             // 2. Places
             if (metadata.places.length > 0) {
@@ -5548,7 +6267,7 @@
         }
 
         // 9. Export実行関数
-        function executeExport(format) {
+        function executeExport(format, targetFiles = null) {
             console.log('Executing export with format:', format);
             const statusDiv = document.getElementById('exportStatus');
 
@@ -5558,7 +6277,7 @@
                 statusDiv.style.color = '#fff';
                 statusDiv.textContent = '⏳ Collecting metadata...';
 
-                const metadata = collectAllMetadata();
+                const metadata = collectAllMetadata(targetFiles);
 
                 if (format === 'excel') {
                     statusDiv.textContent = '⏳ Generating Excel file...';
