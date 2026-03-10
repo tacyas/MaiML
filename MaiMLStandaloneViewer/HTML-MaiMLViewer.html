@@ -400,6 +400,20 @@
         table.kv td.col-value  { overflow: hidden; text-overflow: ellipsis; }
         table.kv th { position: relative; user-select: none; overflow: hidden; }
 
+        /* 列ドラッグ並び替え */
+        table.kv th {
+            cursor: grab;
+        }
+        table.kv th.col-dragging {
+            opacity: 0.35;
+        }
+        table.kv th.col-drop-before {
+            box-shadow: -3px 0 0 var(--accent) inset;
+        }
+        table.kv th.col-drop-after {
+            box-shadow: 3px 0 0 var(--accent) inset;
+        }
+
         /* リサイズハンドル */
         table.kv th .col-resizer {
             position: absolute;
@@ -6506,6 +6520,68 @@
         //   ・調整した列幅はlocalStorageに保存し、次回描画時に復元
         // ============================================================
         const COL_RESIZE_STORAGE_KEY = 'maiml_col_widths';
+        const COL_ORDER_STORAGE_KEY   = 'maiml_col_order';
+
+        // 列順をlocalStorageに保存（thのtextContentラベルの配列として保存）
+        function saveColOrder(resizeKey, ths) {
+            try {
+                const all = JSON.parse(localStorage.getItem(COL_ORDER_STORAGE_KEY) || '{}');
+                all[resizeKey] = Array.from(ths).map(th => {
+                    // リサイザのテキストを除いたラベル文字列
+                    return th.childNodes[0]?.textContent?.trim() || th.textContent.trim();
+                });
+                localStorage.setItem(COL_ORDER_STORAGE_KEY, JSON.stringify(all));
+            } catch(e) {}
+        }
+
+        // 列をDOM上で実際に並べ替える（colgroup・全行のセルを移動）
+        function reorderTableColumn(tbl, fromIdx, toIdx) {
+            if (fromIdx === toIdx) return;
+            const colgroup = tbl.querySelector('colgroup');
+            const cols = colgroup ? Array.from(colgroup.querySelectorAll('col')) : [];
+            const rows = Array.from(tbl.querySelectorAll('tr'));
+
+            // <col>の移動
+            if (cols[fromIdx]) {
+                const fromCol = cols[fromIdx];
+                const ref = fromIdx < toIdx
+                    ? (cols[toIdx] ? cols[toIdx].nextSibling : null)
+                    : cols[toIdx];
+                colgroup.insertBefore(fromCol, ref);
+            }
+
+            // 全行の<th>/<td>を移動
+            rows.forEach(row => {
+                const cells = Array.from(row.children);
+                if (!cells[fromIdx]) return;
+                const fromCell = cells[fromIdx];
+                const ref = fromIdx < toIdx
+                    ? (cells[toIdx] ? cells[toIdx].nextSibling : null)
+                    : cells[toIdx];
+                row.insertBefore(fromCell, ref);
+            });
+        }
+
+        // 保存済み列順をテーブルに復元
+        function restoreColOrder(tbl) {
+            try {
+                const resizeKey = tbl.dataset.resizeKey;
+                if (!resizeKey) return;
+                const all = JSON.parse(localStorage.getItem(COL_ORDER_STORAGE_KEY) || '{}');
+                const savedLabels = all[resizeKey];
+                if (!savedLabels || !savedLabels.length) return;
+
+                savedLabels.forEach((label, targetIdx) => {
+                    const ths = Array.from(tbl.querySelectorAll('th'));
+                    const currentIdx = ths.findIndex(th =>
+                        (th.childNodes[0]?.textContent?.trim() || th.textContent.trim()) === label
+                    );
+                    if (currentIdx !== -1 && currentIdx !== targetIdx) {
+                        reorderTableColumn(tbl, currentIdx, targetIdx);
+                    }
+                });
+            } catch(e) {}
+        }
 
         function saveColWidths(resizeKey, cols) {
             try {
@@ -6567,6 +6643,9 @@
                 th.appendChild(resizer);
 
                 resizer.addEventListener('mousedown', e => {
+                    // リサイズ中は列並べ替えドラッグを無効化
+                    th.draggable = false;
+
                     // 初回ドラッグ時: 現在の実測幅でtable-layout:fixedに切替
                     if (tbl.style.tableLayout !== 'fixed') {
                         const totalW = ths.reduce((sum, th) => sum + th.offsetWidth, 0);
@@ -6598,7 +6677,7 @@
                         resizer.classList.remove('resizing');
                         document.body.style.cursor     = '';
                         document.body.style.userSelect = '';
-                        // 調整後の幅をlocalStorageに保存
+                        th.draggable = true; // 列並べ替えドラッグを再有効化
                         saveColWidths(tbl.dataset.resizeKey, cols);
                         document.removeEventListener('mousemove', onMouseMove);
                         document.removeEventListener('mouseup',   onMouseUp);
@@ -6606,6 +6685,64 @@
 
                     document.addEventListener('mousemove', onMouseMove);
                     document.addEventListener('mouseup',   onMouseUp);
+                });
+            });
+
+            // ---- 列並べ替え（ドラッグ＆ドロップ） ----
+            restoreColOrder(tbl);
+
+            let dragSrcIdx = null;
+
+            Array.from(tbl.querySelectorAll('th')).forEach(th => {
+                th.draggable = true;
+
+                th.addEventListener('dragstart', e => {
+                    // リサイザ上でのドラッグは無視（mousedownでdraggable=falseにしているが念のため）
+                    if (e.target.classList.contains('col-resizer')) { e.preventDefault(); return; }
+                    dragSrcIdx = Array.from(tbl.querySelectorAll('th')).indexOf(th);
+                    e.dataTransfer.effectAllowed = 'move';
+                    // setTimeoutで1フレーム後に適用（ドラッグゴースト生成後）
+                    setTimeout(() => th.classList.add('col-dragging'), 0);
+                });
+
+                th.addEventListener('dragend', () => {
+                    th.classList.remove('col-dragging');
+                    tbl.querySelectorAll('.col-drop-before, .col-drop-after')
+                        .forEach(el => el.classList.remove('col-drop-before', 'col-drop-after'));
+                    dragSrcIdx = null;
+                });
+
+                th.addEventListener('dragover', e => {
+                    if (dragSrcIdx === null) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const rect = th.getBoundingClientRect();
+                    tbl.querySelectorAll('.col-drop-before, .col-drop-after')
+                        .forEach(el => el.classList.remove('col-drop-before', 'col-drop-after'));
+                    th.classList.add(e.clientX < rect.left + rect.width / 2 ? 'col-drop-before' : 'col-drop-after');
+                });
+
+                th.addEventListener('dragleave', () => {
+                    th.classList.remove('col-drop-before', 'col-drop-after');
+                });
+
+                th.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (dragSrcIdx === null) return;
+                    const currentThs = Array.from(tbl.querySelectorAll('th'));
+                    const dropIdx = currentThs.indexOf(th);
+                    if (dragSrcIdx === dropIdx) { dragSrcIdx = null; return; }
+
+                    const rect = th.getBoundingClientRect();
+                    const insertBefore = e.clientX < rect.left + rect.width / 2;
+                    let toIdx = insertBefore ? dropIdx : dropIdx + 1;
+                    if (dragSrcIdx < toIdx) toIdx--;  // 削除後のインデックス補正
+
+                    reorderTableColumn(tbl, dragSrcIdx, toIdx);
+                    saveColOrder(tbl.dataset.resizeKey, tbl.querySelectorAll('th'));
+
+                    th.classList.remove('col-drop-before', 'col-drop-after');
+                    dragSrcIdx = null;
                 });
             });
         }
