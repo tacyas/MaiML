@@ -299,6 +299,7 @@
         }
 
         #stats {
+            display: none;
             font-size: 12px;
             color: var(--muted);
             margin: .8rem .8rem .6rem .8rem;
@@ -396,20 +397,36 @@
         }
 
         /* Properties/Content テーブル 列幅制御 */
-        table.kv td.col-narrow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        table.kv td.col-value  { overflow: hidden; text-overflow: ellipsis; }
-        table.kv th { position: relative; user-select: none; overflow: hidden; }
+        table.kv td.col-narrow {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        table.kv td.col-value {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        table.kv th {
+            position: relative;
+            user-select: none;
+            overflow: hidden;
+        }
 
         /* 列ドラッグ並び替え */
         table.kv th {
             cursor: grab;
         }
+
         table.kv th.col-dragging {
             opacity: 0.35;
         }
+
         table.kv th.col-drop-before {
             box-shadow: -3px 0 0 var(--accent) inset;
         }
+
         table.kv th.col-drop-after {
             box-shadow: 3px 0 0 var(--accent) inset;
         }
@@ -417,20 +434,26 @@
         /* リサイズハンドル */
         table.kv th .col-resizer {
             position: absolute;
-            top: 0; right: 0;
-            width: 6px; height: 100%;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
             cursor: col-resize;
             z-index: 2;
         }
+
         table.kv th .col-resizer::after {
             content: '';
             position: absolute;
-            top: 15%; right: 2px;
-            width: 2px; height: 70%;
+            top: 15%;
+            right: 2px;
+            width: 2px;
+            height: 70%;
             background: var(--table-border);
             border-radius: 1px;
             transition: background 0.15s;
         }
+
         table.kv th .col-resizer:hover::after,
         table.kv th .col-resizer.resizing::after {
             background: var(--accent);
@@ -797,6 +820,47 @@
             fill: none;
         }
 
+        path.link.chain {
+            stroke: #f97316;
+            stroke-width: 2;
+            stroke-dasharray: 8, 4;
+            opacity: 0.85;
+            fill: none;
+        }
+
+        line.parent-line {
+            stroke: #c084fc;
+            stroke-width: 1.5;
+            stroke-dasharray: 8, 4;
+            opacity: 0.8;
+        }
+
+        .chain-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 99px;
+            vertical-align: middle;
+        }
+
+        .chain-badge.ok {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .chain-badge.fail {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .chain-badge.warn {
+            background: #fef9c3;
+            color: #92400e;
+        }
+
         text.ref-label {
             font-size: 10px;
             fill: var(--ink);
@@ -988,10 +1052,332 @@
             padding-bottom: 0.3rem;
             border-bottom: 1px solid var(--border);
         }
+
+        /* ── Decrypt feature styles ── */
+        #enc-banner {
+            display: none;
+            align-items: center;
+            gap: .6rem;
+            padding: .4rem .8rem;
+            background: #fef3c7;
+            border-bottom: 1px solid #f59e0b;
+            font-size: 12px;
+            color: #92400e;
+            flex-shrink: 0;
+        }
+
+        :root[data-theme="dark"] #enc-banner {
+            background: #451a03;
+            border-color: #b45309;
+            color: #fcd34d;
+        }
+
+        #enc-banner .enc-banner-msg {
+            flex: 1;
+        }
+
+        .btn-decrypt-all {
+            background: #f59e0b;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: .2rem .6rem;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-decrypt-all:hover {
+            background: #d97706;
+        }
+
+        .decrypt-btn {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+            border-radius: 5px;
+            padding: 1px 5px;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .decrypt-btn:hover {
+            background: #fde68a;
+        }
+
+        .decrypt-btn.unsupported {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #f87171;
+            cursor: not-allowed;
+        }
+
+        .decrypt-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 12px;
+            color: #f59e0b;
+            cursor: default;
+        }
+
+        .decrypt-error {
+            font-size: 11px;
+            color: #dc2626;
+        }
+
+        /* password modal for viewer */
+        #viewer-decrypt-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #viewer-decrypt-modal.show {
+            display: flex;
+        }
+
+        #viewer-decrypt-modal .vdm-box {
+            background: var(--surface);
+            color: var(--ink);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .3);
+            width: 420px;
+            max-width: 92vw;
+            overflow: hidden;
+        }
+
+        #viewer-decrypt-modal .vdm-header {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+            padding: .8rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        #viewer-decrypt-modal .vdm-header h3 {
+            margin: 0;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        #viewer-decrypt-modal .vdm-body {
+            padding: 1rem;
+        }
+
+        #viewer-decrypt-modal .vdm-info {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: .5rem .7rem;
+            font-size: 11px;
+            color: #92400e;
+            margin-bottom: .8rem;
+        }
+
+        :root[data-theme="dark"] #viewer-decrypt-modal .vdm-info {
+            background: #451a03;
+            color: #fcd34d;
+        }
+
+        #viewer-decrypt-modal label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--muted);
+            margin-bottom: .3rem;
+        }
+
+        #viewer-decrypt-modal input[type=password],
+        #viewer-decrypt-modal input[type=text] {
+            width: 100%;
+            padding: .45rem .6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--ink);
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+
+        #viewer-decrypt-modal input:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+
+        #viewer-decrypt-modal .vdm-error {
+            font-size: 11px;
+            color: #dc2626;
+            min-height: 1rem;
+            margin-top: .3rem;
+        }
+
+        #viewer-decrypt-modal .vdm-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: .5rem;
+            padding: .7rem 1rem;
+            background: var(--table-head);
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── リンク表示制御ツールボックス ── */
+        #linkVisToolbox {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 20;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        #linkVisToolbox summary {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ink);
+            list-style: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            transition: background 0.15s, box-shadow 0.15s;
+            white-space: nowrap;
+        }
+
+        #linkVisToolbox summary::-webkit-details-marker {
+            display: none;
+        }
+
+        #linkVisToolbox[open] summary {
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+        }
+
+        #linkVisToolbox summary:hover {
+            background: var(--btn-hover-bg);
+        }
+
+        #linkVisToolbox summary .toggle-arrow {
+            display: inline-block;
+            transition: transform 0.2s;
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        #linkVisToolbox[open] summary .toggle-arrow {
+            transform: rotate(90deg);
+        }
+
+        #linkVisToolboxBody {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 6px 10px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            min-width: 170px;
+        }
+
+        .lv-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .lv-row input[type="checkbox"] {
+            cursor: pointer;
+            width: 13px;
+            height: 13px;
+            flex-shrink: 0;
+        }
+
+        .lv-swatch {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .lv-swatch.dash {
+            background: repeating-linear-gradient(90deg, currentColor 0, currentColor 5px, transparent 5px, transparent 8px);
+        }
+
+        .lv-label {
+            font-size: 11px;
+            color: var(--ink);
+        }
+
+        #linkVisToolboxBody .lv-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2px 0;
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- Encryption notification banner -->
+    <div id="enc-banner"
+        style="display:none;align-items:center;gap:.6rem;padding:.4rem .8rem;background:#fef3c7;border-bottom:1px solid #f59e0b;font-size:12px;color:#92400e;flex-shrink:0;">
+        <span>🔐</span>
+        <span class="enc-banner-msg" id="enc-banner-msg">This file contains encrypted elements.</span>
+        <button class="btn-decrypt-all" onclick="decryptAll()">🔓 Decrypt All</button>
+    </div>
+
+    <!-- Decrypt password modal -->
+    <div id="viewer-decrypt-modal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+        <div class="vdm-box"
+            style="background:var(--surface);color:var(--ink);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);width:420px;max-width:92vw;overflow:hidden;">
+            <div
+                style="background:linear-gradient(90deg,#f59e0b,#d97706);padding:.8rem 1rem;display:flex;align-items:center;gap:.5rem;">
+                <span style="font-size:20px;">🔐</span>
+                <h3 style="margin:0;color:#fff;font-size:15px;">Enter Decryption Password</h3>
+            </div>
+            <div style="padding:1rem;">
+                <div
+                    style="background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;padding:.5rem .7rem;font-size:11px;color:#92400e;margin-bottom:.8rem;">
+                    ℹ️ AES-256-GCM + PBKDF2-SHA256 (100,000 iterations).<br>
+                    <strong>Password-based decryption only.</strong>
+                    RSA / key-wrap methods are not supported.
+                </div>
+                <label for="vdm-pw-input"
+                    style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.3rem;">Password</label>
+                <div style="position:relative;">
+                    <input type="password" id="vdm-pw-input" placeholder="Enter password" autocomplete="off"
+                        style="width:100%;padding:.45rem .6rem;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--ink);font-size:13px;box-sizing:border-box;">
+                    <button type="button"
+                        onclick="(function(){const i=document.getElementById('vdm-pw-input');i.type=i.type==='password'?'text':'password';})()"
+                        style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;">👁</button>
+                </div>
+                <div id="vdm-pw-error" style="font-size:11px;color:#dc2626;min-height:1rem;margin-top:.3rem;"></div>
+            </div>
+            <div
+                style="display:flex;justify-content:flex-end;gap:.5rem;padding:.7rem 1rem;background:var(--table-head);border-top:1px solid var(--border);">
+                <button class="btn" id="vdm-cancel-btn">Cancel</button>
+                <button class="btn primary" id="vdm-ok-btn">🔓 Decrypt</button>
+            </div>
+        </div>
+    </div>
+
     <header id="toolbar">
         <div id="title">MaiML Viewer</div>
         <button class="btn" id="openFileBtn">📂UPLOAD…</button>
@@ -1010,6 +1396,47 @@
             <div id="stageWrap">
                 <div id="grid"></div>
                 <svg id="stage"></svg>
+
+                <!-- リンク表示制御ツールボックス -->
+                <details id="linkVisToolbox">
+                    <summary>
+                        <span class="toggle-arrow">▶</span>
+                        🔗 Link Visibility
+                    </summary>
+                    <div id="linkVisToolboxBody">
+                        <label class="lv-row" title="templateRef線の表示/非表示">
+                            <input type="checkbox" id="lvTemplateRef" checked>
+                            <span class="lv-swatch dash" style="color:#f6d65b;"></span>
+                            <span class="lv-label">templateRef</span>
+                        </label>
+                        <label class="lv-row" title="instanceRef線の表示/非表示">
+                            <input type="checkbox" id="lvInstanceRef" checked>
+                            <span class="lv-swatch dash" style="color:#3ddc97;"></span>
+                            <span class="lv-label">instanceRef</span>
+                        </label>
+                        <label class="lv-row" title="chain線の表示/非表示">
+                            <input type="checkbox" id="lvChain" checked>
+                            <span class="lv-swatch dash" style="color:#f97316;"></span>
+                            <span class="lv-label">chain</span>
+                        </label>
+                        <label class="lv-row" title="parent線の表示/非表示">
+                            <input type="checkbox" id="lvParent" checked>
+                            <span class="lv-swatch dash" style="color:#c084fc;"></span>
+                            <span class="lv-label">parent</span>
+                        </label>
+                        <hr class="lv-divider">
+                        <label class="lv-row" title="same uuid:Template線の表示/非表示">
+                            <input type="checkbox" id="lvSameUuidTemplate" checked>
+                            <span class="lv-swatch dash" style="color:#818cf8;"></span>
+                            <span class="lv-label">same uuid : Template</span>
+                        </label>
+                        <label class="lv-row" title="same uuid:Instance線の表示/非表示">
+                            <input type="checkbox" id="lvSameUuidInstance" checked>
+                            <span class="lv-swatch dash" style="color:#a78bfa;"></span>
+                            <span class="lv-label">same uuid : Instance</span>
+                        </label>
+                    </div>
+                </details>
             </div>
             <div id="verticalSeparator"></div>
             <div id="metadataPanel">
@@ -1166,7 +1593,7 @@
                 <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
                     📖 User Manual
                 </h3>
-                <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">Language
                     <div
                         style="display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
                         <button onclick="switchManualLang('jp', this)" class="active"
@@ -1237,10 +1664,29 @@
                             </li>
                             <li><span style="margin-right: 4px;">⬜</span><strong>Transition (長方形):</strong>
                                 処理やイベントを表します。</li>
-                            <li><span style="margin-right: 4px; color:#f6d65b;">---▶</span><strong>Template Ref
+                            <li><span style="margin-right: 4px;">---▶</span><strong>Template Ref
                                     (黄色の破線):</strong> データの「ひな形（テンプレート）」同士の参照関係です。</li>
                             <li><span style="margin-right: 4px; color:#3ddc97;">---▶</span><strong>Instance Ref
                                     (緑色の破線):</strong> 実際の「測定データ（インスタンス）」同士の参照関係です。</li>
+                            <li><span style="margin-right: 4px; color:#f97316;">---</span><strong>Chain
+                                    (橙色の破線):</strong> 異なるMaiMLファイル間の連鎖（chain）関係です。ハッシュ値による整合性検証も行います。</li>
+                            <li><span style="margin-right: 4px; color:#818cf8;">---</span><strong>Same UUID : Template
+                                    (青紫の破線):</strong> 同一UUIDを持つTemplateノード同士の対応関係です。</li>
+                            <li><span style="margin-right: 4px; color:#a78bfa;">---</span><strong>Same UUID : Instance
+                                    (薄紫の破線):</strong> 同一UUIDを持つInstanceノード同士の対応関係です。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔗 Link Visibility
+                            ツールボックス</h3>
+                        <p>グラフエリアの左上にある <span
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔗
+                                Link Visibility</span> ボタンをクリックするとツールボックスが展開されます。</p>
+                        <ul style="padding-left: 1.5rem;">
+                            <li>5種類の関係線（templateRef・instanceRef・chain・same uuid:Template・same
+                                uuid:Instance）をチェックボックスで個別に表示/非表示切り替えできます。</li>
+                            <li>関係線が重なって見づらい場合にOFFにすることで、必要な線だけを表示できます。</li>
+                            <li>チェックを外すと、対応する線とラベルが即座に非表示になります。</li>
+                            <li>ツールボックスを使わない場合は折り畳んでおけばグラフの表示を妨げません。</li>
                         </ul>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">右上パネル: Metadata
@@ -1293,10 +1739,102 @@
                             <li><strong>ズーム:</strong> グラフ上でマウスホイールを回転させると拡大・縮小できます。</li>
                             <li><strong>パン（移動）:</strong> グラフをドラッグすると表示範囲を移動できます。</li>
                             <li><strong>ズームリセット:</strong> グラフをダブルクリック、または <span
-                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔍 Reset Zoom</span>
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔍
+                                    Reset Zoom</span>
                                 ボタンで初期表示に戻ります。</li>
                         </ul>
                     </div>
+
+                    <div style="margin-bottom: 2.5rem;">
+                        <h2
+                            style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #f59e0b; padding-bottom: 0.3rem; margin-bottom: 1rem;">
+                            🔐 5. XML復号機能 (JIS K0200)</h2>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">概要</h3>
+                        <p style="margin-bottom: 0.8rem;">MaiML Studio で暗号化して出力した <code>.maiml</code>
+                            ファイルを復号して表示できます。<strong>AES-256-GCM + PBKDF2-SHA256</strong>（W3C XML Encryption 1.1 / JIS
+                            K0200 準拠）のパスワード方式のみ対応しています。</p>
+                        <div
+                            style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 12px; color: #92400e; margin-bottom: 1rem;">
+                            ⚠️ <strong>パスワード方式（PBKDF2）のみ対応。</strong> RSA や鍵ラップ方式で暗号化された要素は復号できません（⚠️ Unsupported
+                            と表示されます）。
+                        </div>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📢 暗号済みファイルの読み込み
+                        </h3>
+                        <p>暗号化要素を含む MaiML ファイルを読み込むと、ツールバー直下に通知バナーが表示されます。</p>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><code>🔐 N encrypted element(s) found.</code> — N 個の暗号化要素が検出されたことを示します。</li>
+                            <li>バナー右端の <span
+                                    style="background: #f59e0b; color: #fff; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 12px; font-weight: 600;">🔓
+                                    Decrypt All</span> ボタンで全要素を一括復号できます。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔓 個別復号の手順</h3>
+                        <ol style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li style="margin-bottom: 0.4rem;">ノードをクリックして詳細パネルを表示します。</li>
+                            <li style="margin-bottom: 0.4rem;">暗号化された行の Value 列に <span
+                                    style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px; padding: 1px 5px; font-size: 12px;">🔓
+                                    Decrypt</span> ボタンが表示されます（tooltip: <em>Decrypt (Password-based / PBKDF2 only)</em>）。
+                            </li>
+                            <li style="margin-bottom: 0.4rem;">ボタンをクリックするとパスワード入力モーダルが表示されます（初回のみ）。</li>
+                            <li style="margin-bottom: 0.4rem;">正しいパスワードを入力すると復号され、Description と Value が表示されます。復号済みの行には
+                                🔓 バッジが残ります。</li>
+                            <li>2回目以降は同一セッション内でパスワードが自動使用されます。</li>
+                        </ol>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">⚡ Decrypt
+                            All（一括復号）</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><strong>ノードクリック前でも使用可能：</strong> ファイル読み込み直後にバナーの Decrypt All
+                                を押すとパスワードが事前保存されます。その後ノードをクリックすると暗号化行が自動復号されます。</li>
+                            <li><strong>ノードクリック後：</strong> 現在表示中の全暗号化行をまとめて復号します。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔑 パスワードキャッシュ</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li>一度入力したパスワードはセッション中メモリに保持され、次回から自動使用されます。</li>
+                            <li>localStorage 等には保存されず、ページ再読み込みで消去されます。</li>
+                            <li>誤ったパスワードを入力するとキャッシュがクリアされ、再入力を求められます。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📊 復号後の表示とエクスポート
+                        </h3>
+                        <ul style="padding-left: 1.5rem;">
+                            <li>ネスト構造（property / content / uncertainty の子要素）は復号後に自動展開され、テーブルに行として追加されます。</li>
+                            <li>復号済みのデータは <strong>AI Summary</strong> および <strong>Export Metadata</strong> の対象に含まれます。
+                            </li>
+                            <li>数値配列 content 要素が展開された場合、<strong>PLOT</strong> 機能でグラフ表示も可能です。</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 2.5rem;">
+                        <h2
+                            style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #10b981; padding-bottom: 0.3rem; margin-bottom: 1rem;">
+                            🔏 6. XML署名検証機能 (ds:Signature)</h2>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">概要</h3>
+                        <p style="margin-bottom: 0.8rem;">W3C XML Signature 準拠（ECDSA P-256）で署名された MaiML
+                            ファイルを読み込んだ際、改ざんが行われていないか自動的に検証します。</p>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">✅ 検証と結果表示</h3>
+                        <p>検証結果は右上パネル（<strong>Document Metadata</strong>）の表の最上部に自動表示されます。</p>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><span
+                                    style="background: #ecfdf5; border: 1px solid #10b981; color: #047857; border-radius: 4px; padding: 1px 5px; font-size: 12px;">✅
+                                    Valid</span> — 署名が有効かつ、データが改ざんされていません。</li>
+                            <li><span
+                                    style="background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c; border-radius: 4px; padding: 1px 5px; font-size: 12px;">❌
+                                    Invalid</span> — ハッシュの不一致、または署名値の不一致が検出されました。ファイルの内容が改変されている可能性があります。</li>
+                            <li><span
+                                    style="background: #fef3c7; border: 1px solid #f59e0b; color: #b45309; border-radius: 4px; padding: 1px 5px; font-size: 12px;">⚠️
+                                    Unsupported</span> — RSA 暗号など、現在のビューアが未対応のアルゴリズムの署名です（現状は ECDSA P-256 のみに対応）。</li>
+                            <li><span
+                                    style="background: #fef3c7; border: 1px solid #f59e0b; color: #b45309; border-radius: 4px; padding: 1px 5px; font-size: 12px;">🔏
+                                    Verifying...</span> — ファイル読み込み中に表示される、検証処理中の状態です。</li>
+                        </ul>
+                    </div>
+
                 </div>
 
                 <div id="manual-en" style="display: none;">
@@ -1365,6 +1903,32 @@
                                     Dashed):</strong> Relationship between "Templates".</li>
                             <li><span style="margin-right: 4px; color:#3ddc97;">---▶</span><strong>Instance Ref (Green
                                     Dashed):</strong> Relationship between actual "Instances".</li>
+                            <li><span style="margin-right: 4px; color:#f97316;">---</span><strong>Chain (Orange
+                                    Dashed):</strong> Links between different MaiML files. Hash-based integrity
+                                verification is also performed.</li>
+                            <li><span style="margin-right: 4px; color:#818cf8;">---</span><strong>Same UUID : Template
+                                    (Blue-Purple Dashed):</strong> Connects Template nodes sharing the same UUID across
+                                files.</li>
+                            <li><span style="margin-right: 4px; color:#a78bfa;">---</span><strong>Same UUID : Instance
+                                    (Violet Dashed):</strong> Connects Instance nodes sharing the same UUID across
+                                files.</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔗 Link Visibility
+                            Toolbox</h3>
+                        <p>Click the <span
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔗
+                                Link Visibility</span> button in the top-left corner of the graph area to expand the
+                            toolbox.</p>
+                        <ul style="padding-left: 1.5rem;">
+                            <li>Toggle the visibility of each of the five link types individually:
+                                <strong>templateRef</strong>, <strong>instanceRef</strong>, <strong>chain</strong>,
+                                <strong>same uuid : Template</strong>, and <strong>same uuid : Instance</strong>.
+                            </li>
+                            <li>When links overlap and make the graph hard to read, hide unnecessary types to focus on
+                                the ones you need.</li>
+                            <li>Unchecking a link type immediately hides both its lines and labels.</li>
+                            <li>Collapse the toolbox when not in use to keep the graph area unobstructed.</li>
                         </ul>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">Top-Right Panel:
@@ -1411,18 +1975,127 @@
                             <li><strong>Chart Type:</strong> Switch instantly between three types using the buttons at
                                 the top of the chart modal.
                                 <ul style="padding-left: 1.2rem; margin-top: 0.3rem;">
-                                    <li><strong>📈 Line:</strong> Best for time-series data and trend analysis (default).</li>
+                                    <li><strong>📈 Line:</strong> Best for time-series data and trend analysis
+                                        (default).</li>
                                     <li><strong>📊 Bar:</strong> Best for histograms and discrete data.</li>
-                                    <li><strong>⚬ Scatter:</strong> Best for visualizing correlations between two variables.</li>
+                                    <li><strong>⚬ Scatter:</strong> Best for visualizing correlations between two
+                                        variables.</li>
                                 </ul>
                             </li>
                             <li><strong>Zoom:</strong> Scroll the mouse wheel over the chart to zoom in or out.</li>
                             <li><strong>Pan:</strong> Drag the chart to move the visible area.</li>
                             <li><strong>Reset Zoom:</strong> Double-click the chart or click the <span
-                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔍 Reset Zoom</span>
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔍
+                                    Reset Zoom</span>
                                 button to return to the default view.</li>
                         </ul>
                     </div>
+
+                    <div style="margin-bottom: 2.5rem;">
+                        <h2
+                            style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #f59e0b; padding-bottom: 0.3rem; margin-bottom: 1rem;">
+                            🔐 5. XML Decryption (JIS K0200)</h2>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">Overview</h3>
+                        <p style="margin-bottom: 0.8rem;">Decrypts and displays <code>.maiml</code> files encrypted by
+                            MaiML Studio. Only <strong>AES-256-GCM + PBKDF2-SHA256</strong> password-based decryption is
+                            supported (W3C XML Encryption 1.1 / JIS K0200).</p>
+                        <div
+                            style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 12px; color: #92400e; margin-bottom: 1rem;">
+                            ⚠️ <strong>Password-based (PBKDF2) decryption only.</strong> Elements encrypted with RSA or
+                            key-wrap methods cannot be decrypted (shown as ⚠️ Unsupported).
+                        </div>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📢 Loading an
+                            Encrypted File</h3>
+                        <p>When loading a MaiML file containing encrypted elements, a notification banner appears just
+                            below the toolbar.</p>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><code>🔐 N encrypted element(s) found.</code> — Indicates N encrypted elements were
+                                detected.</li>
+                            <li>Click the <span
+                                    style="background: #f59e0b; color: #fff; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 12px; font-weight: 600;">🔓
+                                    Decrypt All</span> button on the right side of the banner to decrypt all elements at
+                                once.</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔓 Individual
+                            Decryption</h3>
+                        <ol style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li style="margin-bottom: 0.4rem;">Click a node to open the Details Panel.</li>
+                            <li style="margin-bottom: 0.4rem;">Encrypted rows show a <span
+                                    style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px; padding: 1px 5px; font-size: 12px;">🔓
+                                    Decrypt</span> button in the Value column (tooltip: <em>Decrypt (Password-based /
+                                    PBKDF2 only)</em>).</li>
+                            <li style="margin-bottom: 0.4rem;">Clicking the button shows a password input modal (first
+                                time only).</li>
+                            <li style="margin-bottom: 0.4rem;">On success, the description and value are revealed. A 🔓
+                                badge remains on the row to indicate it was previously encrypted.</li>
+                            <li>The same password is reused automatically for subsequent decryptions within the same
+                                session.</li>
+                        </ol>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">⚡ Decrypt All</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><strong>Before clicking a node:</strong> Pressing Decrypt All saves the password in
+                                advance. Encrypted rows are automatically decrypted as you navigate to each node.</li>
+                            <li><strong>After clicking a node:</strong> All currently displayed encrypted rows are
+                                decrypted at once.</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔑 Password Cache
+                        </h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li>The password entered is cached in memory for the session and reused automatically.</li>
+                            <li>It is never saved to localStorage or any persistent storage, and is cleared on page
+                                reload.</li>
+                            <li>An incorrect password clears the cache and prompts re-entry.</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📊 Display and
+                            Export After Decryption</h3>
+                        <ul style="padding-left: 1.5rem;">
+                            <li>Nested structures (child property / content / uncertainty elements) are automatically
+                                expanded and added as rows to the table.</li>
+                            <li>Decrypted data is included in <strong>AI Summary</strong> and <strong>Export
+                                    Metadata</strong>.</li>
+                            <li>If numeric array content elements are revealed, the <strong>PLOT</strong> feature
+                                becomes available for those rows.</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 2.5rem;">
+                        <h2
+                            style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #10b981; padding-bottom: 0.3rem; margin-bottom: 1rem;">
+                            🔏 6. XML Signature Verification (ds:Signature)</h2>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">Overview</h3>
+                        <p style="margin-bottom: 0.8rem;">Automatically verifies W3C XML Signature compliant (ECDSA
+                            P-256) signatures when a signed MaiML file is loaded to detect any tampering.</p>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">✅ Verification and
+                            Display</h3>
+                        <p>The verification result is automatically displayed at the very top of the table in the
+                            top-right panel (<strong>Document Metadata</strong>).</p>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><span
+                                    style="background: #ecfdf5; border: 1px solid #10b981; color: #047857; border-radius: 4px; padding: 1px 5px; font-size: 12px;">✅
+                                    Valid</span> — The signature is valid and the data has not been tampered with.</li>
+                            <li><span
+                                    style="background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c; border-radius: 4px; padding: 1px 5px; font-size: 12px;">❌
+                                    Invalid</span> — Hash mismatch or signature value mismatch detected. The file
+                                content may have been altered.</li>
+                            <li><span
+                                    style="background: #fef3c7; border: 1px solid #f59e0b; color: #b45309; border-radius: 4px; padding: 1px 5px; font-size: 12px;">⚠️
+                                    Unsupported</span> — The signature uses an unsupported algorithm, such as RSA.
+                                Currently, only ECDSA P-256 is supported.</li>
+                            <li><span
+                                    style="background: #fef3c7; border: 1px solid #f59e0b; color: #b45309; border-radius: 4px; padding: 1px 5px; font-size: 12px;">🔏
+                                    Verifying...</span> — Displayed immediately after loading while the verification
+                                process is running.</li>
+                        </ul>
+                    </div>
+
                 </div>
 
             </div>
@@ -1494,6 +2167,32 @@
                 .attr('d', 'M0,-5L10,0L0,5')
                 .attr('fill', '#3ddc97');
 
+            // chain arrowマーカー（橙色）
+            svg.select('defs').append('marker')
+                .attr('id', 'arrow-chain')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 10)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#f97316');
+
+            // parent arrowマーカー（紫色）
+            svg.select('defs').append('marker')
+                .attr('id', 'arrow-parent')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 10)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#c084fc');
+
             let nodes = [], links = [];
             let byId = new Map();
             let simulation = null, netKey = 'default';
@@ -1504,6 +2203,11 @@
             const instances = [];
             const insertionFiles = new Map();
             const documentMetadataMap = new Map();
+            window.chainInfoMap = new Map();  // key: sourceId → [{uuid,hash,hashMethod,key}]
+            window.parentInfoMap = new Map();  // key: sourceId → {uuid,hash,hashMethod,key}
+            const chainFileCache = new Map();  // key: sourceId → ArrayBuffer（ハッシュ検証用）
+            let selChainLines = null;         // SVG chain接続線
+            let selParentLines = null;         // SVG parent接続線
             // ★Export用: ドキュメント情報を構造化して保持するマップ
             window.documentInfoMap = new Map();
 
@@ -1739,6 +2443,10 @@
 
             async function handleFiles(files) {
                 resetData();
+                _encRowCounter = 0;
+                _encRowRegistry.clear();
+                _sessionPassword = null;
+                _pendingDecryptAll = false;
                 for (const file of files) {
                     if (file.name.toLowerCase().endsWith('.zip') || file.name.toLowerCase().endsWith('.maiml.zip')) {
                         await handleMaiMLZipFile(file, true, false);
@@ -1749,10 +2457,14 @@
 
                 connectTemplateRefs();
                 connectInstanceRefs();
-                connectSameUuidInstances();
+                //connectSameUuidInstances();
+                connectSameUuidLinks();
                 render();
                 runAutoLayout(true);
                 updateStats();
+                // chain / parent 接続線とハッシュ検証（非同期）
+                connectChainLinks();
+                connectParentLinks();
             }
 
             async function handleMaiMLFile(file, append = false) {
@@ -1771,7 +2483,9 @@
                         netKey += '+' + key;
                     }
 
-                    const text = await file.text();
+                    const arrayBuffer = await file.arrayBuffer();
+                    const text = new TextDecoder().decode(arrayBuffer);
+                    chainFileCache.set(key, arrayBuffer);  // ハッシュ検証用
                     loadXml(text, append, key);
                     extractDocumentMetadata(text, append, key);
                 }
@@ -1819,6 +2533,8 @@
 
                     // MaiMLファイルの内容を読み込み
                     const maimlText = await maimlFile.async('text');
+                    // ハッシュ検証用にArrayBufferも取得してchainFileCacheに保存
+                    const maimlArrayBuffer = await maimlFile.async('arraybuffer');
 
                     // ファイル名からnetKeyを設定
                     const key = maimlFileName.replace(/\.[^.]+$/, '');
@@ -1897,6 +2613,8 @@
                     if (progressBar) progressBar.style.width = '85%';
 
                     // MaiMLファイルをパース
+                    // chainFileCache: ハッシュ検証のためArrayBufferを保存
+                    chainFileCache.set(key, maimlArrayBuffer);
                     loadXml(maimlText, append, key);
                     extractDocumentMetadata(maimlText, append, key);
 
@@ -2261,32 +2979,459 @@
                 }
             }
 
-            function connectSameUuidInstances() {
+            function connectSameUuidLinks() {
+                // uuid -> { places: Set, sourceTypes: Set("instance"/"template") }
                 const uuidGroups = new Map();
+
+                // Instance由来
                 instances.forEach(inst => {
                     if (inst.uuid && inst.templateRef) {
                         const tpl = templateById.get(inst.templateRef);
                         if (tpl && tpl.placeRef) {
                             const placeNode = byId.get(tpl.placeRef);
                             if (placeNode) {
-                                if (!uuidGroups.has(inst.uuid)) uuidGroups.set(inst.uuid, new Set());
-                                uuidGroups.get(inst.uuid).add(placeNode);
+                                if (!uuidGroups.has(inst.uuid)) uuidGroups.set(inst.uuid, { places: new Set(), types: new Set() });
+                                uuidGroups.get(inst.uuid).places.add(placeNode);
+                                uuidGroups.get(inst.uuid).types.add('Instance');
                             }
                         }
                     }
                 });
-                for (const [uuid, placeSet] of uuidGroups.entries()) {
-                    const list = Array.from(placeSet);
-                    if (list.length > 1) {
-                        for (let i = 0; i < list.length - 1; i++) {
-                            links.push({
-                                source: list[i].id,
-                                target: list[i + 1].id,
-                                type: 'same-uuid'
-                            });
+
+                // Template由来
+                for (const tpl of templateById.values()) {
+                    if (tpl.uuid && tpl.placeRef) {
+                        const placeNode = byId.get(tpl.placeRef);
+                        if (placeNode) {
+                            if (!uuidGroups.has(tpl.uuid)) uuidGroups.set(tpl.uuid, { places: new Set(), types: new Set() });
+                            uuidGroups.get(tpl.uuid).places.add(placeNode);
+                            uuidGroups.get(tpl.uuid).types.add('Template');
                         }
                     }
                 }
+
+                for (const [uuid, info] of uuidGroups.entries()) {
+                    const list = Array.from(info.places);
+                    if (list.length > 1) {
+                        // ラベルの種別を判定（typeも細分化）
+                        let linkType, labelType;
+                        if (info.types.size === 2) {
+                            linkType = 'same-uuid:Mixed';
+                            labelType = 'Mixed';
+                        } else {
+                            const t = Array.from(info.types)[0]; // 'Template' or 'Instance'
+                            linkType = `same-uuid:${t}`;
+                            labelType = t;
+                        }
+
+                        for (let i = 0; i < list.length - 1; i++) {
+                            for (let j = i + 1; j < list.length; j++) {
+                                links.push({
+                                    source: list[i].id,
+                                    target: list[j].id,
+                                    type: linkType,
+                                    label: `<same uuid:${labelType}>`
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            // chain接続線の描画とハッシュ検証
+
+            // ============================================================
+            // XML署名検証 (Enveloped, ECDSA P-256)
+            // ============================================================
+            async function verifyXmlSignature(xmlText, key, baseHtml) {
+                try {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+                    const NS_DS = 'http://www.w3.org/2000/09/xmldsig#';
+                    const NS_DSIG11 = 'http://www.w3.org/2009/xmldsig11#';
+
+                    const sigEl = xmlDoc.getElementsByTagNameNS(NS_DS, 'Signature')[0];
+                    if (!sigEl) return;
+
+                    // DigestValue・SignatureValue を取得
+                    const digestValEl = sigEl.getElementsByTagNameNS(NS_DS, 'DigestValue')[0];
+                    const sigValEl = sigEl.getElementsByTagNameNS(NS_DS, 'SignatureValue')[0];
+                    const sigMethodEl = sigEl.getElementsByTagNameNS(NS_DS, 'SignatureMethod')[0];
+                    const sigMethodAlgo = sigMethodEl?.getAttribute('Algorithm') || '';
+
+                    if (sigMethodAlgo.includes('rsa')) {
+                        _updateSigBadge(key, baseHtml, 'warn', '⚠️ Unsupported (RSA Signature)');
+                        return;
+                    }
+
+                    // PublicKey は dsig11 名前空間（修正後）または ds 名前空間（旧形式）の両方に対応
+                    const pubKeyEl = sigEl.getElementsByTagNameNS(NS_DSIG11, 'PublicKey')[0]
+                                  || sigEl.getElementsByTagNameNS(NS_DS, 'PublicKey')[0];
+
+                    if (!digestValEl || !sigValEl || !pubKeyEl) {
+                        _updateSigBadge(key, baseHtml, 'warn', '⚠️ Signature elements missing (ECDSA only)');
+                        return;
+                    }
+
+                    const digestB64 = digestValEl.textContent.trim().replace(/\s/g, '');
+                    const sigB64 = sigValEl.textContent.trim().replace(/\s/g, '');
+                    const pubB64 = pubKeyEl.textContent.trim().replace(/\s/g, '');
+
+                    // Step1: <ds:Signature> を除いたXML本体を再構築して SHA-256 ダイジェスト検証
+                    // <ds:Signature>要素とその前後のインデントと改行を正しく除去する
+                    const sigRegex = /[ \t]*<ds:Signature [\s\S]*?<\/ds:Signature>\n?/;
+                    if (!sigRegex.test(xmlText)) {
+                        _updateSigBadge(key, baseHtml, 'fail', '❌ Signature block not found');
+                        return;
+                    }
+                    let xmlWithoutSig = xmlText.replace(sigRegex, '');
+
+                    const enc = new TextEncoder();
+                    const digestBuf = await crypto.subtle.digest('SHA-256', enc.encode(xmlWithoutSig));
+                    const actualDigestB64 = btoa(String.fromCharCode(...new Uint8Array(digestBuf)));
+
+                    if (actualDigestB64 !== digestB64) {
+                        _updateSigBadge(key, baseHtml, 'fail', '❌ Digest mismatch (content altered)');
+                        return;
+                    }
+
+                    // Step2: SignedInfo を再構築して ECDSA 署名値を検証
+                    const digestMethodEl = sigEl.getElementsByTagNameNS(NS_DS, 'DigestMethod')[0];
+                    const c14nMethodEl = sigEl.getElementsByTagNameNS(NS_DS, 'CanonicalizationMethod')[0];
+
+                    const signedInfoXml =
+                        '<ds:SignedInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">' +
+                        `<ds:CanonicalizationMethod Algorithm="${c14nMethodEl?.getAttribute('Algorithm') || 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315'}"/>` +
+                        `<ds:SignatureMethod Algorithm="${sigMethodEl?.getAttribute('Algorithm') || 'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256'}"/>` +
+                        '<ds:Reference URI="">' +
+                        '<ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></ds:Transforms>' +
+                        `<ds:DigestMethod Algorithm="${digestMethodEl?.getAttribute('Algorithm') || 'http://www.w3.org/2001/04/xmlenc#sha256'}"/>` +
+                        `<ds:DigestValue>${digestB64}</ds:DigestValue>` +
+                        '</ds:Reference>' +
+                        '</ds:SignedInfo>';
+
+                    // 公開鍵（SPKI DER）をインポート
+                    const pubDer = Uint8Array.from(atob(pubB64), c => c.charCodeAt(0));
+                    const pubKey = await crypto.subtle.importKey(
+                        'spki', pubDer.buffer,
+                        { name: 'ECDSA', namedCurve: 'P-256' },
+                        false, ['verify']
+                    );
+
+                    // 署名値をバイト列に変換して検証
+                    const sigBytes = Uint8Array.from(atob(sigB64), c => c.charCodeAt(0));
+                    const isValid = await crypto.subtle.verify(
+                        { name: 'ECDSA', hash: 'SHA-256' },
+                        pubKey,
+                        sigBytes.buffer,
+                        enc.encode(signedInfoXml)
+                    );
+
+                    if (isValid) {
+                        _updateSigBadge(key, baseHtml, 'ok', '✅ Signature valid (ECDSA P-256)');
+                    } else {
+                        _updateSigBadge(key, baseHtml, 'fail', '❌ Signature invalid');
+                    }
+                } catch (e) {
+                    console.error('Signature verification error:', e);
+                    _updateSigBadge(key, baseHtml, 'fail', '❌ Verification error: ' + e.message);
+                }
+            }
+
+            function _updateSigBadge(key, baseHtml, status, message) {
+                // 「Verifying...」バッジを最終結果に置き換え
+                const cls = status === 'ok' ? 'ok' : status === 'fail' ? 'fail' : 'warn';
+                const badge = `<span class="chain-badge ${cls}">${message}</span>`;
+                const updated = (baseHtml || '').replace(
+                    '<span class="chain-badge warn">🔏 Verifying...</span>',
+                    badge
+                );
+                documentMetadataMap.set(key, updated);
+
+                // Document Metadataパネルを再描画
+                let fullHtml = '';
+                for (const html of documentMetadataMap.values()) fullHtml += html;
+                $documentInfo.innerHTML = fullHtml;
+            }
+
+            async function connectChainLinks() {
+                // gGroupsレイヤーにchain接続線を描画（group-box中心間）
+                gGroups.selectAll('line.chain-line').remove();
+                gGroups.selectAll('text.chain-line-label').remove();
+
+                if (!window.chainInfoMap || window.chainInfoMap.size === 0) return;
+
+                // chainInfoMap走査: sourceId(A)が持つchain → uuid照合でsourceId(B)を特定
+                const chainLinks = []; // { sourceId, targetId, hash, hashMethod }
+
+                for (const [srcId, chainList] of window.chainInfoMap.entries()) {
+                    for (const ch of chainList) {
+                        // documentInfoMapの全エントリのuuidと照合
+                        let targetId = null;
+                        if (window.documentInfoMap) {
+                            for (const [tid, info] of window.documentInfoMap.entries()) {
+                                if (info.uuid && info.uuid.trim() === ch.uuid.trim()) {
+                                    targetId = tid;
+                                    break;
+                                }
+                            }
+                        }
+                        chainLinks.push({ sourceId: srcId, targetId, hash: ch.hash, hashMethod: ch.hashMethod });
+                    }
+                }
+
+                if (chainLinks.length === 0) return;
+
+                // ハッシュ検証（非同期）
+                // JIS K0200仕様:
+                //   参照先ファイルに<ds:Signature>がある → Signature内の<ds:DigestValue>と比較
+                //   <ds:Signature>がない              → ファイル全体のSHA-256と比較
+                const verifyHash = async (targetId, recordedHash) => {
+                    if (!targetId) return 'notloaded';
+                    const buf = chainFileCache.get(targetId);
+                    if (!buf) return 'notloaded';
+                    try {
+                        const text = new TextDecoder().decode(buf);
+                        // ds:DigestValueを探す（ds:Signatureが存在する場合）
+                        const dvMatch = text.match(/<ds:DigestValue>([^<]+)<\/ds:DigestValue>/) ||
+                            text.match(/<DigestValue[^>]*>([^<]+)<\/DigestValue>/);
+
+                        let actualBase64 = '';
+                        let actualHex = '';
+
+                        if (dvMatch) {
+                            // 【署名ありルート】: DigestValue (Base64) を取得
+                            actualBase64 = dvMatch[1].trim();
+
+                            // Base64文字列をHex（16進数）文字列に変換しておく
+                            const raw = atob(actualBase64);
+                            for (let i = 0; i < raw.length; i++) {
+                                actualHex += raw.charCodeAt(i).toString(16).padStart(2, '0');
+                            }
+                        } else {
+                            // 【署名なしルート】: ファイル全体のSHA-256を計算
+                            const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+                            const uint8Array = new Uint8Array(hashBuf);
+
+                            // 計算結果から Base64 と Hex の両方を生成する
+                            actualBase64 = btoa(String.fromCharCode(...uint8Array));
+                            actualHex = Array.from(uint8Array)
+                                .map(b => b.toString(16).padStart(2, '0'))
+                                .join('');
+                        }
+
+                        // 記録されたハッシュ値（HexまたはBase64）の空白等を除去
+                        const normalizedRecorded = recordedHash.trim();
+
+                        // どちらかのフォーマットと一致すれば 'ok' を返す
+                        if (normalizedRecorded === actualBase64) {
+                            return 'ok'; // Base64形式として一致
+                        } else if (normalizedRecorded.toLowerCase() === actualHex.toLowerCase()) {
+                            return 'ok'; // 16進数(Hex)形式として一致（大文字小文字区別なし）
+                        } else {
+                            return 'fail'; // どちらとも一致しない
+                        }
+                    } catch { return 'notloaded'; }
+                };
+
+                // SVG chain接続線を描画（<line>要素, gGroupsレイヤー）
+                selChainLines = gGroups.selectAll('line.chain-line').data(
+                    chainLinks.filter(d => d.targetId),
+                    d => `${d.sourceId}->${d.targetId}`
+                );
+                selChainLines.exit().remove();
+                selChainLines = selChainLines.enter().append('line')
+                    .attr('class', 'chain-line')
+                    .attr('stroke', '#f97316')
+                    .attr('stroke-width', 1.5)
+                    .attr('stroke-dasharray', '8,4')
+                    .attr('opacity', 0.8)
+                    .attr('marker-end', 'url(#arrow-chain)')
+                    .merge(selChainLines);
+
+                // chain線ラベル
+                gGroups.selectAll('text.chain-line-label').data(
+                    chainLinks.filter(d => d.targetId),
+                    d => `${d.sourceId}->${d.targetId}-label`
+                ).enter().append('text')
+                    .attr('class', 'chain-line-label')
+                    .attr('font-size', '10px')
+                    .attr('fill', '#ea580c')
+                    .attr('text-anchor', 'middle')
+                    .attr('dy', '-4')
+                    .text('🔗 chain');
+
+                ticked(); // 座標を即時反映
+
+                // ハッシュ検証とバッジ表示
+                for (const cl of chainLinks) {
+                    const result = await verifyHash(cl.targetId, cl.hash);
+                    const badge = result === 'ok'
+                        ? `<span class="chain-badge ok">✅ Chain verified</span>`
+                        : result === 'fail'
+                            ? `<span class="chain-badge fail">❌ Hash mismatch</span>`
+                            : `<span class="chain-badge warn">⚠️ Linked file not loaded</span>`;
+
+                    // Document Metadataパネルの該当sourceIdのセクションにバッジを追加
+                    const savedHtml = documentMetadataMap.get(cl.sourceId);
+                    if (savedHtml !== undefined) {
+                        // chain記録のUUID行の後にバッジを挿入
+                        const targetUuid = cl.targetId
+                            ? (window.documentInfoMap?.get(cl.targetId)?.uuid || cl.hash.slice(0, 8) + '...')
+                            : cl.hash.slice(0, 8) + '...';
+                        const badgeHtml = `<tr><th>chain</th><td colspan="2">${badge} → ${esc(targetUuid)}</td></tr>`;
+                        const updated = savedHtml.replace('</table>', badgeHtml + '</table>');
+                        documentMetadataMap.set(cl.sourceId, updated);
+                    }
+                }
+
+                // Document Metadataパネルを再描画
+                // ※各エントリに既にh3ヘッダーが含まれているので先頭には追加しない
+                let fullHtml = '';
+                for (const html of documentMetadataMap.values()) {
+                    fullHtml += html;
+                }
+                $documentInfo.innerHTML = fullHtml;
+
+                // chain線ラベルの座標をtickedで更新
+                ticked();
+            }
+
+
+            // parent接続線の描画とハッシュ検証
+            async function connectParentLinks() {
+                gGroups.selectAll('line.parent-line').remove();
+                gGroups.selectAll('text.parent-line-label').remove();
+
+                if (!window.parentInfoMap || window.parentInfoMap.size === 0) return;
+
+                const parentLinks = [];
+                for (const [srcId, p] of window.parentInfoMap.entries()) {
+                    let targetId = null;
+                    if (window.documentInfoMap) {
+                        for (const [tid, info] of window.documentInfoMap.entries()) {
+                            if (info.uuid && info.uuid.trim() === p.uuid.trim()) {
+                                targetId = tid;
+                                break;
+                            }
+                        }
+                    }
+                    parentLinks.push({ sourceId: srcId, targetId, hash: p.hash, hashMethod: p.hashMethod });
+                }
+
+                if (parentLinks.length === 0) return;
+
+                // ハッシュ検証（非同期）
+                // JIS K0200仕様:
+                //   参照先ファイルに<ds:Signature>がある → Signature内の<ds:DigestValue>と比較
+                //   <ds:Signature>がない              → ファイル全体のSHA-256と比較
+                const verifyHash = async (targetId, recordedHash) => {
+                    if (!targetId) return 'notloaded';
+                    const buf = chainFileCache.get(targetId);
+                    if (!buf) return 'notloaded';
+                    try {
+                        const text = new TextDecoder().decode(buf);
+                        // ds:DigestValueを探す（ds:Signatureが存在する場合）
+                        const dvMatch = text.match(/<ds:DigestValue>([^<]+)<\/ds:DigestValue>/) ||
+                            text.match(/<DigestValue[^>]*>([^<]+)<\/DigestValue>/);
+
+                        let actualBase64 = '';
+                        let actualHex = '';
+
+                        if (dvMatch) {
+                            // 【署名ありルート】: DigestValue (Base64) を取得
+                            actualBase64 = dvMatch[1].trim();
+
+                            // Base64文字列をHex（16進数）文字列に変換しておく
+                            const raw = atob(actualBase64);
+                            for (let i = 0; i < raw.length; i++) {
+                                actualHex += raw.charCodeAt(i).toString(16).padStart(2, '0');
+                            }
+                        } else {
+                            // 【署名なしルート】: ファイル全体のSHA-256を計算
+                            const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+                            const uint8Array = new Uint8Array(hashBuf);
+
+                            // 計算結果から Base64 と Hex の両方を生成する
+                            actualBase64 = btoa(String.fromCharCode(...uint8Array));
+                            actualHex = Array.from(uint8Array)
+                                .map(b => b.toString(16).padStart(2, '0'))
+                                .join('');
+                        }
+
+                        // 記録されたハッシュ値（HexまたはBase64）の空白等を除去
+                        const normalizedRecorded = recordedHash.trim();
+
+                        // どちらかのフォーマットと一致すれば 'ok' を返す
+                        if (normalizedRecorded === actualBase64) {
+                            return 'ok'; // Base64形式として一致
+                        } else if (normalizedRecorded.toLowerCase() === actualHex.toLowerCase()) {
+                            return 'ok'; // 16進数(Hex)形式として一致（大文字小文字区別なし）
+                        } else {
+                            return 'fail'; // どちらとも一致しない
+                        }
+                    } catch { return 'notloaded'; }
+                };
+
+                // SVG parent接続線を描画（紫色）
+                const showParent = document.getElementById('lvParent')?.checked !== false;
+                selParentLines = gGroups.selectAll('line.parent-line').data(
+                    parentLinks.filter(d => d.targetId),
+                    d => `${d.sourceId}->${d.targetId}-parent`
+                );
+                selParentLines.exit().remove();
+                selParentLines = selParentLines.enter().append('line')
+                    .attr('class', 'parent-line')
+                    .attr('stroke', '#c084fc')
+                    .attr('stroke-width', 1.5)
+                    .attr('stroke-dasharray', '8,4')
+                    .attr('opacity', 0.8)
+                    .attr('marker-end', 'url(#arrow-parent)')
+                    .style('display', showParent ? null : 'none')
+                    .merge(selParentLines);
+
+                // parent線ラベル
+                gGroups.selectAll('text.parent-line-label').data(
+                    parentLinks.filter(d => d.targetId),
+                    d => `${d.sourceId}->${d.targetId}-parent-label`
+                ).enter().append('text')
+                    .attr('class', 'parent-line-label')
+                    .attr('font-size', '10px')
+                    .attr('fill', '#a855f7')
+                    .attr('text-anchor', 'middle')
+                    .attr('dy', '-4')
+                    .text('🔀 parent')
+                    .style('display', showParent ? null : 'none');
+
+                ticked();
+
+                // ハッシュ検証とバッジ表示
+                for (const pl of parentLinks) {
+                    const result = await verifyHash(pl.targetId, pl.hash);
+                    const badge = result === 'ok'
+                        ? `<span class="chain-badge ok">✅ Parent verified</span>`
+                        : result === 'fail'
+                            ? `<span class="chain-badge fail">❌ Hash mismatch</span>`
+                            : `<span class="chain-badge warn">⚠️ Parent file not loaded</span>`;
+
+                    const savedHtml = documentMetadataMap.get(pl.sourceId);
+                    if (savedHtml !== undefined) {
+                        const targetUuid = pl.targetId
+                            ? (window.documentInfoMap?.get(pl.targetId)?.uuid || pl.hash.slice(0, 8) + '...')
+                            : pl.hash.slice(0, 8) + '...';
+                        const badgeHtml = `<tr><th>parent</th><td colspan="2">${badge} → ${esc(targetUuid)}</td></tr>`;
+                        const updated = savedHtml.replace('</table>', badgeHtml + '</table>');
+                        documentMetadataMap.set(pl.sourceId, updated);
+                    }
+                }
+
+                // Document Metadataパネルを再描画
+                let fullHtml = '';
+                for (const html of documentMetadataMap.values()) fullHtml += html;
+                $documentInfo.innerHTML = fullHtml;
+
+                ticked();
             }
 
             function extractDocumentMetadata(xmlText, append = false, key = null) {
@@ -2307,10 +3452,17 @@
                 html += '<table>';
                 let rowCount = 0;
 
+                const sigEl = xmlDoc.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "Signature")[0];
+                if (sigEl) {
+                    html += `<tr><th>ds:Signature</th><td colspan="2"><span class="chain-badge warn">🔏 Verifying...</span></td></tr>`;
+                    rowCount++;
+                }
+
                 const uuidEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "uuid")[0];
                 const nameEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "name")[0];
                 const descriptionEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "description")[0];
                 const annotationEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "annotation")[0];
+                const dateEl = documentElement.getElementsByTagNameNS("http://www.maiml.org/schemas", "date")[0];
 
                 if (uuidEl) {
                     html += `<tr><th>UUID</th><td colspan="2">${esc(uuidEl.textContent)}</td></tr>`;
@@ -2326,6 +3478,10 @@
                 }
                 if (annotationEl) {
                     html += `<tr><th>Annotation</th><td colspan="2">${esc(annotationEl.textContent)}</td></tr>`;
+                    rowCount++;
+                }
+                if (dateEl) {
+                    html += `<tr><th>Date</th><td colspan="2">${esc(dateEl.textContent)}</td></tr>`;
                     rowCount++;
                 }
 
@@ -2455,6 +3611,7 @@
                             name: nameEl ? nameEl.textContent : '',
                             description: descriptionEl ? descriptionEl.textContent : '',
                             annotation: annotationEl ? annotationEl.textContent : '',
+                            date: dateEl ? dateEl.textContent : '',
                             others: [],
                             properties: []
                         };
@@ -2480,8 +3637,50 @@
                         window.documentInfoMap.set(key, infoObj);
                     }
 
+                    // <chain>要素を解析してchainInfoMapに格納
+                    if (key) {
+                        const chainEls = Array.from(documentElement.children || [])
+                            .filter(el => el.tagName.split(':').pop().toLowerCase() === 'chain');
+                        if (chainEls.length > 0 && window.chainInfoMap) {
+                            const chainList = chainEls.map(cel => {
+                                const uuidEl2 = Array.from(cel.children || []).find(c => c.tagName.split(':').pop().toLowerCase() === 'uuid');
+                                const hashEl2 = Array.from(cel.children || []).find(c => c.tagName.split(':').pop().toLowerCase() === 'hash');
+                                return {
+                                    uuid: uuidEl2 ? uuidEl2.textContent.trim() : '',
+                                    hash: hashEl2 ? hashEl2.textContent.trim() : '',
+                                    hashMethod: hashEl2 ? (hashEl2.getAttribute('method') || 'SHA-256') : 'SHA-256',
+                                    key: cel.getAttribute('key') || 'chain',
+                                };
+                            }).filter(c => c.uuid);
+                            if (chainList.length > 0) window.chainInfoMap.set(key, chainList);
+                        }
+                    }
+
+
+                    // <parent>要素を解析してparentInfoMapに格納（直下の1件のみ）
+                    const parentEl = Array.from(documentElement.children || [])
+                        .find(el => el.tagName.split(':').pop().toLowerCase() === 'parent');
+                    if (parentEl && window.parentInfoMap) {
+                        const puuidEl = Array.from(parentEl.children || []).find(c => c.tagName.split(':').pop().toLowerCase() === 'uuid');
+                        const phashEl = Array.from(parentEl.children || []).find(c => c.tagName.split(':').pop().toLowerCase() === 'hash');
+                        const puuid = puuidEl ? puuidEl.textContent.trim() : '';
+                        const phash = phashEl ? phashEl.textContent.trim() : '';
+                        if (puuid && key) {
+                            window.parentInfoMap.set(key, {
+                                uuid: puuid,
+                                hash: phash,
+                                hashMethod: phashEl ? (phashEl.getAttribute('method') || 'SHA-256') : 'SHA-256',
+                                key: parentEl.getAttribute('key') || 'revised',
+                            });
+                        }
+                    }
                     const saveHtml = append ? (header + html) : html;
                     documentMetadataMap.set(key, saveHtml);
+
+                    // ds:Signature 検証（非同期 - 後で反映）
+                    if (key && sigEl) {
+                        setTimeout(() => verifyXmlSignature(xmlText, key, saveHtml), 0);
+                    }
                 }
 
                 if (rowCount === 0 && directProperties.length === 0) {
@@ -2869,13 +4068,24 @@
                 zipFileCache.clear();
                 documentMetadataMap.clear();
                 if (window.documentInfoMap) window.documentInfoMap.clear();
+                if (window.chainInfoMap) window.chainInfoMap.clear();
+                if (window.parentInfoMap) window.parentInfoMap.clear();
+                chainFileCache.clear();
+                selChainLines = null;
+                selParentLines = null;
                 $meta.innerHTML = '';
                 $documentInfo.innerHTML = '<h3>📄 Document Metadata</h3>';
                 $stats.textContent = 'Loading...';
             }
 
             function loadXml(text, append = false, sourceId = null) {
-                if (!append) resetData();
+                if (!append) {
+                    resetData();
+                    _encRowCounter = 0;
+                    _encRowRegistry.clear();
+                    _sessionPassword = null;
+                    _pendingDecryptAll = false;
+                }
 
                 const xml = new DOMParser().parseFromString(text, 'application/xml');
                 if (xml.querySelector('parsererror')) {
@@ -2893,6 +4103,8 @@
                     else ticked();
                     updateStats();
                 }
+                // Update encryption notification banner after rendering
+                setTimeout(updateEncBanner, 100);
             }
 
             function updateStats() {
@@ -3099,8 +4311,11 @@
                         if (ref) ref = resolve(ref);
                         if (ref) {
                             const meta = extractMetaBlock(el);
+                            // resultsRef 要素から ref 属性を取得
+                            const resultsRefEl = Array.from(el.children || []).find(c => local(c) === 'resultsref');
+                            const resultsRefValue = resultsRefEl ? (attr(resultsRefEl, 'ref', 'Ref', 'REF') || '') : '';
                             if (!eventsByInstructionId.has(ref)) eventsByInstructionId.set(ref, []);
-                            eventsByInstructionId.get(ref).push({ ...meta, rawEl: el });
+                            eventsByInstructionId.get(ref).push({ ...meta, resultsRef: resultsRefValue, rawEl: el });
                         }
                     }
                 }
@@ -3191,6 +4406,31 @@
                     const size = el.getAttribute('size') || '';
                     const axis = el.getAttribute('axis') || '';
                     const name = child('name');
+
+                    // EncryptedData (Content暗号化) の検出
+                    const encEl = Array.from(el.children || []).find(x => local(x) === 'encrypteddata');
+                    if (encEl) {
+                        // W3C XML Encryption仕様準拠: EncryptedDataの直接の子CipherDataの
+                        // CipherValueを取得する。EncryptedKey内の空のCipherValueとは別物。
+                        const directCipherDataEl = Array.from(encEl.children || []).find(x => local(x) === 'cipherdata');
+                        const cvEl = directCipherDataEl
+                            ? Array.from(directCipherDataEl.children || []).find(x => local(x) === 'ciphervalue')
+                            : null;
+                        const cipherValue = cvEl ? cvEl.textContent.trim() : '';
+                        // EncryptedKey内のEncryptionMethodでPBKDF2か判定
+                        const encKeyEl = Array.from(encEl.getElementsByTagName('*')).find(x => local(x) === 'encryptedkey');
+                        const keyMethEl = encKeyEl
+                            ? Array.from(encKeyEl.children || []).find(x => local(x) === 'encryptionmethod')
+                            : null;
+                        const keyAlg = keyMethEl ? (keyMethEl.getAttribute('Algorithm') || '') : '';
+                        const isPbkdf2 = keyAlg.toLowerCase().includes('pbkdf2');
+                        return {
+                            kind: 'property', key, name, type, description: '', value: '',
+                            units, fstring, scaleFactor, size, axis, children: [],
+                            encrypted: true, cipherValue, isPbkdf2, keyAlgorithm: keyAlg
+                        };
+                    }
+
                     const description = child('description') || el.getAttribute('description') || el.getAttribute('desc') || '';
 
                     // value要素を持つ場合はそのテキスト、持たない場合は属性値、それもなければ空文字
@@ -3232,6 +4472,31 @@
                     const size = el.getAttribute('size') || '';
                     const axis = el.getAttribute('axis') || '';
                     const name = child('name') || el.getAttribute('name') || '';
+
+                    // EncryptedData (Content暗号化) の検出
+                    const encEl = Array.from(el.children || []).find(x => local(x) === 'encrypteddata');
+                    if (encEl) {
+                        // W3C XML Encryption仕様準拠: EncryptedDataの直接の子CipherDataの
+                        // CipherValueを取得する。EncryptedKey内の空のCipherValueとは別物。
+                        const directCipherDataEl = Array.from(encEl.children || []).find(x => local(x) === 'cipherdata');
+                        const cvEl = directCipherDataEl
+                            ? Array.from(directCipherDataEl.children || []).find(x => local(x) === 'ciphervalue')
+                            : null;
+                        const cipherValue = cvEl ? cvEl.textContent.trim() : '';
+                        // EncryptedKey内のEncryptionMethodでPBKDF2か判定
+                        const encKeyEl = Array.from(encEl.getElementsByTagName('*')).find(x => local(x) === 'encryptedkey');
+                        const keyMethEl = encKeyEl
+                            ? Array.from(encKeyEl.children || []).find(x => local(x) === 'encryptionmethod')
+                            : null;
+                        const keyAlg = keyMethEl ? (keyMethEl.getAttribute('Algorithm') || '') : '';
+                        const isPbkdf2 = keyAlg.toLowerCase().includes('pbkdf2');
+                        return {
+                            kind: 'content', key, name, type, description: '', value: '',
+                            units, fstring, scaleFactor, size, axis, children: [],
+                            encrypted: true, cipherValue, isPbkdf2, keyAlgorithm: keyAlg
+                        };
+                    }
+
                     const description = child('description') || el.getAttribute('description') || el.getAttribute('desc') || '';
 
                     // value要素を持つ場合はそのテキスト、持たない場合は属性値、それもなければ空文字
@@ -3343,24 +4608,30 @@
                 selLinks = selLinks.enter()
                     .append('path')
                     .attr('class', d => {
-                        if (d.type === 'same-uuid') return 'link same-uuid';
+                        if (d.type === 'same-uuid:Template') return 'link same-uuid';
+                        if (d.type === 'same-uuid:Instance') return 'link same-uuid';
+                        if (d.type === 'same-uuid:Mixed') return 'link same-uuid';
                         if (d.type === 'templateRef') return 'link templateRef';
                         if (d.type === 'instanceRef') return 'link instanceRef';
+                        if (d.type === 'chain') return 'link chain';
                         if (d.type) return 'link ref-link';
                         return 'link';
                     })
                     .attr('fill', 'none')
                     .attr('marker-end', d => {
-                        if (d.type === 'same-uuid') return null;
+                        if (d.type === 'same-uuid:Template') return null;
+                        if (d.type === 'same-uuid:Instance') return null;
+                        if (d.type === 'same-uuid:Mixed') return null;
                         if (d.type === 'templateRef') return 'url(#arrow-templateRef)';
                         if (d.type === 'instanceRef') return 'url(#arrow-instanceRef)';
+                        if (d.type === 'chain') return 'url(#arrow-chain)';
                         return 'url(#arrow)';
                     })
                     .merge(selLinks);
 
                 // same-uuid, templateRef, instanceRef
                 selLinkLabels = gLinks.selectAll('text.link-label').data(
-                    links.filter(d => d.type === 'same-uuid' || d.type === 'templateRef' || d.type === 'instanceRef'),
+                    links.filter(d => d.type === 'same-uuid:Template' || d.type === 'same-uuid:Instance' || d.type === 'same-uuid:Mixed' || d.type === 'templateRef' || d.type === 'instanceRef' || d.type === 'chain'),
                     d => {
                         const src = d.source.id || d.source;
                         const tgt = d.target.id || d.target;
@@ -3372,19 +4643,24 @@
                     .attr('class', d => {
                         if (d.type === 'templateRef') return 'link-label ref-label templateRef';
                         if (d.type === 'instanceRef') return 'link-label ref-label instanceRef';
+                        if (d.type === 'chain') return 'link-label ref-label chain';
                         return 'link-label';
                     })
                     .attr('font-size', '10px')
                     .attr('fill', d => {
                         if (d.type === 'templateRef') return '#d4a800';
                         if (d.type === 'instanceRef') return '#2a9';
+                        if (d.type === 'chain') return '#ea580c';
                         return 'var(--accent)';
                     })
                     .attr('text-anchor', 'middle')
                     .text(d => {
-                        if (d.type === 'same-uuid') return '<same uuid>';
+                        if (d.type === 'same-uuid:Template') return d.label || '<same uuid:Template>';
+                        if (d.type === 'same-uuid:Instance') return d.label || '<same uuid:Instance>';
+                        if (d.type === 'same-uuid:Mixed') return d.label || '<same uuid:Mixed>';
                         if (d.type === 'templateRef') return '<templateRef>';
                         if (d.type === 'instanceRef') return '<instanceRef>';
+                        if (d.type === 'chain') return '<chain>';
                         return '';
                     })
                     .merge(selLinkLabels);
@@ -3413,7 +4689,9 @@
                     if (selGroups) selGroups.classed('selected', g => g === d.sourceId);
                     showDetails(d);
                 });
-                enableDrag(true);
+                /* enableDrag(true);  */
+                /*  Editが常にOnの動作になる不具合対応 */
+                enableDrag(document.getElementById('dragMode').checked);
             }
 
             function runAutoLayout(resetAlpha = false) {
@@ -3468,6 +4746,86 @@
                         .attr('x', d => (bounds.get(d)?.x0 || 0))
                         .attr('y', d => (bounds.get(d)?.y0 || 0) - 5)
                         .style('display', d => bounds.has(d) ? null : 'none');
+
+                    // chain接続線: group-box の最近傍コーナー間を繋ぐ
+                    // ドラッグ操作時も毎フレーム再計算するためスナップが自動的に適用される
+                    if (selChainLines) {
+                        // 2つのboundsの4隅から最近傍ペアを求めるヘルパー
+                        const nearestCorners = (bs, bt) => {
+                            const cs = [{ x: bs.x0, y: bs.y0 }, { x: bs.x1, y: bs.y0 },
+                            { x: bs.x0, y: bs.y1 }, { x: bs.x1, y: bs.y1 }];
+                            const ct = [{ x: bt.x0, y: bt.y0 }, { x: bt.x1, y: bt.y0 },
+                            { x: bt.x0, y: bt.y1 }, { x: bt.x1, y: bt.y1 }];
+                            let minD = Infinity, sc = cs[0], tc = ct[0];
+                            for (const s of cs) for (const t of ct) {
+                                const d = Math.hypot(s.x - t.x, s.y - t.y);
+                                if (d < minD) { minD = d; sc = s; tc = t; }
+                            }
+                            return { sc, tc };
+                        };
+
+                        selChainLines.each(function (d) {
+                            const bs = bounds.get(d.sourceId);
+                            const bt = bounds.get(d.targetId);
+                            const el = d3.select(this);
+                            if (bs && bt) {
+                                // 矢印の向き: 参照先(target) → 参照元(source)
+                                // 時系列的に「古いファイルから新しいファイルへ」の流れを示す
+                                const { sc: tc, tc: sc } = nearestCorners(bs, bt);
+                                el.attr('x1', sc.x).attr('y1', sc.y)
+                                    .attr('x2', tc.x).attr('y2', tc.y)
+                                    .style('display', null);
+                            } else {
+                                el.style('display', 'none');
+                            }
+                        });
+
+                        // chain-line-label: 接続コーナーの中点に表示
+                        gGroups.selectAll('text.chain-line-label').each(function (d) {
+                            const bs = bounds.get(d.sourceId);
+                            const bt = bounds.get(d.targetId);
+                            if (bs && bt) {
+                                const { sc, tc } = nearestCorners(bs, bt);
+                                d3.select(this)
+                                    .attr('x', (sc.x + tc.x) / 2)
+                                    .attr('y', (sc.y + tc.y) / 2 - 5)
+                                    .style('display', null);
+                            } else {
+                                d3.select(this).style('display', 'none');
+                            }
+                        });
+
+                        // parent接続線（紫色）: 同じnearestCornersロジックで描画
+                        if (selParentLines) {
+                            const showParent = document.getElementById('lvParent')?.checked !== false;
+                            selParentLines.each(function (d) {
+                                const bs = bounds.get(d.sourceId);
+                                const bt = bounds.get(d.targetId);
+                                const el = d3.select(this);
+                                if (bs && bt) {
+                                    const { sc: tc, tc: sc } = nearestCorners(bs, bt);
+                                    el.attr('x1', sc.x).attr('y1', sc.y)
+                                        .attr('x2', tc.x).attr('y2', tc.y)
+                                        .style('display', showParent ? null : 'none');
+                                } else {
+                                    el.style('display', 'none');
+                                }
+                            });
+                            gGroups.selectAll('text.parent-line-label').each(function (d) {
+                                const bs = bounds.get(d.sourceId);
+                                const bt = bounds.get(d.targetId);
+                                if (bs && bt) {
+                                    const { sc, tc } = nearestCorners(bs, bt);
+                                    d3.select(this)
+                                        .attr('x', (sc.x + tc.x) / 2)
+                                        .attr('y', (sc.y + tc.y) / 2 - 5)
+                                        .style('display', showParent ? null : 'none');
+                                } else {
+                                    d3.select(this).style('display', 'none');
+                                }
+                            });
+                        }
+                    }
                 }
 
                 selNodes.attr('transform', d => {
@@ -3484,6 +4842,9 @@
 
                     return `M${source.x},${source.y} L${target.x},${target.y}`;
                 });
+
+                // リンク表示状態の適用（チェックボックスON/OFFを反映）
+                _applyLinkVisibility();
 
                 if (selLinkLabels) {
                     selLinkLabels
@@ -3542,6 +4903,67 @@
                 return (typeof idOrObj === 'object') ? idOrObj : nodes.find(n => n.id === idOrObj);
             }
 
+            // ── リンク表示制御ロジック ──────────────────────────
+            function _applyLinkVisibility() {
+                const showTemplateRef = document.getElementById('lvTemplateRef')?.checked !== false;
+                const showInstanceRef = document.getElementById('lvInstanceRef')?.checked !== false;
+                const showChain = document.getElementById('lvChain')?.checked !== false;
+                const showParent = document.getElementById('lvParent')?.checked !== false;
+                const showSameUuidTemplate = document.getElementById('lvSameUuidTemplate')?.checked !== false;
+                const showSameUuidInstance = document.getElementById('lvSameUuidInstance')?.checked !== false;
+
+                // path.link の表示制御
+                if (selLinks) {
+                    selLinks.style('display', d => {
+                        if (d.type === 'templateRef') return showTemplateRef ? null : 'none';
+                        if (d.type === 'instanceRef') return showInstanceRef ? null : 'none';
+                        if (d.type === 'chain') return showChain ? null : 'none';
+                        if (d.type === 'same-uuid:Template') return showSameUuidTemplate ? null : 'none';
+                        if (d.type === 'same-uuid:Instance') return showSameUuidInstance ? null : 'none';
+                        // Mixed: どちらかがONなら表示
+                        if (d.type === 'same-uuid:Mixed') return (showSameUuidTemplate || showSameUuidInstance) ? null : 'none';
+                        return null; // アーク等は常時表示
+                    });
+                }
+
+                // リンクラベルの表示制御
+                if (selLinkLabels) {
+                    selLinkLabels.style('display', d => {
+                        if (d.type === 'templateRef') return showTemplateRef ? null : 'none';
+                        if (d.type === 'instanceRef') return showInstanceRef ? null : 'none';
+                        if (d.type === 'chain') return showChain ? null : 'none';
+                        if (d.type === 'same-uuid:Template') return showSameUuidTemplate ? null : 'none';
+                        if (d.type === 'same-uuid:Instance') return showSameUuidInstance ? null : 'none';
+                        if (d.type === 'same-uuid:Mixed') return (showSameUuidTemplate || showSameUuidInstance) ? null : 'none';
+                        return null;
+                    });
+                }
+
+                // chain接続線（line要素）の表示制御
+                if (selChainLines) {
+                    selChainLines.style('display', showChain ? null : 'none');
+                    gGroups.selectAll('text.chain-line-label').style('display', showChain ? null : 'none');
+                }
+                // parent接続線（line要素）の表示制御
+                if (selParentLines) {
+                    selParentLines.style('display', showParent ? null : 'none');
+                    gGroups.selectAll('text.parent-line-label').style('display', showParent ? null : 'none');
+                }
+            }
+
+            // チェックボックスの変更イベントを登録
+            const _registerLvHandlers = () => {
+                ['lvTemplateRef', 'lvInstanceRef', 'lvChain', 'lvParent', 'lvSameUuidTemplate', 'lvSameUuidInstance'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('change', _applyLinkVisibility);
+                });
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _registerLvHandlers);
+            } else {
+                _registerLvHandlers();
+            }
+            // ──────────────────────────────────────────────────────
 
             function linkArc(source, target, type) {
                 const dx = target.x - source.x;
@@ -3580,7 +5002,14 @@
                         saveLayout();
                     });
 
-                if (selNodes) selNodes.call(enabled ? nodeDrag : null);
+                // --- 修正箇所1：個別のノード（丸・四角）のドラッグON/OFF制御 ---
+                if (selNodes) {
+                    if (enabled) {
+                        selNodes.call(nodeDrag);
+                    } else {
+                        selNodes.on('.drag', null); // D3.jsでの正しいイベント解除
+                    }
+                }
 
                 if (selGroups) {
                     const groupDrag = d3.drag()
@@ -3613,8 +5042,15 @@
                             if (simulation) simulation.alphaTarget(0);
                             saveLayout();
                         });
-                    selGroups.call(enabled ? groupDrag : null);
-                    selGroups.style("cursor", enabled ? "move" : "default");
+
+                    // --- 修正箇所2：グループ（ZIP展開時のファイルごとの破線枠）のドラッグON/OFF制御 ---
+                    if (enabled) {
+                        selGroups.call(groupDrag);
+                        selGroups.style("cursor", "move");
+                    } else {
+                        selGroups.on('.drag', null); // D3.jsでの正しいイベント解除
+                        selGroups.style("cursor", "default");
+                    }
                 }
             }
 
@@ -3806,7 +5242,11 @@
                                     div.style.margin = '0.2rem 0';
                                     div.style.borderRadius = '4px';
 
-                                    div.innerHTML = `<div style="font-size:12px; font-weight:bold; color:var(--accent);">Event #${eIdx + 1}</div>`;
+                                    // resultsRef をバッジ付きでタイトル行に表示
+                                    const resultsLabel = evt.resultsRef
+                                        ? `<span style="margin-left:8px; padding:1px 7px; border-radius:10px; background:var(--chip); color:var(--chip-ink); font-size:11px; font-weight:600;">${esc(evt.resultsRef)}</span>`
+                                        : '';
+                                    div.innerHTML = `<div style="font-size:12px; font-weight:bold; color:var(--accent);">Event #${eIdx + 1}${resultsLabel}</div>`;
 
                                     if (evt.properties && evt.properties.length > 0) {
                                         div.appendChild(renderPropertiesTable(evt.properties));
@@ -4505,7 +5945,38 @@
                         contentIndex++;
                     }
 
-                    rows += `<tr data-idx="${isContent ? contentIndex - 1 : ''}">
+                    // 暗号化行用のユニークID
+                    let encRowAttr = '';
+                    let descCell = `<td title="${esc(pr.description || '')}">${esc(pr.description || '')}</td>`;
+                    // 復号済み行: Value セル先頭に 🔓 バッジを表示
+                    let valueCell = pr.wasEncrypted
+                        ? `<td class="col-value"><span class="decrypt-badge" title="Previously encrypted / Decrypted">🔓</span><div class="value-cell-scroll" style="display:inline-block;max-width:calc(100% - 22px);vertical-align:middle;" title="${esc(displayValue)}">${esc(displayValue)}</div></td>`
+                        : `<td class="col-value"><div class="value-cell-scroll" title="${esc(displayValue)}">${esc(displayValue)}</div></td>`;
+                    if (pr.encrypted) {
+                        const encId = 'enc_' + (_encRowCounter++);
+                        _encRowRegistry.set(encId, {
+                            cipherValue: pr.cipherValue,
+                            isPbkdf2: pr.isPbkdf2,
+                            keyAlgorithm: pr.keyAlgorithm || '',
+                            dataItem: pr,          // データモデルへの参照
+                            level: level,       // インデントレベル
+                            tblEl: tbl,         // 所属テーブル要素への参照
+                            contentItemsArr: contentItems // PLOTボタン用配列への参照
+                        });
+                        // Decrypt Allで先にパスワードが保存済みの場合、DOM追加後に自動復号
+                        if (_pendingDecryptAll && pr.isPbkdf2 && _sessionPassword) {
+                            const _eid = encId;
+                            setTimeout(() => decryptRow(_eid, null), 50);
+                        }
+                        encRowAttr = ` data-enc-id="${encId}"`;
+                        descCell = `<td id="desc-${encId}"></td>`;
+                        if (!pr.isPbkdf2) {
+                            valueCell = `<td class="col-value"><button class="decrypt-btn unsupported" title="Unsupported key method (data algorithm: ${esc(pr.keyAlgorithm || 'unknown')}). Only PBKDF2+AES-256-GCM is supported.">⚠️ Unsupported</button></td>`;
+                        } else {
+                            valueCell = `<td class="col-value" id="val-${encId}"><button class="decrypt-btn" onclick="decryptRow('${encId}',this)" title="Decrypt (Password-based / PBKDF2 only)">🔓 Decrypt</button></td>`;
+                        }
+                    }
+                    rows += `<tr data-idx="${isContent ? contentIndex - 1 : ''}"${encRowAttr}>
             <td title="${esc(pr.key || '')}">${esc(indent + (pr.key || ''))}</td>
             <td title="${esc(pr.type || '')}">${esc(pr.type || '')}</td>
             <td class="col-narrow" title="${esc(pr.axis || '')}">${esc(pr.axis || '')}</td>
@@ -4513,10 +5984,8 @@
             <td class="col-narrow" title="${esc(pr.fstring || '')}">${esc(pr.fstring || '')}</td>
             <td class="col-narrow" title="${esc(pr.units || '')}">${esc(pr.units || '')}</td>
             <td class="col-narrow" title="${esc(pr.scaleFactor || '')}">${esc(pr.scaleFactor || '')}</td>
-            <td title="${esc(pr.description || '')}">${esc(pr.description || '')}</td>
-            <td class="col-value">
-                <div class="value-cell-scroll" title="${esc(displayValue)}">${esc(displayValue)}</div>
-            </td>
+            ${descCell}
+            ${valueCell}
             <td style="text-align:center;">${xRadio}</td>
             <td style="text-align:center;">${yRadio}</td>
         </tr>`;
@@ -4741,8 +6210,8 @@
                 const activeBtnStyle = () => {
                     modal.querySelectorAll('.chart-type-btn').forEach(b => {
                         const isActive = b.classList.contains('active-chart-btn');
-                        b.style.background  = isActive ? 'var(--accent)' : '';
-                        b.style.color       = isActive ? '#fff' : '';
+                        b.style.background = isActive ? 'var(--accent)' : '';
+                        b.style.color = isActive ? '#fff' : '';
                         b.style.borderColor = isActive ? 'var(--accent)' : '';
                     });
                 };
@@ -4751,9 +6220,9 @@
                 const ctx = modal.querySelector('#xyPlotCanvas');
                 let currentType = 'line';
 
-                const dataPoints   = xVals.map((x, i) => ({ x: parseFloat(x), y: parseFloat(yVals[i]) }));
+                const dataPoints = xVals.map((x, i) => ({ x: parseFloat(x), y: parseFloat(yVals[i]) }));
                 const BORDER_COLOR = 'rgba(79,70,229,1)';
-                const FILL_COLOR   = 'rgba(79,70,229,0.25)';
+                const FILL_COLOR = 'rgba(79,70,229,0.25)';
 
                 function buildConfig(type) {
                     const isBar = type === 'bar';
@@ -4788,11 +6257,11 @@
                             },
                             plugins: {
                                 zoom: {
-                                    pan:  { enabled: true, mode: 'xy' },
+                                    pan: { enabled: true, mode: 'xy' },
                                     zoom: {
                                         wheel: { enabled: true },
                                         pinch: { enabled: true },
-                                        mode:  'xy',
+                                        mode: 'xy',
                                     }
                                 },
                                 tooltip: {
@@ -4838,6 +6307,409 @@
             function esc(s) {
                 return (s == null ? '' : (s + '')).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
             }
+
+
+            // ── Decryption utilities ──────────────────────────────────────
+            let _sessionPassword = null;
+            let _encRowCounter = 0;
+            const _encRowRegistry = new Map();
+            let _pendingDecryptAll = false; // Decrypt All押下後、テーブル描画時に自動復号するフラグ
+
+            async function _deriveKey(password, salt) {
+                const km = await crypto.subtle.importKey(
+                    'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+                return crypto.subtle.deriveKey(
+                    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+                    km, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+            }
+
+            // CipherValue format: salt[16] + iv[12] + ciphertext+tag[variable]
+            async function _decryptB64(b64, password) {
+                const bin = atob(b64);
+                const buf = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+                const key = await _deriveKey(password, buf.slice(0, 16));
+                const pt = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: buf.slice(16, 28), tagLength: 128 }, key, buf.slice(28));
+                return new TextDecoder().decode(pt);
+            }
+
+            function _promptDecryptPassword() {
+                return new Promise(resolve => {
+                    const modal = document.getElementById('viewer-decrypt-modal');
+                    const inp = document.getElementById('vdm-pw-input');
+                    const err = document.getElementById('vdm-pw-error');
+                    const okBtn = document.getElementById('vdm-ok-btn');
+                    const cnBtn = document.getElementById('vdm-cancel-btn');
+                    inp.value = ''; err.textContent = '';
+                    modal.style.display = 'flex';
+                    setTimeout(() => inp.focus(), 50);
+                    const cleanup = () => {
+                        modal.style.display = 'none';
+                        okBtn.removeEventListener('click', onOk);
+                        cnBtn.removeEventListener('click', onCancel);
+                        inp.onkeydown = null;
+                    };
+                    const onOk = () => {
+                        if (!inp.value) { err.textContent = 'Password is required.'; return; }
+                        cleanup(); resolve(inp.value);
+                    };
+                    const onCancel = () => { cleanup(); resolve(null); };
+                    okBtn.addEventListener('click', onOk);
+                    cnBtn.addEventListener('click', onCancel);
+                    inp.onkeydown = e => { if (e.key === 'Enter') onOk(); };
+                });
+            }
+
+            // 解析済みデータから暗号化要素を再帰カウント
+            function countEncryptedInItems(items) {
+                if (!items || !items.length) return { pbkdf2: 0, unsupported: 0 };
+                let pbkdf2 = 0, unsupported = 0;
+                for (const item of items) {
+                    if (item.encrypted) {
+                        if (item.isPbkdf2) pbkdf2++;
+                        else unsupported++;
+                    }
+                    if (item.children && item.children.length) {
+                        const child = countEncryptedInItems(item.children);
+                        pbkdf2 += child.pbkdf2;
+                        unsupported += child.unsupported;
+                    }
+                }
+                return { pbkdf2, unsupported };
+            }
+
+            function countAllEncrypted() {
+                let pbkdf2 = 0, unsupported = 0;
+                // templateById内のproperties/contents
+                for (const tpl of templateById.values()) {
+                    const p = countEncryptedInItems((tpl.properties || []).concat(tpl.contents || []));
+                    pbkdf2 += p.pbkdf2; unsupported += p.unsupported;
+                }
+                // instances内のproperties/contents
+                for (const inst of instances) {
+                    const p = countEncryptedInItems((inst.properties || []).concat(inst.contents || []));
+                    pbkdf2 += p.pbkdf2; unsupported += p.unsupported;
+                }
+                return { pbkdf2, unsupported };
+            }
+
+            function updateEncBanner() {
+                const banner = document.getElementById('enc-banner');
+                if (!banner) return;
+                // _encRowRegistry(表描画時に登録)と解析済みデータの両方から件数を取得
+                // ファイル読み込み直後はregistryが空なのでparsedデータを使う
+                const registryPbkdf2 = Array.from(_encRowRegistry.values()).filter(v => v.isPbkdf2).length;
+                const registryUnsup = _encRowRegistry.size - registryPbkdf2;
+                const parsed = countAllEncrypted();
+                // registry > 0 なら表描画済み(registry優先)、そうでなければparsed値を使う
+                const pbkdf2Count = registryPbkdf2 > 0 ? registryPbkdf2 : parsed.pbkdf2;
+                const unsupported = registryUnsup > 0 ? registryUnsup : parsed.unsupported;
+                const total = pbkdf2Count + unsupported;
+                if (total === 0) { banner.style.display = 'none'; return; }
+                let msg = pbkdf2Count + ' encrypted element(s) found.';
+                if (unsupported > 0) msg += ' (' + unsupported + ' use unsupported key method)';
+                document.getElementById('enc-banner-msg').textContent = msg;
+                banner.style.display = pbkdf2Count > 0 ? 'flex' : 'none';
+            }
+
+            // XMLフラグメントから property/content/uncertainty の子データを再帰的に構築
+            function _parseFragment(rootEl) {
+                const localName = el => el.tagName.split(':').pop().toLowerCase();
+                const childText = (parent, tag) => {
+                    const c = Array.from(parent.children || []).find(e => localName(e) === tag);
+                    return c ? c.textContent.trim() : '';
+                };
+                function readProp(el) {
+                    const key = el.getAttribute('key') || '';
+                    const type = el.getAttribute('xsi:type') || el.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type') || '';
+                    const units = el.getAttribute('units') || '';
+                    const fstring = el.getAttribute('formatString') || '';
+                    const scaleFactor = el.getAttribute('scaleFactor') || '';
+                    const size = el.getAttribute('size') || '';
+                    const axis = el.getAttribute('axis') || '';
+                    // EncryptedData（子要素が暗号化されたまま）を検出
+                    const encChild = Array.from(el.children || []).find(x => localName(x) === 'encrypteddata');
+                    if (encChild) {
+                        const cvEl2 = Array.from(encChild.children || [])
+                            .find(x => localName(x) === 'cipherdata')?.children?.[0];
+                        const cv2 = cvEl2 ? cvEl2.textContent.trim() : '';
+                        const encKeyEl2 = Array.from(encChild.getElementsByTagName('*')).find(x => localName(x) === 'encryptedkey');
+                        const kmEl2 = encKeyEl2 ? Array.from(encKeyEl2.children || []).find(x => localName(x) === 'encryptionmethod') : null;
+                        const kAlg2 = kmEl2 ? (kmEl2.getAttribute('Algorithm') || '') : '';
+                        return {
+                            kind: 'property', key, type, description: '', value: '',
+                            units, fstring, scaleFactor, size, axis, children: [],
+                            encrypted: true, cipherValue: cv2, isPbkdf2: kAlg2.toLowerCase().includes('pbkdf2'), keyAlgorithm: kAlg2
+                        };
+                    }
+                    const description = childText(el, 'description');
+                    const value = childText(el, 'value');
+                    const children = [];
+                    for (const child of Array.from(el.children || [])) {
+                        const ln = localName(child);
+                        if (ln === 'property') children.push(readProp(child));
+                        else if (ln === 'content') children.push(readCont(child));
+                        else if (ln === 'uncertainty') children.push(readUncert(child));
+                    }
+                    return { kind: 'property', key, type, description, value, units, fstring, scaleFactor, size, axis, children };
+                }
+                function readCont(el) {
+                    const key = el.getAttribute('key') || '';
+                    const type = el.getAttribute('xsi:type') || el.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type') || '';
+                    const units = el.getAttribute('units') || '';
+                    const fstring = el.getAttribute('formatString') || '';
+                    const scaleFactor = el.getAttribute('scaleFactor') || '';
+                    const size = el.getAttribute('size') || '';
+                    const axis = el.getAttribute('axis') || '';
+                    // EncryptedData（子要素が暗号化されたまま）を検出
+                    const encChild = Array.from(el.children || []).find(x => localName(x) === 'encrypteddata');
+                    if (encChild) {
+                        const cvEl2 = Array.from(encChild.children || [])
+                            .find(x => localName(x) === 'cipherdata')?.children?.[0];
+                        const cv2 = cvEl2 ? cvEl2.textContent.trim() : '';
+                        const encKeyEl2 = Array.from(encChild.getElementsByTagName('*')).find(x => localName(x) === 'encryptedkey');
+                        const kmEl2 = encKeyEl2 ? Array.from(encKeyEl2.children || []).find(x => localName(x) === 'encryptionmethod') : null;
+                        const kAlg2 = kmEl2 ? (kmEl2.getAttribute('Algorithm') || '') : '';
+                        return {
+                            kind: 'content', key, type, description: '', value: '',
+                            units, fstring, scaleFactor, size, axis, children: [],
+                            encrypted: true, cipherValue: cv2, isPbkdf2: kAlg2.toLowerCase().includes('pbkdf2'), keyAlgorithm: kAlg2
+                        };
+                    }
+                    const description = childText(el, 'description');
+                    const value = childText(el, 'value');
+                    const children = [];
+                    for (const child of Array.from(el.children || [])) {
+                        const ln = localName(child);
+                        if (ln === 'content') children.push(readCont(child));
+                        else if (ln === 'uncertainty') children.push(readUncert(child));
+                    }
+                    return { kind: 'content', key, type, description, value, units, fstring, scaleFactor, size, axis, children };
+                }
+                function readUncert(el) {
+                    const key = el.getAttribute('key') || '';
+                    const type = el.getAttribute('xsi:type') || el.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'type') || '';
+                    const units = el.getAttribute('units') || '';
+                    const description = childText(el, 'description');
+                    const value = childText(el, 'value');
+                    return { kind: 'uncertainty', key, type, description, value, units, fstring: '', scaleFactor: '', size: '', axis: '', children: [] };
+                }
+                // rootElの直接の子を解析
+                const results = [];
+                for (const child of Array.from(rootEl.children || [])) {
+                    const ln = localName(child);
+                    if (ln === 'description' || ln === 'value') continue; // 親の直接の子は除く
+                    if (ln === 'property') results.push({ kind: 'property', val: readProp(child) });
+                    else if (ln === 'content') results.push({ kind: 'content', val: readCont(child) });
+                    else if (ln === 'uncertainty') results.push({ kind: 'uncertainty', val: readUncert(child) });
+                }
+                return {
+                    description: childText(rootEl, 'description'),
+                    value: childText(rootEl, 'value'),
+                    children: results
+                };
+            }
+
+            async function decryptRow(encId, btnEl) {
+                const reg = _encRowRegistry.get(encId);
+                if (!reg || !reg.isPbkdf2) return;
+                let password = _sessionPassword;
+                if (!password) {
+                    password = await _promptDecryptPassword();
+                    if (!password) return;
+                }
+                try {
+                    const plainXml = await _decryptB64(reg.cipherValue, password);
+                    _sessionPassword = password;
+
+                    // フラグメントをパース
+                    // 名前空間宣言を付けてラップ（xsi:type等のプレフィックスを宣言しないと
+                    // DOMParser(application/xml)がパースエラーを返し子要素が取れなくなる）
+                    const _NS = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
+                        + ' xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"'
+                        + ' xmlns:ds="http://www.w3.org/2000/09/xmldsig#"';
+                    const frag = new DOMParser().parseFromString(
+                        `<root ${_NS}>${plainXml}</root>`, 'application/xml');
+                    // パースエラーチェック
+                    if (frag.querySelector('parsererror')) {
+                        throw new Error('Decrypted XML fragment could not be parsed.');
+                    }
+                    const parsed = _parseFragment(frag.documentElement);
+
+                    // ── データモデルを更新（AI Summary / Export に反映） ──
+                    const item = reg.dataItem;
+                    if (item) {
+                        item.encrypted = false;
+                        item.wasEncrypted = true;  // 復号済みフラグ（再描画時の表示用）
+                        item.description = parsed.description;
+                        item.value = parsed.value;
+                        item.children = parsed.children.map(c => c.val);
+                    }
+
+                    // ── 表の行を更新・展開 ──
+                    const encTr = document.querySelector(`[data-enc-id="${encId}"]`);
+                    if (encTr) {
+                        const esc2 = s => (s + '').replace(/[&<>"]/g, c =>
+                            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+                        const indent = '　'.repeat(reg.level);
+
+                        // 親行のDescription・Valueセルを復号済み表示に更新
+                        const descCell = document.getElementById('desc-' + encId);
+                        if (descCell) {
+                            descCell.removeAttribute('id');
+                            descCell.title = parsed.description;
+                            descCell.textContent = parsed.description;
+                        }
+                        const valCell = document.getElementById('val-' + encId);
+                        if (valCell) {
+                            valCell.removeAttribute('id');
+                            const dispVal = esc2(parsed.value);
+                            valCell.innerHTML = '<span class="decrypt-badge" title="Decrypted">🔓</span>'
+                                + (parsed.value
+                                    ? '<div class="value-cell-scroll" style="display:inline-block;max-width:calc(100% - 22px);vertical-align:middle;" title="'
+                                    + dispVal + '">' + dispVal + '</div>'
+                                    : '');
+                        }
+                        encTr.removeAttribute('data-enc-id');
+
+                        // 子要素を行として親行の直後に挿入
+                        if (parsed.children.length > 0) {
+                            const tbl = reg.tblEl;
+                            const ci = reg.contentItemsArr;
+                            let insertAfter = encTr;
+
+                            function insertChildRow(childData, depth) {
+                                const childItem = childData.val;
+                                const childIndent = '　'.repeat(depth);
+                                const isContent = childItem.kind === 'content';
+                                const isUncertainty = childItem.kind === 'uncertainty';
+                                let dispV = '';
+                                if (isContent || isUncertainty) {
+                                    dispV = esc2(childItem.value || '');
+                                } else {
+                                    dispV = esc2(
+                                        Array.isArray(childItem.value)
+                                            ? childItem.value.join(' ')
+                                            : (childItem.value || '')
+                                    );
+                                }
+                                // ラジオボタン（content行のみ）
+                                let xRadioHtml = '', yRadioHtml = '';
+                                if (isContent && ci) {
+                                    const idx = ci.length;
+                                    ci.push(childItem);
+                                    xRadioHtml = `<input type="radio" name="xSelect" data-idx="${idx}" class="x-select">`;
+                                    yRadioHtml = `<input type="radio" name="ySelect" data-idx="${idx}" class="y-select">`;
+                                }
+                                const newTr = document.createElement('tr');
+                                newTr.innerHTML = `
+                                    <td title="${esc2(childItem.key || '')}">${esc2(childIndent + (childItem.key || ''))}</td>
+                                    <td title="${esc2(childItem.type || '')}">${esc2(childItem.type || '')}</td>
+                                    <td class="col-narrow" title="${esc2(childItem.axis || '')}">${esc2(childItem.axis || '')}</td>
+                                    <td class="col-narrow" title="${esc2(childItem.size || '')}">${esc2(childItem.size || '')}</td>
+                                    <td class="col-narrow" title="${esc2(childItem.fstring || '')}">${esc2(childItem.fstring || '')}</td>
+                                    <td class="col-narrow" title="${esc2(childItem.units || '')}">${esc2(childItem.units || '')}</td>
+                                    <td class="col-narrow" title="${esc2(childItem.scaleFactor || '')}">${esc2(childItem.scaleFactor || '')}</td>
+                                    <td title="${esc2(childItem.description || '')}">${esc2(childItem.description || '')}</td>
+                                    <td class="col-value">
+                                        <div class="value-cell-scroll" title="${dispV}">${dispV}</div>
+                                    </td>
+                                    <td style="text-align:center;">${xRadioHtml}</td>
+                                    <td style="text-align:center;">${yRadioHtml}</td>`;
+                                insertAfter.insertAdjacentElement('afterend', newTr);
+                                insertAfter = newTr;
+                                // 孫以下を再帰挿入
+                                if (childItem.children && childItem.children.length > 0) {
+                                    for (const gc of childItem.children) {
+                                        insertChildRow({ val: gc }, depth + 1);
+                                    }
+                                }
+                            }
+
+                            for (const childData of parsed.children) {
+                                insertChildRow(childData, reg.level + 1);
+                            }
+
+                            // PLOTボタンが未表示でcontent >= 2になったら追加
+                            if (ci && ci.length >= 2) {
+                                const wrapper = tbl.closest('.table-wrapper') || tbl.parentElement;
+                                if (wrapper && !wrapper.querySelector('.btn.primary')) {
+                                    const btnW = document.createElement('div');
+                                    btnW.style.cssText = 'display:flex;justify-content:flex-end;margin-top:.5rem;';
+                                    const plotBtn = document.createElement('button');
+                                    plotBtn.className = 'btn primary';
+                                    plotBtn.textContent = '📈 PLOT';
+                                    plotBtn.addEventListener('click', () => {
+                                        const xIdx = wrapper.querySelector('.x-select:checked')?.dataset.idx;
+                                        const yIdx = wrapper.querySelector('.y-select:checked')?.dataset.idx;
+                                        if (xIdx == null || yIdx == null) { alert('Please select X and Y axis.'); return; }
+                                        const xRow = ci[xIdx], yRow = ci[yIdx];
+                                        const xVals = parseValues(xRow.value), yVals = parseValues(yRow.value);
+                                        if (xVals.length !== yVals.length) { alert(`X=${xVals.length} vs Y=${yVals.length} points`); return; }
+                                        showXYPlotModal(xRow.key || 'X', yRow.key || 'Y', xVals, yVals);
+                                    });
+                                    btnW.appendChild(plotBtn);
+                                    wrapper.appendChild(btnW);
+                                }
+                            }
+                        }
+                    }
+
+                    _encRowRegistry.delete(encId);
+                    updateEncBanner();
+
+                } catch (e) {
+                    _sessionPassword = null;
+                    const valCell = document.getElementById('val-' + encId);
+                    if (valCell) {
+                        const old = valCell.querySelector('.decrypt-error');
+                        if (old) old.remove();
+                        valCell.insertAdjacentHTML('beforeend',
+                            '<div class="decrypt-error">\u274C Incorrect password or corrupted data.</div>');
+                    }
+                }
+            }
+
+            async function decryptAll() {
+                const ids = Array.from(_encRowRegistry.entries())
+                    .filter(([, v]) => v.isPbkdf2).map(([k]) => k);
+
+                // レジストリが空 = テーブル未描画（ノード未クリック）の場合
+                // パスワードを取得・保存だけ行う。テーブル描画時に自動復号される。
+                if (ids.length === 0) {
+                    const enc = countAllEncrypted();
+                    if (enc.pbkdf2 === 0) return; // 暗号化要素自体がない
+                    if (_sessionPassword) return;  // すでにパスワード保存済み
+                    const password = await _promptDecryptPassword();
+                    if (!password) return;
+                    _sessionPassword = password;
+                    _pendingDecryptAll = true;
+                    // バナーメッセージを更新
+                    const msg = document.getElementById('enc-banner-msg');
+                    if (msg) msg.textContent = 'Password saved. Encrypted elements will decrypt when displayed.';
+                    return;
+                }
+
+                let password = _sessionPassword;
+                if (!password) {
+                    password = await _promptDecryptPassword();
+                    if (!password) return;
+                }
+                // Verify password with first entry
+                try { await _decryptB64(_encRowRegistry.get(ids[0]).cipherValue, password); }
+                catch (e) { alert('\u274C Incorrect password. Please try again.'); return; }
+                _sessionPassword = password;
+                _pendingDecryptAll = false;
+                for (const id of ids) {
+                    const btn = document.querySelector('[data-enc-id="' + id + '"] .decrypt-btn');
+                    await decryptRow(id, btn);
+                }
+            }
+            // グローバルスコープに公開（onclick属性から呼べるようにする）
+            window.decryptRow = decryptRow;
+            window.decryptAll = decryptAll;
+            // ── End decryption utilities ──────────────────────────────────
 
             ;
             (function demo() {
@@ -6520,7 +8392,7 @@
         //   ・調整した列幅はlocalStorageに保存し、次回描画時に復元
         // ============================================================
         const COL_RESIZE_STORAGE_KEY = 'maiml_col_widths';
-        const COL_ORDER_STORAGE_KEY   = 'maiml_col_order';
+        const COL_ORDER_STORAGE_KEY = 'maiml_col_order';
 
         // 列順をlocalStorageに保存（thのtextContentラベルの配列として保存）
         function saveColOrder(resizeKey, ths) {
@@ -6531,7 +8403,7 @@
                     return th.childNodes[0]?.textContent?.trim() || th.textContent.trim();
                 });
                 localStorage.setItem(COL_ORDER_STORAGE_KEY, JSON.stringify(all));
-            } catch(e) {}
+            } catch (e) { }
         }
 
         // 列をDOM上で実際に並べ替える（colgroup・全行のセルを移動）
@@ -6580,7 +8452,7 @@
                         reorderTableColumn(tbl, currentIdx, targetIdx);
                     }
                 });
-            } catch(e) {}
+            } catch (e) { }
         }
 
         function saveColWidths(resizeKey, cols) {
@@ -6588,7 +8460,7 @@
                 const all = JSON.parse(localStorage.getItem(COL_RESIZE_STORAGE_KEY) || '{}');
                 all[resizeKey] = Array.from(cols).map(c => c.style.width || '');
                 localStorage.setItem(COL_RESIZE_STORAGE_KEY, JSON.stringify(all));
-            } catch(e) {}
+            } catch (e) { }
         }
 
         function restoreColWidths(tbl) {
@@ -6610,12 +8482,12 @@
                     tbl.style.width = totalW + 'px';
                 }
                 return true;
-            } catch(e) { return false; }
+            } catch (e) { return false; }
         }
 
         function makeKvTableResizable(tbl) {
             const cols = Array.from(tbl.querySelectorAll('col'));
-            const ths  = Array.from(tbl.querySelectorAll('th'));
+            const ths = Array.from(tbl.querySelectorAll('th'));
             if (!cols.length || !ths.length) return;
 
             // 保存済み列幅を復元（描画後にコンテナ幅と比較）
@@ -6656,35 +8528,35 @@
                         tbl.style.width = totalW + 'px';
                     }
 
-                    const startX     = e.clientX;
+                    const startX = e.clientX;
                     const startWidth = th.offsetWidth;
-                    const startTblW  = tbl.offsetWidth;
+                    const startTblW = tbl.offsetWidth;
                     resizer.classList.add('resizing');
-                    document.body.style.cursor     = 'col-resize';
+                    document.body.style.cursor = 'col-resize';
                     document.body.style.userSelect = 'none';
                     e.preventDefault();
                     e.stopPropagation();
 
                     function onMouseMove(e) {
-                        const delta    = e.clientX - startX;
+                        const delta = e.clientX - startX;
                         const newWidth = Math.max(40, startWidth + delta);
-                        const diff     = newWidth - startWidth;
+                        const diff = newWidth - startWidth;
                         col.style.width = newWidth + 'px';
                         tbl.style.width = (startTblW + diff) + 'px';
                     }
 
                     function onMouseUp() {
                         resizer.classList.remove('resizing');
-                        document.body.style.cursor     = '';
+                        document.body.style.cursor = '';
                         document.body.style.userSelect = '';
                         th.draggable = true; // 列並べ替えドラッグを再有効化
                         saveColWidths(tbl.dataset.resizeKey, cols);
                         document.removeEventListener('mousemove', onMouseMove);
-                        document.removeEventListener('mouseup',   onMouseUp);
+                        document.removeEventListener('mouseup', onMouseUp);
                     }
 
                     document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup',   onMouseUp);
+                    document.addEventListener('mouseup', onMouseUp);
                 });
             });
 
