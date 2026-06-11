@@ -6,6 +6,7 @@
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title>MaiMLStandaloneViewer</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --toolbar-h: 56px;
@@ -70,7 +71,7 @@
             transition: background 0.2s, color 0.2s;
         }
 
-        header#toolbar {
+        /* header#toolbar {
             position: sticky;
             top: 0;
             z-index: 10;
@@ -83,12 +84,52 @@
             border-bottom: 1px solid var(--border);
             background: var(--surface);
             flex-shrink: 0;
-        }
+        } */
+        /* 変更後 */
+header#toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: var(--toolbar-h);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .4rem .6rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: #1e1b4b;
+    flex-shrink: 0;
+}
 
-        header #title {
+        /* header #title {
             font-weight: 600;
             margin-right: .5rem
-        }
+        } */
+        /* 変更後 */
+/* header #title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-right: .5rem;
+    border-left: 2px solid #378ADD;
+    padding-left: 8px;
+    line-height: 1.2;
+    white-space: nowrap;
+} */
+ /* 変更後 */
+header #title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-right: .5rem;
+    border-left: 2px solid #818cf8;
+    padding-left: 8px;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: #e0e7ff;
+}
 
         header .spacer {
             flex: 1 1 auto
@@ -108,6 +149,26 @@
             font-size: 12px;
             transition: all 0.2s ease;
         }
+
+/* ツールバー内ボタンだけダーク背景に合わせる */
+header .btn {
+    background: rgba(255,255,255,0.08);
+    color: #c7d2fe;
+    border-color: rgba(255,255,255,0.15);
+}
+
+header .btn:hover {
+    background: rgba(255,255,255,0.16);
+}
+
+header .chk {
+    color: #a5b4fc;
+}
+
+/* ↓ これを追加 */
+header#toolbar {
+    color: #a5b4fc;
+}
 
         .btn:hover {
             background: var(--btn-hover-bg);
@@ -214,16 +275,6 @@
             background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiM2NDc0OGIiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9zdmc+');
         }
 
-        #grid {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            opacity: .35;
-            background-image: linear-gradient(to right, #0000 9px, var(--border) 10px), linear-gradient(to bottom, #0000 9px, var(--border) 10px);
-            background-size: 10px 10px;
-            display: none
-        }
-
         #verticalSeparator {
             flex-shrink: 0;
             width: 5px;
@@ -275,7 +326,7 @@
         #document-info th {
             background: var(--table-head);
             font-weight: 600;
-            width: 1%;
+            width: auto;
             white-space: nowrap;
         }
 
@@ -485,6 +536,20 @@
             stroke: var(--accent2);
             stroke-width: 2
         }
+
+        /* placeType ごとのストロークカラー */
+        .nodes .place.place-material  circle { stroke: #3b82f6; }
+        .nodes .place.place-condition circle { stroke: #f59e0b; }
+        .nodes .place.place-result    circle { stroke: #10b981; }
+
+        /* バッジテキストの色（circle と同色） */
+        .nodes .place.place-material  .place-type-badge { fill: #3b82f6; }
+        .nodes .place.place-condition .place-type-badge { fill: #f59e0b; }
+        .nodes .place.place-result    .place-type-badge { fill: #10b981; }
+
+        /* selected 時：circle/rect は赤、バッジ文字は元の色を維持 */
+        .node.selected circle,
+        .node.selected rect { stroke: var(--warn) !important; }
 
         .nodes .transition rect {
             fill: var(--surface);
@@ -745,6 +810,16 @@
             font-size: 12px;
             padding: .25rem .5rem
         }
+
+        /* 変更後 */
+.toolbar-sep {
+    width: 1px;
+    height: 1.4rem;
+    background: rgba(255,255,255,0.2);
+    margin: 0 0.3rem;
+    align-self: center;
+    flex-shrink: 0;
+}
 
         .value-cell-scroll {
             max-height: 3em;
@@ -1329,10 +1404,448 @@
             border-top: 1px solid var(--border);
             margin: 2px 0;
         }
+
+        /* ============================================================
+           DATA LAKE OVERLAY PANEL
+           ============================================================ */
+        #datalakeOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 500;
+            animation: dlFadeIn 0.2s ease;
+        }
+
+        #datalakeOverlay.show {
+            display: block;
+        }
+
+        @keyframes dlFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        #datalakePanel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 680px;
+            max-width: 92vw;
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            z-index: 501;
+            transform: translateX(-100%);
+            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #datalakePanel.open {
+            transform: translateX(0);
+        }
+
+        /* --- パネルヘッダー --- */
+        #datalakePanel .dl-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+        }
+
+        #datalakePanel .dl-header h2 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #datalakePanel .dl-header .dl-folder-name {
+            font-size: 11px;
+            opacity: 0.85;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        #datalakePanel .dl-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        #datalakePanel .dl-close-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        /* --- プログレスバー --- */
+        #datalakePanel .dl-progress-wrap {
+            flex-shrink: 0;
+            padding: 0.6rem 0.8rem;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: none;
+        }
+
+        #datalakePanel .dl-progress-wrap.show {
+            display: block;
+        }
+
+        #datalakePanel .dl-progress-bar-track {
+            background: var(--border);
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.3rem;
+        }
+
+        #datalakePanel .dl-progress-bar-fill {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            height: 100%;
+            width: 0%;
+            transition: width 0.2s ease;
+            border-radius: 2px;
+        }
+
+        #datalakePanel .dl-progress-text {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* --- 検索・フィルターエリア --- */
+        #datalakePanel .dl-search-area {
+            flex-shrink: 0;
+            padding: 0.7rem 0.8rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        #datalakePanel .dl-search-area input[type="text"],
+        #datalakePanel .dl-search-area input[type="date"] {
+            width: 100%;
+            padding: 0.35rem 0.5rem;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--ink);
+            box-sizing: border-box;
+            transition: border-color 0.15s;
+        }
+
+        #datalakePanel .dl-search-area input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        #datalakePanel .dl-date-row {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        #datalakePanel .dl-date-row label {
+            font-size: 11px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        #datalakePanel .dl-date-row input[type="date"] {
+            flex: 1;
+        }
+
+        #datalakePanel .dl-filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.1rem;
+        }
+
+        #datalakePanel .dl-instrument-list {
+            max-height: 100px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            padding: 0.3rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        #datalakePanel .dl-instrument-list label {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            color: var(--ink);
+        }
+
+        #datalakePanel .dl-search-btn {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.4rem;
+        }
+
+        /* --- 結果リスト --- */
+        #datalakePanel .dl-results-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.45rem 0.8rem;
+            font-size: 12px;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            background: var(--table-head);
+        }
+
+        #datalakePanel .dl-results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.3rem;
+        }
+
+        .dl-file-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.45rem 0.5rem;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: background 0.12s;
+            border: 1px solid transparent;
+        }
+
+        .dl-file-card:hover {
+            background: var(--bg);
+            border-color: var(--border);
+        }
+
+        .dl-file-card.selected {
+            background: var(--chip);
+            border-color: var(--accent);
+        }
+
+        .dl-file-card .dl-card-chk {
+            flex-shrink: 0;
+            margin-top: 2px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .dl-file-card .dl-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dl-file-card .dl-card-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        .dl-file-card .dl-card-name:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .dl-file-card .dl-card-meta {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dl-file-card .dl-card-badges {
+            display: flex;
+            gap: 3px;
+            margin-top: 2px;
+            flex-wrap: wrap;
+        }
+
+        .dl-badge {
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 99px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .dl-badge.chain {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .dl-badge.instrument {
+            background: var(--chip);
+            color: var(--chip-ink);
+        }
+
+        /* --- フッター（複数選択ロードボタン） --- */
+        #datalakePanel .dl-footer {
+            flex-shrink: 0;
+            padding: 0.5rem 0.8rem;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        #datalakePanel .dl-footer .dl-selected-count {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* --- 空状態 --- */
+        .dl-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--muted);
+            font-size: 13px;
+            gap: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .dl-empty-state .dl-empty-icon {
+            font-size: 40px;
+            opacity: 0.4;
+        }
+
+        /* 追加 */
+header .chk input[type="checkbox"] {
+    accent-color: #ffffff;
+    width: 13px;
+    height: 13px;
+}
+
+.modal-body span[style*="background: #fef3c7"] {
+    color: #92400e !important;
+}
     </style>
 </head>
 
 <body>
+
+    <!-- ============================================================
+         DATA LAKE OVERLAY PANEL
+         ============================================================ -->
+    <!-- 背景オーバーレイ（クリックで閉じる） -->
+    <div id="datalakeOverlay"></div>
+
+    <!-- データレイクサイドパネル -->
+    <div id="datalakePanel">
+
+        <!-- Header -->
+        <div class="dl-header">
+            <div style="flex:1;min-width:0;">
+                <h2>🛢️ Data Lake</h2>
+                <div class="dl-folder-name" id="dlFolderName">Please select a folder</div>
+            </div>
+            <button class="dl-close-btn" id="dlCloseBtn" title="Close Panel">✕</button>
+        </div>
+
+        <!-- Progress -->
+        <div class="dl-progress-wrap" id="dlProgressWrap">
+            <div class="dl-progress-text" id="dlProgressText">Loading...</div>
+            <div class="dl-progress-bar-track">
+                <div class="dl-progress-bar-fill" id="dlProgressBarFill"></div>
+            </div>
+        </div>
+
+        <!-- Search / Filter -->
+        <div class="dl-search-area" id="dlSearchArea" style="display:none;">
+            <!-- Keyword -->
+            <div>
+                <div class="dl-filter-label">Keyword Search</div>
+                <input type="text" id="dlKeywordInput" placeholder="Filename, Sample, Operator..." autocomplete="off">
+            </div>
+            <!-- Date Range -->
+            <div>
+                <div class="dl-filter-label">Date Range</div>
+                <div class="dl-date-row">
+                    <label>From</label>
+                    <input type="date" id="dlDateFrom">
+                    <label>To</label>
+                    <input type="date" id="dlDateTo">
+                </div>
+            </div>
+            <!-- Instrument Filter -->
+            <div id="dlInstrumentFilterWrap" style="display:none;">
+                <div class="dl-filter-label">Instrument Filter</div>
+                <div class="dl-instrument-list" id="dlInstrumentList"></div>
+            </div>
+            <!-- Search Buttons -->
+            <div class="dl-search-btn">
+                <button class="btn" id="dlClearBtn">Clear</button>
+                <button class="btn primary" id="dlSearchBtn">🔍 Search</button>
+            </div>
+        </div>
+
+        <!-- Results Header -->
+        <div class="dl-results-header" id="dlResultsHeader" style="display:none;">
+            <span id="dlResultCount">0 items</span>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <input type="checkbox" id="dlSelectAllChk" style="accent-color:var(--accent);">
+                <span style="font-size:11px;">Select All</span>
+            </label>
+        </div>
+
+        <!-- File List -->
+        <div class="dl-results-list" id="dlResultsList">
+            <div class="dl-empty-state">
+                <div class="dl-empty-icon">📁</div>
+                <div>Please select a folder using<br>the "📁 Open Folder" button</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="dl-footer" id="dlFooter" style="display:none;">
+            <span class="dl-selected-count" id="dlSelectedCount">0 selected</span>
+            <button class="btn primary" id="dlLoadSelectedBtn" disabled>📂 Open Selected</button>
+        </div>
+    </div>
 
     <!-- Encryption notification banner -->
     <div id="enc-banner"
@@ -1379,14 +1892,27 @@
     </div>
 
     <header id="toolbar">
-        <div id="title">MaiML Viewer</div>
-        <button class="btn" id="openFileBtn">📂UPLOAD…</button>
+        <!-- <div id="title">MaiML Viewer</div> -->
+        <!-- <div id="title">MaiML <span style="font-weight:500;color:var(--muted);">Standalone Viewer</span></div> -->
+<div id="title">MaiML <span style="font-weight:500;color:rgba(255,255,255,0.75);">Standalone Viewer</span></div>
+        <div class="toolbar-sep"></div>
+        <button class="btn" id="openFileBtn">📂Upload Files…</button>
+        <button class="btn" id="openFolderBtn" title="Connect to Data Lake (Chrome/Edge)" style="display:none;">🛢️ Data Lake</button>
+        <div class="toolbar-sep"></div>
         <button class="btn" id="dagreBtn">Dagre Layout</button>
         <button class="btn" id="auto">Auto Layout</button>
         <button class="btn" id="reset">Reset Position</button>
         <label class="chk"><input checked="" id="dragMode" type="checkbox" /> Drag Edit</label>
         <label class="chk"><input id="showGrid" type="checkbox" /> Show Grid</label>
         <label class="chk"><input id="snapGrid" type="checkbox" /> Snap to Grid</label>
+        <span id="gridSizeControl"
+            style="display:inline-flex;align-items:center;gap:3px;font-size:13px;opacity:0.4;pointer-events:none;">
+            Grid:
+            <button id="gridSizeDec" class="btn" style="padding:1px 7px;min-width:unset;">−</button>
+            <span id="gridSizeVal" style="min-width:28px;text-align:center;font-variant-numeric:tabular-nums;">20</span>
+            <button id="gridSizeInc" class="btn" style="padding:1px 7px;min-width:unset;">＋</button>
+        </span>
+        <div class="toolbar-sep"></div>
         <div class="spacer"></div>
         <button class="btn" id="themeBtn" title="Light/Dark Toggle">🌙 Theme</button>
     </header>
@@ -1394,7 +1920,6 @@
     <div id="mainContainer">
         <div id="topSection">
             <div id="stageWrap">
-                <div id="grid"></div>
                 <svg id="stage"></svg>
 
                 <!-- リンク表示制御ツールボックス -->
@@ -1476,8 +2001,8 @@
                 <div class="upload-area" id="uploadArea">
                     <div style="font-size:48px; margin-bottom:1rem;">📁</div>
                     <p>Drag & Drop a file<br />or<br />Click to select</p>
-                    <input accept="image/*,.tif,.tiff,.csv,.json,.txt" id="insertionFile" style="display:none;"
-                        type="file" />
+                    <input accept="image/*,.tif,.tiff,.csv,.json,.txt,.msa,.emsa,.ems" id="insertionFile"
+                        style="display:none;" type="file" />
                 </div>
                 <div id="formatSelector" style="display:none;">
                     <h4>Select Display Format</h4>
@@ -1497,6 +2022,10 @@
                         <div class="format-option" data-format="text">
                             <div class="format-icon">📝</div>
                             <div>Text</div>
+                        </div>
+                        <div class="format-option" data-format="emsa">
+                            <div class="format-icon">📈</div>
+                            <div>EMSA Spectrum</div>
                         </div>
                     </div>
                 </div>
@@ -1518,20 +2047,54 @@
                 <button class="modal-close" id="aiSummaryClose">&times;</button>
             </div>
             <div class="modal-body">
-                <div
-                    style="display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 0.6rem; align-items: center; margin-bottom: 0.8rem;">
+                <!-- LLM Provider -->
+                <div style="margin-bottom: 0.8rem;">
+                    <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 0.3rem;">LLM
+                        Provider:</label>
+                    <div style="display: flex; gap: 1.2rem;">
+                        <label style="font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                            <input type="radio" name="viewer-provider" id="viewer-provider-cloud" value="cloud" checked
+                                onchange="toggleSummaryProvider()">
+                            ☁️ Cloud (Gemini)
+                        </label>
+                        <label style="font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                            <input type="radio" name="viewer-provider" id="viewer-provider-local" value="local"
+                                onchange="toggleSummaryProvider()">
+                            🖥️ Local (Ollama)
+                        </label>
+                    </div>
+                </div>
+                <!-- Cloud: Gemini Model -->
+                <div id="viewer-cloud-model"
+                    style="display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 0.6rem; align-items: center; margin-bottom: 0.4rem;">
                     <label style="font-size: 12px; font-weight: 600; white-space: nowrap;">AI Agent Model:</label>
                     <div style="display: flex; gap: 4px; align-items: center; min-width: 0;">
                         <select id="modelName"
                             style="padding: 0.3rem; font-size: 12px; flex: 1; min-width: 0; border: 1px solid var(--btn-border); border-radius: 6px; background: var(--surface); color: var(--ink);">
-                            <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
+                            <option value="gemini-3.5-flash">gemini-3.5-flash</option>
                             <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-                            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                            <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
                         </select>
                         <button id="fetchModelsBtn" class="btn" title="Refresh model list"
                             style="padding: 0.3rem 0.6rem; font-size: 13px; flex-shrink: 0;">🔄</button>
                     </div>
+                </div>
+                <!-- Local: Ollama Model -->
+                <div id="viewer-local-section"
+                    style="display: none; grid-template-columns: auto 1fr; gap: 0.4rem 0.6rem; align-items: center; margin-bottom: 0.4rem;">
+                    <label style="font-size: 12px; font-weight: 600; white-space: nowrap;">Ollama Model:</label>
+                    <div style="display: flex; gap: 4px; align-items: center; min-width: 0;">
+                        <select id="viewer-ollama-model-select"
+                            style="padding: 0.3rem; font-size: 12px; flex: 1; min-width: 0; border: 1px solid var(--btn-border); border-radius: 6px; background: var(--surface); color: var(--ink);">
+                            <option value="">-- Click 🔄 to fetch --</option>
+                        </select>
+                        <button class="btn" title="Fetch Ollama models" onclick="fetchOllamaModelsForSummary()"
+                            style="padding: 0.3rem 0.6rem; font-size: 13px; flex-shrink: 0;">🔄</button>
+                    </div>
+                </div>
+                <!-- Prompt Template (共通) -->
+                <div
+                    style="display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 0.6rem; align-items: center; margin-bottom: 0.8rem;">
                     <label style="font-size: 12px; font-weight: 600; white-space: nowrap;">Prompt Template:</label>
                     <select id="promptTemplate"
                         style="padding: 0.3rem; font-size: 12px; border: 1px solid var(--btn-border); border-radius: 6px; background: var(--surface); color: var(--ink);">
@@ -1563,9 +2126,14 @@
                 </div>
 
                 <!-- Generateボタン -->
-                <div style="display:flex; justify-content:flex-end; margin-top:0.8rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem;">
+                    <span id="viewer-gemini-key-wrapper">
+                        <button class="btn" id="geminiKeyBtn">🔑 Gemini API Key</button>
+                    </span>
                     <button class="btn primary" id="generateSummaryBtn">🚀 Generate</button>
                 </div>
+                <p id="viewer-elapsed-time"
+                    style="font-size: 11px; color: var(--muted); margin: 0.3rem 0 0 0; min-height: 1rem;"></p>
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:0.5rem;">
                     <h4>AI Summary Result</h4>
                     <div style="display:flex; gap: 5px;">
@@ -1619,7 +2187,8 @@
                             <li><strong>グラフ可視化:</strong> 実験プロセス（Petri Net）とデータの関係をノードグラフで表示します。</li>
                             <li><strong>メタデータ抽出:</strong> ドキュメント情報、テンプレート定義、計測結果を一元管理・表示します。</li>
                             <li><strong>データプレビュー:</strong> 埋め込みファイル（画像、CSV、テキスト、TIFF等）をブラウザ上でプレビューします。</li>
-                            <li><strong>AI要約 (Gemini):</strong> Google Gemini API を利用して、実験データの要約やレポートを生成します。</li>
+                            <li><strong>AI要約 (Cloud / Local):</strong> クラウドLLM（Google
+                                Gemini）またはローカルLLM（Ollama）を利用して、実験データの要約やレポートを生成します。</li>
                         </ul>
                     </div>
 
@@ -1628,9 +2197,10 @@
                             style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid var(--accent); padding-bottom: 0.3rem; margin-bottom: 1rem;">
                             2. 基本操作</h2>
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📂 ファイル読み込み
-                            (Upload)</h3>
+                            (Upload Files)</h3>
                         <p>画面左上の <span
-                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📂UPLOAD…</span>
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📂Upload
+                                Files…</span>
                             ボタン、または画面へのドラッグ＆ドロップでファイルを読み込みます。</p>
                         <ul style="padding-left: 1.5rem;">
                             <li><strong>対応形式:</strong> <code>.maiml</code> およびこれらを含む <code>.zip</code> ファイル。</li>
@@ -1706,12 +2276,47 @@
                             (要約機能)</h3>
                         <p>各データの詳細パネルにある <span
                                 style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">AI
-                                Summary</span> ボタンをクリックすると、Google Gemini API を使用してデータの内容を解析・要約します。</p>
+                                Summary</span> ボタンをクリックすると、AIを使用してデータの内容を解析・要約します。クラウドLLM（Google
+                            Gemini）とローカルLLM（Ollama）を切り替えて使用できます。</p>
+
+                        <h4 style="font-size: 1rem; color: var(--ink); margin: 1rem 0 0.4rem;">☁️ Cloud (Gemini) モード
+                        </h4>
                         <ul style="padding-left: 1.5rem;">
-                            <li><strong>API Key設定:</strong> ヘッダーの <span
+                            <li><strong>API Key設定:</strong> モーダル内の <span
                                     style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔑
-                                    Gemini API Key</span> からキーを設定してください（ブラウザに保存されます）。</li>
+                                    Gemini API Key</span> ボタンからキーを設定してください（ブラウザのローカルストレージに保存されます）。</li>
+                            <li><strong>モデル選択:</strong> ドロップダウンからGeminiモデルを選択します。🔄ボタンでAPIから最新モデル一覧を取得できます。</li>
+                            <li><strong>特徴:</strong> 高精度・高速（数秒）。データはGoogleのサーバーに送信されます。</li>
                         </ul>
+
+                        <h4 style="font-size: 1rem; color: var(--ink); margin: 1rem 0 0.4rem;">🖥️ Local (Ollama) モード
+                        </h4>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>特徴:</strong> データが外部に送信されません。機密性の高い実験データに適しています。ネットワーク環境がなくても利用できます。</li>
+                            <li><strong>モデル取得:</strong> 🔄ボタンをクリックするとOllamaにインストール済みのモデル一覧を自動取得します。</li>
+                            <li><strong>処理時間:</strong> PCのスペック（特にGPU）に依存します。GPU非搭載PCでは数分〜十数分かかる場合があります。</li>
+                        </ul>
+
+                        <h4 style="font-size: 1rem; color: var(--ink); margin: 1rem 0 0.4rem;">🛠️ Ollama セットアップ手順</h4>
+                        <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">
+                            ローカルモードを使用するには、事前にOllamaのインストールが必要です。</p>
+                        <ol style="padding-left: 1.5rem;">
+                            <li><strong>Ollamaをインストール:</strong> <a href="https://ollama.com" target="_blank"
+                                    style="color: var(--accent);">https://ollama.com</a> からインストーラーをダウンロードして実行します。</li>
+                            <li><strong>AIモデルをダウンロード:</strong> PowerShellまたはコマンドプロンプトで以下を実行します。
+                                <pre
+                                    style="background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem; margin: 0.3rem 0; font-size: 11px;">ollama pull gemma4:e4b</pre>
+                                推奨モデル例：<code>gemma4:e4b</code>（高品質）、<code>qwen3:1.7b</code>（軽量・高速）
+                            </li>
+                            <li><strong>Ollamaを起動:</strong> スタートメニューからOllamaを起動します。タスクバーの通知領域にアイコンが表示されれば準備完了です。</li>
+                            <li><strong>MaiML Viewerでローカルモードを使用:</strong> AI SummaryモーダルのLLM Providerで「🖥️ Local
+                                (Ollama)」を選択し、🔄ボタンをクリックしてモデル一覧を取得します。</li>
+                            <li><strong>接続できない場合のCORS設定:</strong> 手順4で「Connection
+                                failed」と表示された場合、Ollamaを一度終了し、PowerShellで以下を実行してから再起動してください。
+                                <pre
+                                    style="background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem; margin: 0.3rem 0; font-size: 11px;">[System.Environment]::SetEnvironmentVariable("OLLAMA_ORIGINS", "*", "User")</pre>
+                            </li>
+                        </ol>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📊 Metadata Export
                         </h3>
@@ -1774,7 +2379,7 @@
                         <ol style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
                             <li style="margin-bottom: 0.4rem;">ノードをクリックして詳細パネルを表示します。</li>
                             <li style="margin-bottom: 0.4rem;">暗号化された行の Value 列に <span
-                                    style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px; padding: 1px 5px; font-size: 12px;">🔓
+                                    style="background: #f59e0b; color: #fff; border-radius: 4px; padding: 1px 5px; font-size: 12px; font-weight: 600;">🔓
                                     Decrypt</span> ボタンが表示されます（tooltip: <em>Decrypt (Password-based / PBKDF2 only)</em>）。
                             </li>
                             <li style="margin-bottom: 0.4rem;">ボタンをクリックするとパスワード入力モーダルが表示されます（初回のみ）。</li>
@@ -1810,8 +2415,82 @@
 
                     <div style="margin-bottom: 2.5rem;">
                         <h2
+                            style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #3b82f6; padding-bottom: 0.3rem; margin-bottom: 1rem;">
+                            🛢️ 7. Data Lake（ローカルフォルダ一括管理）</h2>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">概要</h3>
+                        <p style="margin-bottom: 0.8rem;">ローカルフォルダをまるごと接続し、フォルダ内の <code>.maiml</code> /
+                            <code>.maiml.zip</code>
+                            ファイルを一覧表示・検索・選択して読み込む機能です。大量のデータを管理する研究室環境での利用を想定しています。</p>
+                        <div
+                            style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 12px; color: #1e40af; margin-bottom: 1rem;">
+                            ℹ️ <strong>対応ブラウザ:</strong> Google Chrome または Microsoft Edge（File System Access API
+                            を使用）。<br>
+                            Firefox・Safari では <code>input[webkitdirectory]</code>
+                            によるフォールバック動作となり、一部機能（セッション間でのフォルダ再接続等）が制限されます。
+                        </div>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🚀 基本的な使い方</h3>
+                        <ol style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li style="margin-bottom: 0.4rem;">ツールバーの <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🛢️
+                                    Data Lake</span>
+                                ボタンをクリックしてパネルを開きます。</li>
+                            <li style="margin-bottom: 0.4rem;">パネル下部の <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📁
+                                    Open Folder</span>
+                                ボタンをクリックし、管理したいフォルダを選択します（OS のフォルダ選択ダイアログが表示されます）。</li>
+                            <li style="margin-bottom: 0.4rem;">サブフォルダを再帰的にスキャンし、MaiML
+                                ファイルのインデックスを構築します。スキャン完了後、ファイル一覧が表示されます。</li>
+                            <li style="margin-bottom: 0.4rem;">キーワード・日付範囲・装置名でファイルを絞り込み、読み込みたいファイルにチェックを入れます。</li>
+                            <li>フッターの <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📂
+                                    Open Selected</span>
+                                ボタンをクリックすると、選択したファイルがビューアに読み込まれます。複数ファイルの一括読み込みも可能です。</li>
+                        </ol>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔍 検索・フィルタ機能</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><strong>Keyword Search:</strong> ファイル名・サンプル名・担当者名などでキーワード検索します。</li>
+                            <li><strong>Date Range:</strong> MaiML ファイルに記録された測定日時で期間を絞り込みます（From / To）。</li>
+                            <li><strong>Instrument Filter:</strong> 装置名（instrument）のチェックボックスで特定の測定装置のデータのみ表示します。</li>
+                            <li><strong>Sort:</strong> ファイル一覧を日付（新しい順 / 古い順）、ファイル名（昇順）、ファイルサイズ（大きい順）で並べ替えられます。</li>
+                            <li><strong>Select All:</strong> 検索結果に表示中の全ファイルをまとめて選択します。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔄 Sync /
+                            Re-Verify（同期・再接続）</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li>フォルダを新規接続したセッションでは、インデックス情報が <strong>localStorage</strong> にキャッシュされます。</li>
+                            <li>次回起動時にはキャッシュからファイル一覧を即座に復元し、検索・フィルタが使用可能です。</li>
+                            <li>フォルダ内のファイルが追加・削除・更新された場合は、<span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔄
+                                    Sync / Re-Verify</span>
+                                ボタンで再スキャンしてインデックスを最新化してください。</li>
+                            <li>ブラウザのセッションが切れてフォルダへのアクセス権限が失われた場合も、このボタンで再接続できます（OS の権限確認ダイアログが表示されます）。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📁 Change
+                            Folder（フォルダ変更）</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li>別のフォルダに切り替えたい場合は <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📁
+                                    Change Folder</span>
+                                ボタンで新しいフォルダを選択できます。</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">⚠️ 注意事項</h3>
+                        <ul style="padding-left: 1.5rem;">
+                            <li>フォルダへのアクセスは読み取り専用（<code>mode: 'read'</code>）です。ファイルの変更・削除は行いません。</li>
+                            <li>キャッシュ（インデックス）はブラウザの localStorage に保存されます。ブラウザの閲覧データ消去を行うと再スキャンが必要になります。</li>
+                            <li>スキャン対象は <code>.maiml</code> および <code>.maiml.zip</code> 拡張子のファイルのみです。</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 2.5rem;">
+                        <h2
                             style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #10b981; padding-bottom: 0.3rem; margin-bottom: 1rem;">
-                            🔏 6. XML署名検証機能 (ds:Signature)</h2>
+                            🔏 8. XML署名検証機能 (ds:Signature)</h2>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">概要</h3>
                         <p style="margin-bottom: 0.8rem;">W3C XML Signature 準拠（ECDSA P-256）で署名された MaiML
@@ -1851,8 +2530,8 @@
                                 definitions, and measurement results.</li>
                             <li><strong>Data Preview:</strong> Previews embedded files (Images, CSV, Text, TIFF, etc.)
                                 directly in the browser.</li>
-                            <li><strong>AI Summary (Gemini):</strong> Uses Google Gemini API to summarize experimental
-                                data and generate reports.</li>
+                            <li><strong>AI Summary (Cloud / Local):</strong> Summarizes experimental data and generates
+                                reports using either a cloud LLM (Google Gemini) or a local LLM (Ollama).</li>
                         </ul>
                     </div>
 
@@ -1861,9 +2540,10 @@
                             style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid var(--accent); padding-bottom: 0.3rem; margin-bottom: 1rem;">
                             2. Basic Operations</h2>
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📂 Loading Files
-                            (Upload)</h3>
+                            (Upload Files)</h3>
                         <p>Click the <span
-                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📂UPLOAD…</span>
+                                style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📂Upload
+                                Files…</span>
                             button or drag & drop files onto the screen.</p>
                         <ul style="padding-left: 1.5rem;">
                             <li><strong>Supported Formats:</strong> <code>.maiml</code> and <code>.zip</code> archives.
@@ -1948,12 +2628,58 @@
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🤖 AI Summary</h3>
                         <p>Click the <span
                                 style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">AI
-                                Summary</span> button in the details panel to analyze data using Google Gemini API.</p>
+                                Summary</span> button in the details panel to analyze and summarize data using AI. You
+                            can switch between Cloud LLM (Google Gemini) and Local LLM (Ollama).</p>
+
+                        <h4 style="font-size: 1rem; color: var(--ink); margin: 1rem 0 0.4rem;">☁️ Cloud (Gemini) Mode
+                        </h4>
                         <ul style="padding-left: 1.5rem;">
-                            <li><strong>API Key:</strong> Set your key via <span
+                            <li><strong>API Key:</strong> Set your Gemini API key via the <span
                                     style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔑
-                                    Gemini API Key</span> header button.</li>
+                                    Gemini API Key</span> button in the modal. (Saved in browser localStorage.)</li>
+                            <li><strong>Model Selection:</strong> Choose a Gemini model from the dropdown. Click 🔄 to
+                                fetch the latest available model list from the API.</li>
+                            <li><strong>Characteristics:</strong> High accuracy and fast response (a few seconds). Data
+                                is sent to Google's servers.</li>
                         </ul>
+
+                        <h4 style="font-size: 1rem; color: var(--ink); margin: 1rem 0 0.4rem;">🖥️ Local (Ollama) Mode
+                        </h4>
+                        <ul style="padding-left: 1.5rem;">
+                            <li><strong>Characteristics:</strong> Data never leaves your PC. Suitable for confidential
+                                experimental data. Works offline.</li>
+                            <li><strong>Fetch Models:</strong> Click 🔄 to automatically retrieve the list of models
+                                installed in Ollama.</li>
+                            <li><strong>Processing Time:</strong> Depends on your PC hardware (especially GPU). Expect
+                                several minutes on CPU-only machines.</li>
+                        </ul>
+
+                        <h4 style="font-size: 1rem; color: var(--ink); margin: 1rem 0 0.4rem;">🛠️ Ollama Setup Guide
+                        </h4>
+                        <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">To use Local mode,
+                            Ollama must be installed on your PC in advance.</p>
+                        <ol style="padding-left: 1.5rem;">
+                            <li><strong>Install Ollama:</strong> Download and run the installer from <a
+                                    href="https://ollama.com" target="_blank"
+                                    style="color: var(--accent);">https://ollama.com</a>.</li>
+                            <li><strong>Download an AI model:</strong> Run the following in PowerShell or Command
+                                Prompt:
+                                <pre
+                                    style="background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem; margin: 0.3rem 0; font-size: 11px;">ollama pull gemma4:e4b</pre>
+                                Recommended models: <code>gemma4:e4b</code> (high quality), <code>qwen3:1.7b</code>
+                                (lightweight, fast)
+                            </li>
+                            <li><strong>Start Ollama:</strong> Launch Ollama from the Start menu. When the icon appears
+                                in the system tray, Ollama is ready.</li>
+                            <li><strong>Use Local mode in MaiML Viewer:</strong> In the AI Summary modal, select "🖥️
+                                Local (Ollama)" as the LLM Provider, then click 🔄 to fetch the list of installed
+                                models.</li>
+                            <li><strong>If connection fails — Configure CORS:</strong> If "Connection failed" appears in
+                                step 4, quit Ollama, run the following in PowerShell, then restart Ollama:
+                                <pre
+                                    style="background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem; margin: 0.3rem 0; font-size: 11px;">[System.Environment]::SetEnvironmentVariable("OLLAMA_ORIGINS", "*", "User")</pre>
+                            </li>
+                        </ol>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📊 Metadata Export
                         </h3>
@@ -2024,7 +2750,7 @@
                         <ol style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
                             <li style="margin-bottom: 0.4rem;">Click a node to open the Details Panel.</li>
                             <li style="margin-bottom: 0.4rem;">Encrypted rows show a <span
-                                    style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px; padding: 1px 5px; font-size: 12px;">🔓
+                                    style="background: #f59e0b; color: #fff; border-radius: 4px; padding: 1px 5px; font-size: 12px; font-weight: 600;">🔓
                                     Decrypt</span> button in the Value column (tooltip: <em>Decrypt (Password-based /
                                     PBKDF2 only)</em>).</li>
                             <li style="margin-bottom: 0.4rem;">Clicking the button shows a password input modal (first
@@ -2066,8 +2792,98 @@
 
                     <div style="margin-bottom: 2.5rem;">
                         <h2
+                            style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #3b82f6; padding-bottom: 0.3rem; margin-bottom: 1rem;">
+                            🛢️ 7. Data Lake (Local Folder Management)</h2>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">Overview</h3>
+                        <p style="margin-bottom: 0.8rem;">Data Lake connects an entire local folder to MaiML Viewer,
+                            allowing you to browse, search, select, and load <code>.maiml</code> /
+                            <code>.maiml.zip</code> files stored anywhere in that folder tree. It is designed for
+                            laboratory environments that manage large volumes of measurement data.</p>
+                        <div
+                            style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 12px; color: #1e40af; margin-bottom: 1rem;">
+                            ℹ️ <strong>Supported browsers:</strong> Google Chrome or Microsoft Edge (File System Access
+                            API required).<br>
+                            Firefox and Safari fall back to <code>input[webkitdirectory]</code>, which limits some
+                            features (e.g., cross-session folder reconnection).
+                        </div>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🚀 Basic Usage
+                        </h3>
+                        <ol style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li style="margin-bottom: 0.4rem;">Click the <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🛢️
+                                    Data Lake</span>
+                                button in the toolbar to open the panel.</li>
+                            <li style="margin-bottom: 0.4rem;">Click the <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📁
+                                    Open Folder</span>
+                                button at the bottom of the panel and select the folder you want to manage (an OS
+                                folder-picker dialog will appear).</li>
+                            <li style="margin-bottom: 0.4rem;">The viewer recursively scans the folder and its
+                                subfolders, then builds a file index. The file list appears when scanning is complete.
+                            </li>
+                            <li style="margin-bottom: 0.4rem;">Filter files by keyword, date range, or instrument name,
+                                then check the files you want to load.</li>
+                            <li>Click the <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📂
+                                    Open Selected</span>
+                                button in the footer to load the selected files into the viewer. Multiple files can be
+                                loaded at once.</li>
+                        </ol>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔍 Search &amp;
+                            Filter</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li><strong>Keyword Search:</strong> Search by filename, sample name, operator name, etc.
+                            </li>
+                            <li><strong>Date Range:</strong> Filter by the measurement date recorded in each MaiML file
+                                (From / To).</li>
+                            <li><strong>Instrument Filter:</strong> Show only files from specific instruments using the
+                                instrument checkboxes.</li>
+                            <li><strong>Sort:</strong> Sort the file list by date (newest / oldest), filename (A–Z), or
+                                file size (largest first).</li>
+                            <li><strong>Select All:</strong> Select all currently displayed files at once.</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">🔄 Sync /
+                            Re-Verify</h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li>When a folder is connected, the file index is cached in the browser's
+                                <strong>localStorage</strong> so that the file list can be restored instantly on the
+                                next launch.</li>
+                            <li>If files in the folder have been added, removed, or updated, click the <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">🔄
+                                    Sync / Re-Verify</span>
+                                button to re-scan the folder and refresh the index.</li>
+                            <li>If the browser session has expired and folder access permission is lost, this button
+                                also re-establishes the connection (an OS permission dialog will appear).</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">📁 Change Folder
+                        </h3>
+                        <ul style="padding-left: 1.5rem; margin-bottom: 0.8rem;">
+                            <li>To switch to a different folder, click the <span
+                                    style="background: var(--chip); color: var(--chip-ink); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace;">📁
+                                    Change Folder</span>
+                                button and select a new folder.</li>
+                        </ul>
+
+                        <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">⚠️ Notes</h3>
+                        <ul style="padding-left: 1.5rem;">
+                            <li>Folder access is read-only (<code>mode: 'read'</code>). No files are modified or
+                                deleted.</li>
+                            <li>The index cache is stored in the browser's localStorage. Clearing browser data will
+                                require a re-scan.</li>
+                            <li>Only files with the <code>.maiml</code> or <code>.maiml.zip</code> extension are scanned
+                                and indexed.</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 2.5rem;">
+                        <h2
                             style="font-size: 1.4rem; color: var(--ink); border-bottom: 2px solid #10b981; padding-bottom: 0.3rem; margin-bottom: 1rem;">
-                            🔏 6. XML Signature Verification (ds:Signature)</h2>
+                            🔏 8. XML Signature Verification (ds:Signature)</h2>
 
                         <h3 style="font-size: 1.1rem; color: var(--accent); margin: 1.2rem 0 0.5rem;">Overview</h3>
                         <p style="margin-bottom: 0.8rem;">Automatically verifies W3C XML Signature compliant (ECDSA
@@ -2118,15 +2934,89 @@
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <!-- [SECURITY] DOMPurify: XSS sanitizer for marked.parse() output -->
+    <!-- SRI hash: generate at https://www.srihash.org/ and add integrity="sha384-..." crossorigin="anonymous" -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script>
         ; (function () {
+
+            // ============================================================
+            // UTILITY FUNCTIONS
+            // ============================================================
+
+            /**
+             * HTMLエスケープ。esc() の別名として全スクリプトブロックで共用可能。
+             * （IIFE内では esc() として参照する）
+             */
+            // ※ esc() は後方で定義済み (line ~6402)。ここでは下記ヘルパーを追加。
+
+            /**
+             * ファイルをブラウザでダウンロードさせる。
+             * @param {string|ArrayBuffer} content - ダウンロード内容
+             * @param {string} filename - ファイル名
+             * @param {string} [mimeType="application/octet-stream"] - MIME タイプ
+             */
+            function downloadFile(content, filename, mimeType = 'application/octet-stream') {
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            // 他の <script> ブロックからも参照できるよう window に公開
+            window.downloadFile = downloadFile;
+
+            /**
+             * 今日の日付を "YYYY-MM-DD" 形式で返す（エクスポートファイル名用）。
+             */
+            function todayString() {
+                return new Date().toISOString().slice(0, 10);
+            }
+            // 他の <script> ブロックからも参照できるよう window に公開
+            window.todayString = todayString;
+
+            // ============================================================
+            // SVG / D3 SETUP
+            // ============================================================
+
             const svg = d3.select('#stage');
+
+            // グリッド間隔の初期値
+            let GRID_SIZE = 20;
+
+            // SVGグリッド（patternベース・ズーム追従）
+            const defs = svg.append('defs');
+            const gridPattern = defs.append('pattern')
+                .attr('id', 'svgGrid')
+                .attr('width', GRID_SIZE)
+                .attr('height', GRID_SIZE)
+                .attr('patternUnits', 'userSpaceOnUse');
+            gridPattern.append('path')
+                .attr('d', `M ${GRID_SIZE} 0 L 0 0 0 ${GRID_SIZE}`)
+                .attr('fill', 'none')
+                .attr('stroke', '#94a3b8')
+                .attr('stroke-width', 0.8)
+                .attr('opacity', 0.65);
+
+            const gridRect = svg.append('rect')
+                .attr('id', 'svgGridRect')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .attr('fill', 'url(#svgGrid)')
+                .attr('display', 'none');
+
             const gRoot = svg.append('g');
             const gGroups = gRoot.append('g').attr('class', 'groups');
             const gLinks = gRoot.append('g').attr('class', 'links');
             const gNodes = gRoot.append('g').attr('class', 'nodes');
-            svg.call(d3.zoom().scaleExtent([0.25, 6]).on('zoom', (e) => gRoot.attr('transform', e.transform)));
+            svg.call(d3.zoom().scaleExtent([0.25, 6]).on('zoom', (e) => {
+                gRoot.attr('transform', e.transform);
+                // グリッドpatternをズームに追従させる
+                gridPattern.attr('patternTransform', e.transform);
+            }));
 
             //
             svg.append('defs').append('marker')
@@ -2216,7 +3106,6 @@
             const transitionToInstructions = new Map();
             const eventsByInstructionId = new Map();
 
-            const $grid = document.getElementById('grid');
             const $stats = document.getElementById('stats');
             const $meta = document.getElementById('meta');
             const $seg = document.getElementById('metaSource');
@@ -2248,6 +3137,9 @@
                 localStorage.setItem(THEME_KEY, next);
             });
 
+            // ============================================================
+            // THEME
+            // ============================================================
             function initTheme() {
                 const saved = localStorage.getItem(THEME_KEY);
                 if (saved) { applyTheme(saved); return; }
@@ -2268,12 +3160,18 @@
                         $stg.classList.remove('bg-pattern-dark');
                     }
                 }
+                // SVGグリッド色をテーマに合わせて切り替え
+                gridPattern.select('path')
+                    .attr('stroke', isDark ? '#334155' : '#94a3b8');
             }
 
             // Resizers
             setupHorizontalResizer();
             setupVerticalResizer();
 
+            // ============================================================
+            // PANEL RESIZERS
+            // ============================================================
             function setupHorizontalResizer() {
                 const separator = document.getElementById('horizontalSeparator');
                 let isResizing = false;
@@ -2362,13 +3260,37 @@
             document.getElementById('dragMode').addEventListener('change', (e) => enableDrag(e.target.checked));
             document.getElementById('snapGrid').addEventListener('change', () => { });
             document.getElementById('showGrid').addEventListener('change', (e) => {
-                $grid.style.display = e.target.checked ? 'block' : 'none';
+                gridRect.attr('display', e.target.checked ? 'block' : 'none');
+                const ctrl = document.getElementById('gridSizeControl');
+                ctrl.style.opacity = e.target.checked ? '1' : '0.4';
+                ctrl.style.pointerEvents = e.target.checked ? 'auto' : 'none';
             });
+            // グリッドサイズ変更
+            // ============================================================
+            // GRID
+            // ============================================================
+            function applyGridSize(size) {
+                GRID_SIZE = size;
+                gridSize = size;
+                document.getElementById('gridSizeVal').textContent = size;
+                gridPattern.attr('width', size).attr('height', size);
+                gridPattern.select('path').attr('d', `M ${size} 0 L 0 0 0 ${size}`);
+            }
+            document.getElementById('gridSizeDec').addEventListener('click', () => {
+                applyGridSize(Math.max(10, GRID_SIZE - 5));
+            });
+            document.getElementById('gridSizeInc').addEventListener('click', () => {
+                applyGridSize(Math.min(100, GRID_SIZE + 5));
+            });
+
 
             $openFileBtn.addEventListener('click', () => {
                 openMaiMLUploadModal();
             });
 
+            // ============================================================
+            // FILE LOAD / UPLOAD MODAL
+            // ============================================================
             function openMaiMLUploadModal() {
                 const modal = document.createElement('div');
                 modal.className = 'modal-overlay show';
@@ -2462,19 +3384,39 @@
                 render();
                 runAutoLayout(true);
                 updateStats();
-                // chain / parent 接続線とハッシュ検証（非同期）
-                connectChainLinks();
-                connectParentLinks();
+                // chain / parent 接続線とハッシュ検証（順序を保証するため await で直列実行）
+                // ※ await なしだと非同期の割り込みで chain/parent の表示順が乱れるため
+                await connectChainLinks();
+                await connectParentLinks();
             }
+            // ── DATA LAKE MODE: expose to global scope ──
+            window.handleFiles = handleFiles;
+            window.appendFiles = async function dlAppendFiles(files) {
+                for (const file of files) {
+                    if (file.name.toLowerCase().endsWith('.zip') || file.name.toLowerCase().endsWith('.maiml.zip')) {
+                        await handleMaiMLZipFile(file, true, false);
+                    } else {
+                        await handleMaiMLFile(file, true);
+                    }
+                }
+                connectTemplateRefs();
+                connectInstanceRefs();
+                connectSameUuidLinks();
+                render();
+                runAutoLayout(true);
+                updateStats();
+                await connectChainLinks();
+                await connectParentLinks();
+            };
 
             async function handleMaiMLFile(file, append = false) {
                 const fileName = file.name.toLowerCase();
 
-                // ZIPファイルかどうか判定
+                // ZIPまたはmaiml.zipファイルかどうかを確実に判定
                 if (fileName.endsWith('.zip') || fileName.endsWith('.maiml.zip')) {
                     await handleMaiMLZipFile(file, append);
                 } else {
-                    // 単独のMaiMLファイル
+                    // 単独のMaiMLファイル (.maiml)
                     const key = file.name.replace(/\.[^.]+$/, '');
                     if (!append) {
                         netKey = key;
@@ -3039,10 +3981,8 @@
             }
 
 
-            // chain接続線の描画とハッシュ検証
-
             // ============================================================
-            // XML署名検証 (Enveloped, ECDSA P-256)
+            // CHAIN / PARENT CONNECTIONS  &  XML署名検証 (Enveloped, ECDSA P-256)
             // ============================================================
             async function verifyXmlSignature(xmlText, key, baseHtml) {
                 try {
@@ -3061,13 +4001,13 @@
                     const sigMethodAlgo = sigMethodEl?.getAttribute('Algorithm') || '';
 
                     if (sigMethodAlgo.includes('rsa')) {
-                        _updateSigBadge(key, baseHtml, 'warn', '⚠️ Unsupported (RSA Signature)');
+                        _updateSigBadge(key, baseHtml, 'warn', '⚠️ Unsupported (RSA-SHA256): verification skipped');
                         return;
                     }
 
                     // PublicKey は dsig11 名前空間（修正後）または ds 名前空間（旧形式）の両方に対応
                     const pubKeyEl = sigEl.getElementsByTagNameNS(NS_DSIG11, 'PublicKey')[0]
-                                  || sigEl.getElementsByTagNameNS(NS_DS, 'PublicKey')[0];
+                        || sigEl.getElementsByTagNameNS(NS_DS, 'PublicKey')[0];
 
                     if (!digestValEl || !sigValEl || !pubKeyEl) {
                         _updateSigBadge(key, baseHtml, 'warn', '⚠️ Signature elements missing (ECDSA only)');
@@ -3135,15 +4075,19 @@
                     }
                 } catch (e) {
                     console.error('Signature verification error:', e);
-                    _updateSigBadge(key, baseHtml, 'fail', '❌ Verification error: ' + e.message);
+                    // [SECURITY FIX] Use esc() to prevent XSS via error message in HTML badge
+                    _updateSigBadge(key, baseHtml, 'fail', '❌ Verification error: ' + esc(e.message));
                 }
             }
 
             function _updateSigBadge(key, baseHtml, status, message) {
                 // 「Verifying...」バッジを最終結果に置き換え
+                // ※ baseHtml（登録時点のスナップショット）ではなく、現在のマップの最新値から置換する
+                //   （connectChainLinks等で後から追加されたchainバッジを消さないため）
                 const cls = status === 'ok' ? 'ok' : status === 'fail' ? 'fail' : 'warn';
                 const badge = `<span class="chain-badge ${cls}">${message}</span>`;
-                const updated = (baseHtml || '').replace(
+                const currentHtml = documentMetadataMap.get(key) || baseHtml || '';
+                const updated = currentHtml.replace(
                     '<span class="chain-badge warn">🔏 Verifying...</span>',
                     badge
                 );
@@ -3274,14 +4218,19 @@
                             : `<span class="chain-badge warn">⚠️ Linked file not loaded</span>`;
 
                     // Document Metadataパネルの該当sourceIdのセクションにバッジを追加
-                    const savedHtml = documentMetadataMap.get(cl.sourceId);
-                    if (savedHtml !== undefined) {
-                        // chain記録のUUID行の後にバッジを挿入
+                    // ※ 複数chainがある場合に前回挿入分が消えないよう、毎回最新のHTMLを取得する
+                    const currentHtml = documentMetadataMap.get(cl.sourceId);
+                    if (currentHtml !== undefined) {
+                        // chain記録のUUID行の後にバッジを挿入（最後の</table>の直前に追加）
                         const targetUuid = cl.targetId
                             ? (window.documentInfoMap?.get(cl.targetId)?.uuid || cl.hash.slice(0, 8) + '...')
                             : cl.hash.slice(0, 8) + '...';
                         const badgeHtml = `<tr><th>chain</th><td colspan="2">${badge} → ${esc(targetUuid)}</td></tr>`;
-                        const updated = savedHtml.replace('</table>', badgeHtml + '</table>');
+                        // lastIndexOf で最後の</table>を対象にすることで複数chain時も正しく追記される
+                        const lastTableClose = currentHtml.lastIndexOf('</table>');
+                        const updated = lastTableClose !== -1
+                            ? currentHtml.slice(0, lastTableClose) + badgeHtml + currentHtml.slice(lastTableClose)
+                            : currentHtml + badgeHtml;
                         documentMetadataMap.set(cl.sourceId, updated);
                     }
                 }
@@ -3415,13 +4364,16 @@
                             ? `<span class="chain-badge fail">❌ Hash mismatch</span>`
                             : `<span class="chain-badge warn">⚠️ Parent file not loaded</span>`;
 
-                    const savedHtml = documentMetadataMap.get(pl.sourceId);
-                    if (savedHtml !== undefined) {
+                    const currentHtml = documentMetadataMap.get(pl.sourceId);
+                    if (currentHtml !== undefined) {
                         const targetUuid = pl.targetId
                             ? (window.documentInfoMap?.get(pl.targetId)?.uuid || pl.hash.slice(0, 8) + '...')
                             : pl.hash.slice(0, 8) + '...';
                         const badgeHtml = `<tr><th>parent</th><td colspan="2">${badge} → ${esc(targetUuid)}</td></tr>`;
-                        const updated = savedHtml.replace('</table>', badgeHtml + '</table>');
+                        const lastTableClose = currentHtml.lastIndexOf('</table>');
+                        const updated = lastTableClose !== -1
+                            ? currentHtml.slice(0, lastTableClose) + badgeHtml + currentHtml.slice(lastTableClose)
+                            : currentHtml + badgeHtml;
                         documentMetadataMap.set(pl.sourceId, updated);
                     }
                 }
@@ -3621,8 +4573,11 @@
                             for (let el of elements) {
                                 const n = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "name")[0];
                                 const d = el.getElementsByTagNameNS("http://www.maiml.org/schemas", "description")[0];
+                                const rawId = el.getAttribute('id') || el.getAttribute('ID') || el.getAttribute('Id') || '';
+                                const resolvedId = (key && rawId) ? `${key}_${rawId}` : rawId;
                                 infoObj.others.push({
                                     tag: tag,
+                                    id: resolvedId,
                                     name: n ? n.textContent : '',
                                     description: d ? d.textContent : ''
                                 });
@@ -3750,27 +4705,40 @@
                 showFormatSelector();
             }
 
-            function showFormatSelector() {
+            async function showFormatSelector() {
                 $formatSelector.style.display = 'block';
 
-                if (currentFile) {
-                    const type = currentFile.type;
-                    const name = currentFile.name.toLowerCase();
+                if (!currentFile) return;
+                const type = currentFile.type;
+                const name = currentFile.name.toLowerCase();
 
-                    if (type.startsWith('image/') || name.endsWith('.tif') || name.endsWith('.tiff')) {
-                        selectFormat('image');
-                    } else if (name.endsWith('.csv')) {
-                        selectFormat('chart');
-                    } else if (name.endsWith('.json')) {
-                        selectFormat('table');
-                    } else if (name.endsWith('.xlsx') || name.endsWith('.xls') ||
-                        type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-                        type === 'application/vnd.ms-excel') {
-                        selectFormat('table');
-                    } else {
-                        selectFormat('text');
-                    }
+                if (type.startsWith('image/') || name.endsWith('.tif') || name.endsWith('.tiff')) {
+                    selectFormat('image');
+                } else if (name.endsWith('.csv')) {
+                    selectFormat('chart');
+                } else if (name.endsWith('.msa') || name.endsWith('.emsa') || name.endsWith('.ems')) {
+                    selectFormat('emsa');
+                } else if (name.endsWith('.json')) {
+                    selectFormat('table');
+                } else if (name.endsWith('.xlsx') || name.endsWith('.xls') ||
+                    type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                    type === 'application/vnd.ms-excel') {
+                    selectFormat('table');
+                } else {
+                    // 拡張子不明: ファイル先頭を読んでEMSAコンテンツ判定
+                    selectFormat('text');  // まずtextを仮選択
+                    try {
+                        const head = await currentFile.slice(0, 512).text();
+                        if (isEmsaContent(head)) selectFormat('emsa');
+                    } catch (_) { /* 読み取り失敗時はtextのまま */ }
                 }
+            }
+
+            /** ファイル先頭テキストからEMSA/MASフォーマットか判定する */
+            function isEmsaContent(head) {
+                if (/^#FORMAT\s*:/im.test(head) && /EMSA/i.test(head)) return true;
+                const keys = ['#NPOINTS', '#XUNITS', '#YUNITS', '#SPECTRUM', '#DATATYPE', '#XPERCHAN'];
+                return keys.filter(k => head.toUpperCase().includes(k)).length >= 3;
             }
 
             document.querySelectorAll('.format-option').forEach(opt => {
@@ -3809,9 +4777,13 @@
                         case 'text':
                             await renderText(file);
                             break;
+                        case 'emsa':
+                            await renderEMSA(file, $previewContent);
+                            break;
                     }
                 } catch (err) {
-                    $previewContent.innerHTML = `<p style="color:var(--warn);">Error: ${err.message}</p>`;
+                    // [SECURITY FIX] Use esc() to prevent XSS via error messages
+                    $previewContent.innerHTML = `<p style="color:var(--warn);">Error: ${esc(err.message)}</p>`;
                 }
             }
 
@@ -3996,7 +4968,174 @@
 
             async function renderText(file) {
                 const text = await file.text();
-                $previewContent.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${text}</pre>`;
+                // [SECURITY FIX] Use esc() to prevent XSS from malicious text file content
+                $previewContent.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${esc(text)}</pre>`;
+            }
+
+            // ============================================================
+            // EMSA/MAS SPECTRUM RENDERER (ISO 22029)
+            // ============================================================
+            async function renderEMSA(file, container) {
+                const text = await file.text();
+                const lines = text.split(/\r?\n/);
+
+                // --- ヘッダー解析 ---
+                const hdr = {};
+                let dataStart = -1, dataEnd = lines.length;
+
+                for (let i = 0; i < lines.length; i++) {
+                    const raw = lines[i];
+                    const upper = raw.trim().toUpperCase();
+
+                    if (upper.startsWith('#SPECTRUM')) { dataStart = i + 1; continue; }
+                    if (upper.startsWith('#ENDOFDATA') || upper.startsWith('#CHECKSUM')) { dataEnd = i; break; }
+
+                    // キーワード行 (## はユーザー定義、# は標準)
+                    if (raw.trim().startsWith('#') && !raw.trim().startsWith('##')) {
+                        const withoutHash = raw.trim().slice(1);
+                        const colonIdx = withoutHash.indexOf(':');
+                        if (colonIdx >= 0) {
+                            // キーワードは最大12文字 + 空白で埋められることがある。最初の単語を取る。
+                            const rawKey = withoutHash.slice(0, colonIdx).trim();
+                            const key = rawKey.split(/[\s\-]/)[0].toUpperCase();
+                            const value = withoutHash.slice(colonIdx + 1).trim();
+                            if (key) hdr[key] = value;
+                        }
+                    }
+                }
+
+                if (dataStart === -1) throw new Error('#SPECTRUM keyword not found — not a valid EMSA file.');
+
+                // --- データ解析 ---
+                const dataType = (hdr['DATATYPE'] || 'Y').trim().toUpperCase();
+                const xPerChan = parseFloat(hdr['XPERCHAN']) || 1;
+                const offset = parseFloat(hdr['OFFSET']) || 0;
+                const title = hdr['TITLE'] || file.name;
+                const xUnits = hdr['XUNITS'] || '';
+                const yUnits = hdr['YUNITS'] || 'Intensity';
+                const xLabel = hdr['XLABEL'] || xUnits || 'Channel';
+                const yLabel = hdr['YLABEL'] || yUnits || 'Intensity';
+                const sigType = hdr['SIGNALTYPE'] || '';
+
+                const xVals = [], yVals = [];
+                const dataLines = lines.slice(dataStart, dataEnd)
+                    .map(l => l.trim())
+                    .filter(l => l && !l.startsWith('#'));
+
+                if (dataType === 'XY') {
+                    for (const line of dataLines) {
+                        const parts = line.split(/[\s,;]+/).filter(Boolean);
+                        if (parts.length >= 2) {
+                            xVals.push(parseFloat(parts[0]));
+                            yVals.push(parseFloat(parts[1]));
+                        }
+                    }
+                } else {
+                    // Y のみ: X = OFFSET + XPERCHAN * チャンネル番号
+                    for (let i = 0; i < dataLines.length; i++) {
+                        const parts = dataLines[i].split(/[\s,;]+/).filter(Boolean);
+                        if (parts.length >= 1) {
+                            xVals.push(offset + xPerChan * i);
+                            yVals.push(parseFloat(parts[0]));
+                        }
+                    }
+                }
+
+                if (xVals.length === 0) throw new Error('No data points found in EMSA file.');
+
+                // --- UI構築 ---
+                container.innerHTML = '';
+
+                // タイトル
+                const titleEl = document.createElement('div');
+                titleEl.style.cssText = 'font-size:13px;font-weight:600;color:var(--accent);padding:0 4px 2px;';
+                titleEl.textContent = title;
+                container.appendChild(titleEl);
+
+                // メタ情報
+                const metaParts = [];
+                if (sigType) metaParts.push(sigType);
+                if (hdr['DATE']) metaParts.push(hdr['DATE']);
+                if (hdr['BEAMKV']) metaParts.push(`Beam: ${hdr['BEAMKV']} kV`);
+                if (hdr['OWNER']) metaParts.push(`Owner: ${hdr['OWNER']}`);
+                if (metaParts.length) {
+                    const metaEl = document.createElement('div');
+                    metaEl.style.cssText = 'font-size:11px;color:var(--muted);padding:0 4px 6px;';
+                    metaEl.textContent = metaParts.join('  |  ');
+                    container.appendChild(metaEl);
+                }
+
+                // キャンバス
+                const wrap = document.createElement('div');
+                wrap.style.cssText = 'width:100%;height:300px;position:relative;';
+                const canvas = document.createElement('canvas');
+                wrap.appendChild(canvas);
+                container.appendChild(wrap);
+
+                // Chart.js でスペクトル描画
+                const accent = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--accent').trim() || '#4f46e5';
+                const thinLine = xVals.length > 1000;
+
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: xVals,
+                        datasets: [{
+                            label: yLabel,
+                            data: yVals,
+                            borderColor: accent,
+                            backgroundColor: accent + '20',
+                            borderWidth: thinLine ? 1 : 1.5,
+                            pointRadius: 0,
+                            tension: 0,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 150 },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    title: ctx => `${xLabel}: ${Number(xVals[ctx[0].dataIndex]).toFixed(2)} ${xUnits}`,
+                                    label: ctx => `${yLabel}: ${ctx.parsed.y}`
+                                }
+                            },
+                            zoom: {
+                                pan: { enabled: true, mode: 'x' },
+                                zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                title: { display: true, text: xLabel + (xUnits ? ` (${xUnits})` : '') },
+                                ticks: {
+                                    maxTicksLimit: 10,
+                                    callback: v => Number(v).toFixed(xPerChan < 0.1 ? 2 : xPerChan < 1 ? 1 : 0)
+                                }
+                            },
+                            y: {
+                                title: { display: true, text: yLabel + (yUnits ? ` (${yUnits})` : '') },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // データ点数と範囲
+                const infoEl = document.createElement('div');
+                infoEl.style.cssText = 'font-size:11px;color:var(--muted);padding:4px 4px 0;';
+                infoEl.textContent =
+                    `${xVals.length} points  |  `
+                    + `${xLabel}: ${xVals[0].toFixed(2)} – ${xVals[xVals.length - 1].toFixed(2)} ${xUnits}`
+                    + (hdr['NPOINTS'] ? `  |  NPOINTS: ${hdr['NPOINTS']}` : '');
+                container.appendChild(infoEl);
             }
 
             $applyBtn.addEventListener('click', () => {
@@ -4116,6 +5255,9 @@
                 $stats.textContent = `PLACE: ${pc} / TRANSITION: ${tc} / Templates: ${tplCount} / Instances: ${instCount} (Saved Key: ${layoutKey()})`;
             }
 
+            // ============================================================
+            // MAIML PARSER
+            // ============================================================
             function parseMaiML(xml, sourceId) {
                 const all = Array.from(xml.getElementsByTagName('*'));
                 const attr = (el, ...names) => {
@@ -4246,12 +5388,16 @@
                     if (instances.some(i => i.id === id)) continue;
 
                     const meta = extractMetaBlock(el);
+                    const resParent = findAncestor(el, a => local(a) === 'results');
+                    const resultsRefValue = resParent ? (attr(resParent, 'id', 'ID', 'Id') || '') : '';
+
                     const rec = {
                         id,
                         originalId: rawId, // 元のIDを保存
                         role,
                         sourceId, // Export用: ソースID
                         templateRef: tplRef ? resolve(tplRef) : null,
+                        resultsRef: resultsRefValue,
                         properties: meta.properties,
                         contents: meta.contents,
                         insertions: meta.insertions,
@@ -4314,8 +5460,20 @@
                             // resultsRef 要素から ref 属性を取得
                             const resultsRefEl = Array.from(el.children || []).find(c => local(c) === 'resultsref');
                             const resultsRefValue = resultsRefEl ? (attr(resultsRefEl, 'ref', 'Ref', 'REF') || '') : '';
+                            // creatorRef / ownerRef 要素
+                            const creatorRefEl = Array.from(el.children || []).find(c => local(c) === 'creatorref');
+                            const ownerRefEl = Array.from(el.children || []).find(c => local(c) === 'ownerref');
+                            const creatorRefValue = creatorRefEl ? (attr(creatorRefEl, 'ref', 'Ref', 'REF') || '') : '';
+                            const ownerRefValue = ownerRefEl ? (attr(ownerRefEl, 'ref', 'Ref', 'REF') || '') : '';
+
                             if (!eventsByInstructionId.has(ref)) eventsByInstructionId.set(ref, []);
-                            eventsByInstructionId.get(ref).push({ ...meta, resultsRef: resultsRefValue, rawEl: el });
+                            eventsByInstructionId.get(ref).push({
+                                ...meta,
+                                resultsRef: resultsRefValue,
+                                creatorRef: creatorRefValue ? resolve(creatorRefValue) : '',
+                                ownerRef: ownerRefValue ? resolve(ownerRefValue) : '',
+                                rawEl: el
+                            });
                         }
                     }
                 }
@@ -4574,7 +5732,18 @@
 
             let selLinks, selLinkLabels, selNodes, selGroups, selGroupLabels;
 
+            // ============================================================
+            // RENDER
+            // ============================================================
             function render() {
+                // placeToTemplates が確定した後に placeType を後付けで設定する。
+                nodes.forEach(n => {
+                    if (n.type !== 'place') return;
+                    if (n.placeType) return;
+                    const tpls = placeToTemplates.get(n.id) || [];
+                    n.placeType = tpls.length > 0 ? (tpls[0].role || 'unknown') : 'unknown';
+                });
+
                 const sourceIds = Array.from(new Set(nodes.map(n => n.sourceId).filter(x => x)));
                 selGroups = gGroups.selectAll('rect.group-box').data(sourceIds, d => d);
                 selGroups.exit().remove();
@@ -4673,7 +5842,26 @@
                     const s = d3.select(this);
                     if (d.type === 'place') {
                         const r = d.r || 16;
+                        const badgeLabelMap = { material: 'M', condition: 'C', result: 'R' };
+                        const badgeLabel = badgeLabelMap[d.placeType] || '';
+
+                        // placeType をクラスとして付与（色はCSSで制御）
+                        s.classed(`place-${d.placeType || 'unknown'}`, true);
+
                         s.append('circle').attr('r', r);
+
+                        // 〇の中央に M / C / R バッジテキスト
+                        if (badgeLabel) {
+                            s.append('text')
+                                .attr('class', 'place-type-badge')
+                                .attr('dy', '0.35em')
+                                .attr('text-anchor', 'middle')
+                                .style('font-size', `${Math.max(Math.floor(r * 0.75), 10)}px`)
+                                .style('font-weight', '700')
+                                .style('pointer-events', 'none')
+                                .text(badgeLabel);
+                        }
+
                         s.append('text').attr('class', 'label').attr('dy', r + 12).attr('text-anchor', 'middle').text(d.label || d.id);
                     } else {
                         d.w = d.w || 24;
@@ -4749,20 +5937,21 @@
 
                     // chain接続線: group-box の最近傍コーナー間を繋ぐ
                     // ドラッグ操作時も毎フレーム再計算するためスナップが自動的に適用される
+                    // 2つのboundsの4隅から最近傍ペアを求めるヘルパー（chain/parent共用）
+                    const nearestCorners = (bs, bt) => {
+                        const cs = [{ x: bs.x0, y: bs.y0 }, { x: bs.x1, y: bs.y0 },
+                        { x: bs.x0, y: bs.y1 }, { x: bs.x1, y: bs.y1 }];
+                        const ct = [{ x: bt.x0, y: bt.y0 }, { x: bt.x1, y: bt.y0 },
+                        { x: bt.x0, y: bt.y1 }, { x: bt.x1, y: bt.y1 }];
+                        let minD = Infinity, sc = cs[0], tc = ct[0];
+                        for (const s of cs) for (const t of ct) {
+                            const d = Math.hypot(s.x - t.x, s.y - t.y);
+                            if (d < minD) { minD = d; sc = s; tc = t; }
+                        }
+                        return { sc, tc };
+                    };
+
                     if (selChainLines) {
-                        // 2つのboundsの4隅から最近傍ペアを求めるヘルパー
-                        const nearestCorners = (bs, bt) => {
-                            const cs = [{ x: bs.x0, y: bs.y0 }, { x: bs.x1, y: bs.y0 },
-                            { x: bs.x0, y: bs.y1 }, { x: bs.x1, y: bs.y1 }];
-                            const ct = [{ x: bt.x0, y: bt.y0 }, { x: bt.x1, y: bt.y0 },
-                            { x: bt.x0, y: bt.y1 }, { x: bt.x1, y: bt.y1 }];
-                            let minD = Infinity, sc = cs[0], tc = ct[0];
-                            for (const s of cs) for (const t of ct) {
-                                const d = Math.hypot(s.x - t.x, s.y - t.y);
-                                if (d < minD) { minD = d; sc = s; tc = t; }
-                            }
-                            return { sc, tc };
-                        };
 
                         selChainLines.each(function (d) {
                             const bs = bounds.get(d.sourceId);
@@ -4795,36 +5984,37 @@
                             }
                         });
 
-                        // parent接続線（紫色）: 同じnearestCornersロジックで描画
-                        if (selParentLines) {
-                            const showParent = document.getElementById('lvParent')?.checked !== false;
-                            selParentLines.each(function (d) {
-                                const bs = bounds.get(d.sourceId);
-                                const bt = bounds.get(d.targetId);
-                                const el = d3.select(this);
-                                if (bs && bt) {
-                                    const { sc: tc, tc: sc } = nearestCorners(bs, bt);
-                                    el.attr('x1', sc.x).attr('y1', sc.y)
-                                        .attr('x2', tc.x).attr('y2', tc.y)
-                                        .style('display', showParent ? null : 'none');
-                                } else {
-                                    el.style('display', 'none');
-                                }
-                            });
-                            gGroups.selectAll('text.parent-line-label').each(function (d) {
-                                const bs = bounds.get(d.sourceId);
-                                const bt = bounds.get(d.targetId);
-                                if (bs && bt) {
-                                    const { sc, tc } = nearestCorners(bs, bt);
-                                    d3.select(this)
-                                        .attr('x', (sc.x + tc.x) / 2)
-                                        .attr('y', (sc.y + tc.y) / 2 - 5)
-                                        .style('display', showParent ? null : 'none');
-                                } else {
-                                    d3.select(this).style('display', 'none');
-                                }
-                            });
-                        }
+                    }
+
+                    // parent接続線（紫色）: 同じnearestCornersロジックで描画
+                    if (selParentLines) {
+                        const showParent = document.getElementById('lvParent')?.checked !== false;
+                        selParentLines.each(function (d) {
+                            const bs = bounds.get(d.sourceId);
+                            const bt = bounds.get(d.targetId);
+                            const el = d3.select(this);
+                            if (bs && bt) {
+                                const { sc: tc, tc: sc } = nearestCorners(bs, bt);
+                                el.attr('x1', sc.x).attr('y1', sc.y)
+                                    .attr('x2', tc.x).attr('y2', tc.y)
+                                    .style('display', showParent ? null : 'none');
+                            } else {
+                                el.style('display', 'none');
+                            }
+                        });
+                        gGroups.selectAll('text.parent-line-label').each(function (d) {
+                            const bs = bounds.get(d.sourceId);
+                            const bt = bounds.get(d.targetId);
+                            if (bs && bt) {
+                                const { sc, tc } = nearestCorners(bs, bt);
+                                d3.select(this)
+                                    .attr('x', (sc.x + tc.x) / 2)
+                                    .attr('y', (sc.y + tc.y) / 2 - 5)
+                                    .style('display', showParent ? null : 'none');
+                            } else {
+                                d3.select(this).style('display', 'none');
+                            }
+                        });
                     }
                 }
 
@@ -4904,6 +6094,9 @@
             }
 
             // ── リンク表示制御ロジック ──────────────────────────
+            // ============================================================
+            // LINK VISIBILITY
+            // ============================================================
             function _applyLinkVisibility() {
                 const showTemplateRef = document.getElementById('lvTemplateRef')?.checked !== false;
                 const showInstanceRef = document.getElementById('lvInstanceRef')?.checked !== false;
@@ -4977,7 +6170,7 @@
                 return `M${source.x},${source.y} A${radius},${radius} 0 0,${sweep} ${target.x},${target.y}`;
             }
 
-            const gridSize = 10;
+            let gridSize = GRID_SIZE;
 
             function enableDrag(enabled) {
                 const nodeDrag = d3.drag()
@@ -5054,6 +6247,9 @@
                 }
             }
 
+            // ============================================================
+            // LAYOUT PERSISTENCE
+            // ============================================================
             function layoutKey() {
                 return 'maiml-layout:' + (netKey || 'default');
             }
@@ -5107,6 +6303,9 @@
                 });
             }
 
+            // ============================================================
+            // DETAIL PANEL
+            // ============================================================
             function showDetails(node) {
                 $meta.innerHTML = '';
                 const basic = document.createElement('table');
@@ -5248,8 +6447,22 @@
                                         : '';
                                     div.innerHTML = `<div style="font-size:12px; font-weight:bold; color:var(--accent);">Event #${eIdx + 1}${resultsLabel}</div>`;
 
-                                    if (evt.properties && evt.properties.length > 0) {
-                                        div.appendChild(renderPropertiesTable(evt.properties));
+                                    if (evt.properties && evt.properties.length > 0 || evt.creatorRef || evt.ownerRef) {
+                                        // creatorRef / ownerRef があればメタデータテーブルとして追加
+                                        if (evt.creatorRef || evt.ownerRef) {
+                                            const mTable = document.createElement('table');
+                                            mTable.className = 'kv';
+                                            mTable.style.marginBottom = '4px';
+                                            let mHtml = '';
+                                            if (evt.creatorRef) mHtml += `<tr><th>creator</th><td>${esc(resolveMetadataName(evt.creatorRef))}</td></tr>`;
+                                            if (evt.ownerRef) mHtml += `<tr><th>owner</th><td>${esc(resolveMetadataName(evt.ownerRef))}</td></tr>`;
+                                            mTable.innerHTML = mHtml;
+                                            div.appendChild(mTable);
+                                        }
+
+                                        if (evt.properties && evt.properties.length > 0) {
+                                            div.appendChild(renderPropertiesTable(evt.properties));
+                                        }
                                     } else {
                                         div.insertAdjacentHTML('beforeend', '<span class="hint">No properties</span>');
                                     }
@@ -5285,7 +6498,10 @@
                 const label = isTemplate ? 'Template' : 'Instance';
                 // isTemplate の判定を外し、item.role があれば常に表示するように変更
                 const roleLabel = item.role ? `(${esc(item.role)})` : '';
-                sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.originalId || item.id || '')} ${roleLabel}`;
+                const resultsLabel = item.resultsRef
+                    ? `<span style="margin-left:8px; padding:1px 7px; border-radius:10px; background:var(--chip); color:var(--chip-ink); font-size:11px; font-weight:600;">${esc(item.resultsRef)}</span>`
+                    : '';
+                sum.innerHTML = `<span class="badge" ${badgeStyle}>#${index}</span> [${label}] ${esc(item.originalId || item.id || '')} ${roleLabel}${resultsLabel}`;
 
                 // --- AI要約ボタン ---
                 const aiBtn = document.createElement('button');
@@ -5885,12 +7101,20 @@
                     } else if (stored.format === 'text') {
                         // Text形式の修正
                         const text = await stored.fileData.data.text();
-                        container.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${text}</pre>`;
+                        // [SECURITY FIX] Use esc() to prevent XSS from malicious text file content
+                        container.innerHTML = `<pre style="white-space:pre-wrap; font-size:12px; max-height:400px; overflow:auto;">${esc(text)}</pre>`;
+                    } else if (stored.format === 'emsa') {
+                        container.innerHTML = '<p>Loading EMSA spectrum...</p>';
+                        await renderEMSA(stored.fileData.data, container);
                     } else {
-                        container.innerHTML = stored.preview;
+                        // [SECURITY FIX] Sanitize stored preview HTML to prevent XSS propagation
+                        container.innerHTML = (typeof DOMPurify !== 'undefined')
+                            ? DOMPurify.sanitize(stored.preview)
+                            : stored.preview;
                     }
                 } catch (err) {
-                    container.innerHTML = `<p style="color:var(--warn);">Failed to display file: ${err.message}</p>`;
+                    // [SECURITY FIX] Use esc() to prevent XSS via error messages
+                    container.innerHTML = `<p style="color:var(--warn);">Failed to display file: ${esc(err.message)}</p>`;
                 }
             }
 
@@ -6006,7 +7230,8 @@
 
                 tbl.innerHTML = html;
                 wrapper.appendChild(tbl);
-                makeKvTableResizable(tbl);
+                // makeKvTableResizable(tbl);
+                if (window.makeKvTableResizable) window.makeKvTableResizable(tbl);
 
                 // content要素が2つ以上ある場合はPLOTボタンを追加
                 if (contentItems.length >= 2) {
@@ -6131,7 +7356,8 @@
 
                 tbl.innerHTML = html;
                 wrapper.appendChild(tbl);
-                makeKvTableResizable(tbl);
+                // makeKvTableResizable(tbl);
+                if (window.makeKvTableResizable) window.makeKvTableResizable(tbl);
 
                 const btn = document.createElement('button');
                 btn.className = 'btn primary';
@@ -6304,12 +7530,28 @@
                 return [];
             }
 
+            /**
+             * メタデータのID（creator/owner等）から表示用名前に変換する
+             */
+            function resolveMetadataName(id) {
+                if (!id) return '';
+                if (!window.documentInfoMap) return id;
+
+                for (const infoObj of window.documentInfoMap.values()) {
+                    const found = infoObj.others.find(o => o.id === id);
+                    if (found && found.name) return found.name;
+                }
+                return id; // 見つからなければIDをそのまま返す
+            }
+
             function esc(s) {
                 return (s == null ? '' : (s + '')).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
             }
 
 
-            // ── Decryption utilities ──────────────────────────────────────
+            // ============================================================
+            // DECRYPTION UTILITIES
+            // ============================================================
             let _sessionPassword = null;
             let _encRowCounter = 0;
             const _encRowRegistry = new Map();
@@ -6714,10 +7956,10 @@
             ;
             (function demo() {
                 nodes = [
-                    { id: 'place_Material', type: 'place', label: 'MaterialPlace', r: 18 },
-                    { id: 'place_Condition', type: 'place', label: 'ConditionPlace', r: 18 },
+                    { id: 'place_Material', type: 'place', label: 'MaterialPlace', r: 18, placeType: 'material' },
+                    { id: 'place_Condition', type: 'place', label: 'ConditionPlace', r: 18, placeType: 'condition' },
                     { id: 'transition1', type: 'transition', label: 'measurementTransition', w: 24, h: 50 },
-                    { id: 'place_Result', type: 'place', label: 'ResultPlace', r: 18 }
+                    { id: 'place_Result', type: 'place', label: 'ResultPlace', r: 18, placeType: 'result' }
                 ];
                 links = [
                     { source: 'place_Material', target: 'transition1' },
@@ -6738,17 +7980,20 @@
     </script>
 
     <script>
-        // Gemini key button with Custom Modal
+        // ============================================================
+        // GEMINI API KEY MODAL
+        // ============================================================
         (function () {
             const themeBtn = document.getElementById("themeBtn");
             if (!themeBtn) return;
 
             // 1. ボタンの作成
-            const gemBtn = document.createElement('button');
-            gemBtn.className = 'btn';
-            gemBtn.id = 'geminiKeyBtn';
-            gemBtn.textContent = '🔑 Gemini API Key';
-            themeBtn.before(gemBtn);
+            // const gemBtn = document.createElement('button');
+            // gemBtn.className = 'btn';
+            // gemBtn.id = 'geminiKeyBtn';
+            // gemBtn.textContent = '🔑 Gemini API Key';
+            // themeBtn.before(gemBtn);
+            const gemBtn = document.getElementById('geminiKeyBtn');
 
             // 2. モーダルHTMLの注入
             const modalHtml = `
@@ -6844,8 +8089,42 @@
     </script>
 
     <script>
-        // summary dialog
+        // ============================================================
+        // AI SUMMARY DIALOG
+        // ============================================================
         (function () {
+            // ============================================================
+            // AI SUMMARY - PROVIDER TOGGLE & OLLAMA FETCH
+            // ============================================================
+            window.toggleSummaryProvider = function () {
+                const isLocal = document.getElementById('viewer-provider-local').checked;
+                document.getElementById('viewer-cloud-model').style.display = isLocal ? 'none' : 'grid';
+                document.getElementById('viewer-local-section').style.display = isLocal ? 'grid' : 'none';
+                document.getElementById('viewer-gemini-key-wrapper').style.display = isLocal ? 'none' : '';
+                localStorage.setItem('viewer_ai_provider', isLocal ? 'local' : 'cloud');
+            };
+
+            window.fetchOllamaModelsForSummary = async function () {
+                const sel = document.getElementById('viewer-ollama-model-select');
+                sel.innerHTML = '<option value="">Fetching...</option>';
+                try {
+                    const resp = await fetch('http://localhost:11434/api/tags');
+                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                    const data = await resp.json();
+                    const models = data.models || [];
+                    if (models.length === 0) {
+                        sel.innerHTML = '<option value="">No models found</option>';
+                        return;
+                    }
+                    const saved = localStorage.getItem('viewer_ollama_model') || '';
+                    sel.innerHTML = models.map(m =>
+                        `<option value="${m.name}" ${m.name === saved ? 'selected' : ''}>${m.name}</option>`
+                    ).join('');
+                } catch (e) {
+                    sel.innerHTML = '<option value="">Connection failed</option>';
+                    alert('Cannot connect to Ollama. Make sure Ollama is running on localhost:11434.');
+                }
+            };
             const modal = document.getElementById("aiSummaryModal");
             const closeBtn = document.getElementById("aiSummaryClose");
             const targetDiv = document.getElementById("aiSummaryTarget");
@@ -6893,24 +8172,62 @@
                     return;
                 }
 
-                // カスタムプロンプトが選択されているが入力されていない場合
                 if (promptTemplateSel.value === "custom" && !customPromptInput.value.trim()) {
                     alert("Please enter a custom prompt.");
                     customPromptInput.focus();
                     return;
                 }
 
+                const isLocal = document.getElementById('viewer-provider-local').checked;
+                if (isLocal) {
+                    const ollamaModel = document.getElementById('viewer-ollama-model-select').value;
+                    if (!ollamaModel) {
+                        alert('Please fetch and select an Ollama model.');
+                        return;
+                    }
+                    localStorage.setItem('viewer_ollama_model', ollamaModel);
+                }
+
                 resultDiv.textContent = "Generating summary...";
                 resultDiv.classList.add("markdown-content");
                 copyBtn.textContent = '📋 Copy';
 
-                // 少し遅延を入れてUIが更新されるのを待つ
+                // タイマー開始
+                const elapsedEl = document.getElementById('viewer-elapsed-time');
+                let elapsed = 0;
+                elapsedEl.textContent = '';
+                const fmtTime = s => `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor(s % 3600 / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+                const timer = setInterval(() => {
+                    elapsed++;
+                    generateBtn.textContent = `⏳ [${fmtTime(elapsed)}]`;
+                }, 1000);
+
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                runGemini(currentText);
+                try {
+                    if (isLocal) {
+                        await runOllama(currentText);
+                    } else {
+                        await runGemini(currentText);
+                    }
+                } finally {
+                    clearInterval(timer);
+                    generateBtn.textContent = '🚀 Generate';
+                    elapsedEl.textContent = `処理時間: ${fmtTime(elapsed)}`;
+                }
             });
 
-            // ===== Gemini モデル一覧取得 + 前回選択モデル復元 =====
+            // プロバイダー設定の復元
+            (function restoreProvider() {
+                const savedProvider = localStorage.getItem('viewer_ai_provider') || 'cloud';
+                if (savedProvider === 'local') {
+                    document.getElementById('viewer-provider-local').checked = true;
+                    window.toggleSummaryProvider();
+                    window.fetchOllamaModelsForSummary();
+                }
+            })();
+
+            // ---- Gemini モデル一覧取得 + 前回選択モデル復元 ----
             const STORAGE_KEY_MODEL = "geminiSelectedModel";
             let modelsFetched = false;
 
@@ -6924,7 +8241,7 @@
                 } else {
                     const opt = document.createElement("option");
                     opt.value = saved;
-                    opt.textContent = saved + "  (前回使用)";
+                    opt.textContent = saved + "  (last used)";
                     sel.insertBefore(opt, sel.firstChild);
                     sel.value = saved;
                 }
@@ -6978,7 +8295,7 @@
 
             const fetchModelsBtn = document.getElementById("fetchModelsBtn");
             if (fetchModelsBtn) fetchModelsBtn.addEventListener("click", () => fetchGeminiModels(true));
-            // ===== ここまで =====
+            // ---- ここまで ----
 
             window.openAISummaryDialog = function (text) {
                 currentText = text;
@@ -7027,15 +8344,7 @@
                     return;
                 }
 
-                const blob = new Blob([textToSave], { type: "text/markdown" });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "AIsummary.md";
-                a.click();
-
-                URL.revokeObjectURL(url);
+                downloadFile(textToSave, "AIsummary.md", "text/markdown");
             });
 
             function getPrompt(text, lang) {
@@ -7122,6 +8431,55 @@
 
             return finalPrompt;
 
+            async function runOllama(text) {
+                const ollamaModel = document.getElementById('viewer-ollama-model-select').value;
+                const browserLang = navigator.language || navigator.userLanguage;
+                const langCode = browserLang.split('-')[0];
+                const prompt = getPrompt(text, langCode);
+
+                try {
+                    const resp = await fetch('http://localhost:11434/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: ollamaModel,
+                            messages: [{ role: 'user', content: prompt }],
+                            temperature: 0.2,
+                            stream: false
+                        })
+                    });
+                    const data = await resp.json();
+                    let raw = data?.choices?.[0]?.message?.content || '';
+                    // Qwen3のThinkingブロックを除去
+                    raw = raw.replace(/<think>[\s\S]*?<\/think>/i, '').trim();
+                    displaySummaryResult(raw, langCode);
+                } catch (e) {
+                    resultDiv.textContent = `Network error: ${e.message}`;
+                    resultDiv.classList.remove("markdown-content");
+                }
+            }
+
+            function displaySummaryResult(rawText, langCode) {
+                rawTextContent = rawText;
+                if (typeof marked !== 'undefined') {
+                    const rawHtml = marked.parse(rawTextContent);
+                    resultDiv.innerHTML = (typeof DOMPurify !== 'undefined')
+                        ? DOMPurify.sanitize(rawHtml)
+                        : rawHtml;
+                    resultDiv.classList.add("markdown-content");
+                    const disclaimer = document.createElement('div');
+                    disclaimer.className = 'ai-disclaimer';
+                    if (langCode === 'ja') {
+                        disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
+                    } else {
+                        disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
+                    }
+                    resultDiv.appendChild(disclaimer);
+                } else {
+                    resultDiv.textContent = rawTextContent;
+                    resultDiv.classList.remove("markdown-content");
+                }
+            }
 
             async function runGemini(text) {
                 const key = localStorage.getItem("geminiApiKey");
@@ -7162,25 +8520,7 @@
                         resultDiv.textContent = rawTextContent;
                         resultDiv.classList.remove("markdown-content");
                     } else {
-                        rawTextContent = data.candidates[0].content.parts[0].text.trim();
-
-                        if (typeof marked !== 'undefined') {
-                            resultDiv.innerHTML = marked.parse(rawTextContent);
-                            resultDiv.classList.add("markdown-content");
-
-                            // 注意書きを追加
-                            const disclaimer = document.createElement('div');
-                            disclaimer.className = 'ai-disclaimer';
-                            if (langCode === 'ja') {
-                                disclaimer.textContent = 'この要約はAIによって生成されたものであり、必ずしも正確とは限りません。重要な情報については元データをご確認ください。';
-                            } else {
-                                disclaimer.textContent = 'This summary was generated by AI and may not be entirely accurate. Please verify important information against the original data.';
-                            }
-                            resultDiv.appendChild(disclaimer);
-                        } else {
-                            resultDiv.textContent = rawTextContent;
-                            resultDiv.classList.remove("markdown-content");
-                        }
+                        displaySummaryResult(data.candidates[0].content.parts[0].text.trim(), langCode);
                     }
                 } catch (e) {
                     rawTextContent = `Network error or API call failed: ${e.message}`;
@@ -7192,9 +8532,9 @@
     </script>
 
     <script>
-        // =============================================================================
-        // MaiMLViewer メタデータExport機能追加コード
-        // =============================================================================
+        // ============================================================
+        // METADATA EXPORT
+        // ============================================================
 
         // デバッグ用：変数が公開されているか確認
 
@@ -8016,7 +9356,7 @@
                 }
 
                 // ファイル名生成
-                const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                const fileName = `MaiML_Metadata_${todayString()}.xlsx`;
 
 
                 // ダウンロード
@@ -8065,40 +9405,38 @@
             };
 
             const jsonStr = JSON.stringify(output, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+            downloadFile(jsonStr, `MaiML_Metadata_${todayString()}.json`, 'application/json');
+        }
 
-            const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.json`;
+        // ============================================================
+        // CSV HELPERS  (module-level so they can be reused)
+        // ============================================================
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
+        /** UTF-8 BOM (Excel互換) */
+        const CSV_BOM = '\uFEFF';
 
-            URL.revokeObjectURL(url);
+        /**
+         * CSV セル値をエスケープする。
+         * ダブルクォート・カンマ・改行を含む場合はクォートで囲む。
+         */
+        function escapeCSV(value) {
+            if (value == null) return '';
+            const str = String(value);
+            if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        }
+
+        /** 配列を1行分の CSV 文字列に変換する。 */
+        function arrayToCSVRow(arr) {
+            return arr.map(escapeCSV).join(',') + '\n';
         }
 
         // CSV出力関数
         function exportToCSV(metadata) {
 
-            const CSV_BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
             let csvContent = CSV_BOM;
-
-            // Helper function: CSVセルのエスケープ
-            function escapeCSV(value) {
-                if (value == null) return '';
-                const str = String(value);
-                // ダブルクォート、カンマ、改行を含む場合はクォートで囲む
-                if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
-                    return '"' + str.replace(/"/g, '""') + '"';
-                }
-                return str;
-            }
-
-            // Helper function: 配列をCSV行に変換
-            function arrayToCSVRow(arr) {
-                return arr.map(escapeCSV).join(',') + '\n';
-            }
 
             // 1. Document Info
             csvContent += '\n=== Document Info ===\n';
@@ -8251,9 +9589,10 @@
                         item.formatString
                     ]);
                 });
-            });
+            }); // ★修正: 正しく閉じました
 
             if (allInstanceData.length > 0) {
+                // ★修正: 5のTemplate Dataを参考にヘッダーとループ処理を追加しました
                 csvContent += '\n=== Instance Data (Properties + Contents) ===\n';
                 csvContent += arrayToCSVRow([
                     'Instance ID', 'Kind', 'Level', 'Path', 'Key', 'Name',
@@ -8262,7 +9601,7 @@
                 allInstanceData.forEach(row => {
                     csvContent += arrayToCSVRow(row);
                 });
-            }
+            } // ★修正: 正しく閉じました
 
             // 7-2. Instance Insertions
             const instanceInsertions = [];
@@ -8279,7 +9618,7 @@
                 });
             });
             if (instanceInsertions.length > 0) {
-                csvContent += '\n=== Instance Insertions ===\n';
+                csvContent += '\n=== Instance Instance Insertions ===\n';
                 csvContent += arrayToCSVRow([
                     'Instance ID', 'Insertion ID', 'URI', 'Hash', 'Hash Method', 'Format'
                 ]);
@@ -8289,16 +9628,7 @@
             }
 
             // ダウンロード
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const fileName = `MaiML_Metadata_${new Date().toISOString().slice(0, 10)}.csv`;
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-
-            URL.revokeObjectURL(url);
+            downloadFile(csvContent, `MaiML_Metadata_${todayString()}.csv`, 'text/csv;charset=utf-8;');
         }
 
         // 8. 階層構造の復元
@@ -8386,6 +9716,7 @@
         }
 
         // ============================================================
+        // COLUMN RESIZE
         // カラムリサイズ機能
         //   ・初期表示はwidth:100%でウインドウ幅にフィット
         //   ・初回ドラッグ時にtable-layout:fixedへ切替（他列が動かなくなる）
@@ -8560,7 +9891,7 @@
                 });
             });
 
-            // ---- 列並べ替え（ドラッグ＆ドロップ） ----
+            // ---- 列並べ替え (ドラッグ＆ドロップ) ----
             restoreColOrder(tbl);
 
             let dragSrcIdx = null;
@@ -8620,9 +9951,9 @@
         }
 
 
-        // ==========================================
-        // Help Manual Feature (Fixed Version)
-        // ==========================================
+        // ============================================================
+        // HELP MANUAL
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
 
             // 1. ヘルプボタンをツールバーに追加
@@ -8688,9 +10019,9 @@
             };
         });
 
-        // ==========================================
-        // Toolbar Button Reordering (UX Improvement: Fixed Version)
-        // ==========================================
+        // ============================================================
+        // TOOLBAR BUTTON REORDERING
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 const toolbar = document.getElementById('toolbar');
@@ -8698,7 +10029,7 @@
 
                 // 各ボタンをIDで確実に取得
                 const btnExport = document.getElementById('exportMetadataBtn'); // Export
-                const btnKey = document.getElementById('geminiKeyBtn');         // Gemini API
+                // const btnKey = document.getElementById('geminiKeyBtn');         // Gemini API
                 const btnTheme = document.getElementById('themeBtn');           // Theme
                 const btnHelp = document.getElementById('manualHelpBtn');       // Help
 
@@ -8706,13 +10037,927 @@
                 // 理想の並び: [Spacer] -> [Export] -> [API Key] -> [Theme] -> [Help]
 
                 if (btnExport) toolbar.appendChild(btnExport);
-                if (btnKey) toolbar.appendChild(btnKey);
+                // if (btnKey) toolbar.appendChild(btnKey);
                 if (btnTheme) toolbar.appendChild(btnTheme);
                 if (btnHelp) toolbar.appendChild(btnHelp);
 
             }, 600); // 描画待ち時間を少し延長
         });
+        // メインIIFEからも参照できるようwindowに公開
+        window.makeKvTableResizable = makeKvTableResizable;
+    </script>
 
+    <!-- ============================================================
+         DATA LAKE MODE — JavaScript (完全追加、既存コードへの変更なし)
+         ============================================================ -->
+    <script>
+        (function () {
+            'use strict';
+
+            // ============================================================
+            // STORAGE KEYS & CONSTANTS
+            // ============================================================
+            const STORAGE_KEY_INDEX = 'maiml_dl_index';
+            const STORAGE_KEY_FOLDER_NAME = 'maiml_dl_folder_name';
+            const DB_NAME = 'MaiMLDataLakeDB';
+            const STORE_NAME = 'handles';
+            const KEY_HANDLE = 'dir_handle';
+
+            // ============================================================
+            // STATE
+            // ============================================================
+            let dlAllFiles = [];
+            let dlIndex = [];
+            let dlFiltered = [];
+            let dlChecked = new Set();
+            let dlDirHandle = null;
+            let dlCurrentSort = 'date-desc';
+            let dlIsCachedMode = false;
+
+            // ============================================================
+            // DOM REFERENCES
+            // ============================================================
+            let elOverlay, elPanel, elFolderName, elProgressWrap, elProgressText,
+                elProgressBarFill, elSearchArea, elKeyword, elDateFrom, elDateTo,
+                elInstrumentFilterWrap, elInstrumentList, elClearBtn, elSearchBtn,
+                elResultsHeader, elResultCount, elSelectAllChk, elResultsList,
+                elFooter, elSelectedCount, elLoadSelectedBtn, elCloseBtn,
+                elOpenFolderBtn, elFolderInput, elSortSelect;
+
+            // ============================================================
+            // INDEXEDDB UTILITIES
+            // ============================================================
+            function openDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, 1);
+                    request.onupgradeneeded = (e) => {
+                        e.target.result.createObjectStore(STORE_NAME);
+                    };
+                    request.onsuccess = (e) => resolve(e.target.result);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            }
+
+            async function saveHandleToDB(handle) {
+                try {
+                    const db = await openDB();
+                    const tx = db.transaction(STORE_NAME, 'readwrite');
+                    tx.objectStore(STORE_NAME).put(handle, KEY_HANDLE);
+                    await new Promise((res) => { tx.oncomplete = res; });
+                } catch (e) {
+                    console.error('Failed to save handle to IndexedDB:', e);
+                }
+            }
+
+            async function loadHandleFromDB() {
+                try {
+                    const db = await openDB();
+                    const tx = db.transaction(STORE_NAME, 'readonly');
+                    const request = tx.objectStore(STORE_NAME).get(KEY_HANDLE);
+                    return await new Promise((res) => { request.onsuccess = () => res(request.result); });
+                } catch (e) {
+                    console.error('Failed to load handle from IndexedDB:', e);
+                    return null;
+                }
+            }
+
+            // ============================================================
+            // PANEL ANIMATION
+            // ============================================================
+            function openPanel() {
+                elOverlay.classList.add('show');
+                requestAnimationFrame(() => elPanel.classList.add('open'));
+            }
+
+            function closePanel() {
+                elPanel.classList.remove('open');
+                elOverlay.classList.remove('show');
+            }
+
+            // ============================================================
+            // FOLDER ACCESS & PERSISTENCE
+            // ============================================================
+            async function selectFolder() {
+                if (!window.showDirectoryPicker) {
+                    elFolderInput.click();
+                    return;
+                }
+
+                try {
+                    const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
+                    dlDirHandle = dirHandle;
+                    elFolderName.textContent = dirHandle.name;
+                    localStorage.setItem(STORAGE_KEY_FOLDER_NAME, dirHandle.name);
+                    await saveHandleToDB(dirHandle);
+                    await syncFolder();
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        alert('Failed to open folder:\n' + err.message);
+                    }
+                }
+            }
+
+            async function syncFolder() {
+                if (!dlDirHandle) {
+                    dlDirHandle = await loadHandleFromDB();
+                }
+
+                if (!dlDirHandle) {
+                    await selectFolder();
+                    return;
+                }
+
+                try {
+                    const opts = { mode: 'read' };
+                    if (await dlDirHandle.queryPermission(opts) !== 'granted') {
+                        if (await dlDirHandle.requestPermission(opts) !== 'granted') {
+                            alert('Permission denied. Cannot scan folder.');
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Handle verification failed, falling back to picker:', e);
+                    await selectFolder();
+                    return;
+                }
+
+                showProgress(true, 'Scanning folder...', 0);
+                const files = [];
+                await recurseDir(dlDirHandle, '', files);
+
+                dlIsCachedMode = false;
+                await buildIndex(files);
+            }
+
+            async function recurseDir(handle, currentPath, files) {
+                for await (const [name, entry] of handle.entries()) {
+                    const fullPath = currentPath ? currentPath + '/' + name : name;
+                    if (entry.kind === 'directory') {
+                        await recurseDir(entry, fullPath, files);
+                    } else {
+                        const lower = name.toLowerCase();
+                        if (lower.endsWith('.maiml') || lower.endsWith('.maiml.zip')) {
+                            try {
+                                const file = await entry.getFile();
+                                Object.defineProperty(file, '_dlRelativePath', { value: currentPath || '/', writable: false });
+                                files.push(file);
+                            } catch (_) { }
+                        }
+                    }
+                }
+            }
+
+            function handleFolderInputChange(e) {
+                const files = Array.from(e.target.files).filter(f => {
+                    const lower = f.name.toLowerCase();
+                    return lower.endsWith('.maiml') || lower.endsWith('.maiml.zip');
+                });
+                if (files.length === 0) return;
+
+                const folderName = (files[0].webkitRelativePath || '').split('/')[0] || 'Folder';
+                elFolderName.textContent = folderName;
+                localStorage.setItem(STORAGE_KEY_FOLDER_NAME, folderName);
+
+                files.forEach(f => {
+                    const parts = (f.webkitRelativePath || '').split('/');
+                    parts.shift();
+                    parts.pop();
+                    const relPath = parts.join('/');
+                    Object.defineProperty(f, '_dlRelativePath', { value: relPath || '/', writable: false });
+                });
+
+                dlDirHandle = null;
+                dlIsCachedMode = false;
+                buildIndex(files);
+                e.target.value = '';
+            }
+
+            // ============================================================
+            // CACHE LOAD
+            // ============================================================
+            async function loadCachedIndex() {
+                try {
+                    const cachedFolderName = localStorage.getItem(STORAGE_KEY_FOLDER_NAME);
+                    const cachedIndexRaw = localStorage.getItem(STORAGE_KEY_INDEX);
+
+                    if (cachedFolderName && cachedIndexRaw) {
+                        elFolderName.textContent = cachedFolderName;
+                        dlIndex = JSON.parse(cachedIndexRaw);
+                        dlFiltered = [...dlIndex];
+                        dlIsCachedMode = true;
+
+                        elSearchArea.style.display = '';
+                        buildInstrumentFilter();
+                        applyFilter();
+                    }
+                    dlDirHandle = await loadHandleFromDB();
+                } catch (e) {
+                    console.error('Failed to load Data Lake cache:', e);
+                }
+            }
+
+            function saveIndexToCache() {
+                try {
+                    const serializableIndex = dlIndex.map(e => ({
+                        fileIdx: e.fileIdx,
+                        displayName: e.displayName,
+                        size: e.size,
+                        date: e.date,
+                        dateStr: e.dateStr,
+                        sampleName: e.sampleName,
+                        operator: e.operator,
+                        instrument: e.instrument,
+                        chainId: e.chainId,
+                        searchText: e.searchText || '',
+                        relativePath: e.relativePath,
+                        isCachedOnly: true
+                    }));
+                    localStorage.setItem(STORAGE_KEY_INDEX, JSON.stringify(serializableIndex));
+                } catch (e) {
+                    console.error('Failed to save Data Lake cache:', e);
+                }
+            }
+
+            // ============================================================
+            // INDEX BUILDER
+            // ============================================================
+            async function buildIndex(files) {
+                dlAllFiles = files;
+                dlIndex = [];
+
+                showProgress(true, 'Indexing 0 / ' + files.length, 0);
+                elSearchArea.style.display = 'none';
+                elResultsHeader.style.display = 'none';
+                elFooter.style.display = 'none';
+                elResultsList.innerHTML = '';
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const pct = Math.round(((i + 1) / files.length) * 100);
+                    elProgressText.textContent = `Indexing ${i + 1} / ${files.length} (${file.name})`;
+                    elProgressBarFill.style.width = pct + '%';
+
+                    const entry = await indexFile(file, i);
+                    if (entry) dlIndex.push(entry);
+
+                    if (i % 5 === 0) await yieldFrame();
+                }
+
+                showProgress(false);
+                elSearchArea.style.display = '';
+
+                saveIndexToCache();
+                buildInstrumentFilter();
+                applyFilter();
+            }
+
+            async function indexFile(file, fileIdx) {
+                try {
+                    let xmlText;
+                    let displayName = file.name;
+
+                    const lower = file.name.toLowerCase();
+                    if (lower.endsWith('.zip') || lower.endsWith('.maiml.zip')) {
+                        if (typeof JSZip === 'undefined') return null;
+                        const ab = await file.arrayBuffer();
+                        const zip = await JSZip.loadAsync(ab);
+                        let maimlEntry = null;
+                        for (const [fname, entry] of Object.entries(zip.files)) {
+                            const fl = fname.toLowerCase();
+                            if (!entry.dir && (fl.endsWith('.maiml') || fl.endsWith('.xml') || fl.endsWith('.mai'))) {
+                                maimlEntry = entry;
+                                displayName = file.name;
+                                break;
+                            }
+                        }
+                        if (!maimlEntry) return null;
+                        xmlText = await maimlEntry.async('text');
+                    } else {
+                        xmlText = await file.text();
+                    }
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(xmlText, 'application/xml');
+                    if (doc.querySelector('parsererror')) return null;
+
+                    const ns = detectNS(doc);
+
+                    const dateStr = getTextByTag(doc, ns, ['createdDateTime', 'dateTime', 'date'])
+                        || getAttrByTag(doc, ns, ['maiML', 'measurement', 'document'], 'date')
+                        || '';
+                    const dateObj = dateStr ? new Date(dateStr) : (file.lastModified ? new Date(file.lastModified) : null);
+
+                    let sampleEl = doc.querySelector('sampleName > name, sampleName > value, sample > name, sample > value, specimenName > name, specimenName > value, specimen > name, specimen > value')
+                        || doc.querySelector('*|sampleName > *|name, *|sampleName > *|value, *|sample > *|name, *|sample > *|value, *|specimenName > *|name, *|specimenName > *|value, *|specimen > *|name, *|specimen > *|value');
+                    const sampleName = (sampleEl && sampleEl.textContent.trim()) ? sampleEl.textContent.trim() : (getTextByTag(doc, ns, ['sampleName', 'sample', 'specimenName', 'specimen']) || '');
+
+                    let operatorEl = doc.querySelector('operator > name, operator > value, author > name, author > value, analyst > name, analyst > value, owner > name, owner > value')
+                        || doc.querySelector('*|operator > *|name, *|operator > *|value, *|author > *|name, *|author > *|value, *|analyst > *|name, *|analyst > *|value, *|owner > *|name, *|owner > *|value');
+                    const operator = (operatorEl && operatorEl.textContent.trim()) ? operatorEl.textContent.trim() : (getTextByTag(doc, ns, ['operator', 'author', 'analyst', 'owner']) || '');
+
+                    let instrumentEl = doc.querySelector('instrumentName > name, instrument > name, deviceName > name, device > name')
+                        || doc.querySelector('*|instrumentName > *|name, *|instrument > *|name, *|deviceName > *|name, *|device > *|name');
+                    let instrument = '';
+                    if (instrumentEl && instrumentEl.textContent.trim()) {
+                        instrument = instrumentEl.textContent.trim();
+                    } else {
+                        instrument = getTextByTag(doc, ns, ['instrumentName', 'instrument', 'deviceName', 'device'])
+                            || getAttrByTag(doc, ns, ['instrumentName', 'instrument', 'deviceName', 'device'], 'name')
+                            || '';
+                    }
+
+                    const chainEl = doc.querySelector('*|chainID, chainId, chainid');
+                    const chainId = chainEl ? chainEl.textContent.trim() : '';
+
+                    // --- 拡張検索用テキスト収集 ---
+                    // 1) すべての uuid/guid/id 属性値を収集
+                    const uuidAttrValues = [];
+                    doc.querySelectorAll('[uuid],[guid],[id]').forEach(el => {
+                        ['uuid','guid','id'].forEach(attr => {
+                            const v = el.getAttribute(attr);
+                            if (v && v.trim()) uuidAttrValues.push(v.trim());
+                        });
+                    });
+                    // 2) property/content 要素の key 属性値を収集
+                    const keyAttrValues = [];
+                    doc.querySelectorAll('property[key], content[key], *|property[key], *|content[key]').forEach(el => {
+                        const k = el.getAttribute('key');
+                        if (k && k.trim()) keyAttrValues.push(k.trim());
+                    });
+                    // 3) よく使われるメタデータタグのテキストを収集
+                    const extraTagNames = [
+                        'uuid', 'guid', 'id', 'description', 'title', 'comment', 'remarks', 'note',
+                        'method', 'technique', 'program', 'software', 'version', 'protocol',
+                        'project', 'experiment', 'condition', 'parameter', 'keyword', 'tag',
+                        'location', 'lab', 'laboratory', 'department', 'company', 'organization',
+                        'material', 'substance', 'formula', 'reference', 'citation'
+                    ];
+                    const extraTexts = [];
+                    extraTagNames.forEach(tag => {
+                        doc.querySelectorAll(tag + ', *|' + tag).forEach(el => {
+                            // 子要素を持たない（テキストのみの）ノード、または直接テキストを持つ要素
+                            const txt = el.textContent.trim();
+                            if (txt && txt.length <= 500) extraTexts.push(txt);
+                        });
+                    });
+                    // 4) まとめて searchText として結合（重複除去）
+                    const searchText = [...new Set([...uuidAttrValues, ...keyAttrValues, ...extraTexts])].join(' ');
+
+                    return {
+                        fileIdx,
+                        file,
+                        displayName,
+                        size: file.size,
+                        date: dateObj,
+                        dateStr,
+                        sampleName,
+                        operator,
+                        instrument,
+                        chainId,
+                        searchText,
+                        relativePath: file._dlRelativePath || '/'
+                    };
+                } catch (_) {
+                    return null;
+                }
+            }
+
+            function detectNS(doc) {
+                const root = doc.documentElement;
+                return root ? root.namespaceURI || '' : '';
+            }
+
+            function getTextByTag(doc, ns, tags) {
+                for (const tag of tags) {
+                    const el = doc.querySelector(tag) || doc.querySelector('*|' + tag);
+                    if (el && el.textContent.trim()) return el.textContent.trim();
+                }
+                return '';
+            }
+
+            function getAttrByTag(doc, ns, tags, attr) {
+                for (const tag of tags) {
+                    const el = doc.querySelector(tag) || doc.querySelector('*|' + tag);
+                    if (el && el.getAttribute(attr)) return el.getAttribute(attr);
+                }
+                return '';
+            }
+
+            function yieldFrame() {
+                return new Promise(resolve => requestAnimationFrame(resolve));
+            }
+
+            function buildInstrumentFilter() {
+                const instruments = [...new Set(dlIndex.map(e => e.instrument).filter(Boolean))].sort();
+                elInstrumentList.innerHTML = '';
+                if (instruments.length === 0) {
+                    elInstrumentFilterWrap.style.display = 'none';
+                    return;
+                }
+                elInstrumentFilterWrap.style.display = '';
+                instruments.forEach(name => {
+                    const label = document.createElement('label');
+                    label.innerHTML = `<input type="checkbox" checked data-instrument="${esc(name)}"> ${esc(name)}`;
+                    elInstrumentList.appendChild(label);
+                });
+            }
+
+            function getCheckedInstruments() {
+                const chks = elInstrumentList.querySelectorAll('input[data-instrument]:checked');
+                return new Set([...chks].map(c => c.dataset.instrument));
+            }
+
+            // ============================================================
+            // FILTER / SORT ENGINE
+            // ============================================================
+            // ============================================================
+            // FILTER / SORT ENGINE (OPTIMIZED FOR TWO-STAGE TREE SORTING)
+            // ============================================================
+            function applyFilter() {
+                const kw = (elKeyword.value || '').trim().toLowerCase();
+                const from = elDateFrom.value ? new Date(elDateFrom.value) : null;
+                const to = elDateTo.value ? new Date(elDateTo.value + 'T23:59:59') : null;
+                const instruments = getCheckedInstruments();
+
+                // 1. Filter base array based on requested metadata fields
+                dlFiltered = dlIndex.filter(entry => {
+                    if (kw) {
+                        const haystack = [
+                            entry.displayName,
+                            entry.sampleName,
+                            entry.operator,
+                            entry.instrument,
+                            entry.chainId,
+                            entry.searchText || ''
+                        ].join(' ').toLowerCase();
+                        if (!haystack.includes(kw)) return false;
+                    }
+                    if (from && entry.date && new Date(entry.date) < from) return false;
+                    if (to && entry.date && new Date(entry.date) > to) return false;
+                    if (instruments.size > 0 && entry.instrument) {
+                        if (!instruments.has(entry.instrument)) return false;
+                    }
+                    return true;
+                });
+
+                dlChecked.clear();
+                renderTreeResults();
+            }
+
+            function clearFilter() {
+                elKeyword.value = '';
+                elDateFrom.value = '';
+                elDateTo.value = '';
+                elInstrumentList.querySelectorAll('input[type="checkbox"]').forEach(c => { c.checked = true; });
+                if (elSortSelect) elSortSelect.value = 'date-desc';
+                applyFilter();
+            }
+
+            // ============================================================
+            // B-PLAN: TREE ACCORDION ENGINE (WITH LIVE FOLDER SORTING)
+            // ============================================================
+            function setAllFoldersOpen(openState) {
+                const details = elResultsList.querySelectorAll('details.dl-folder-details');
+                details.forEach(d => d.open = openState);
+            }
+
+            function renderTreeResults() {
+                elResultCount.textContent = dlFiltered.length + ' items';
+                elResultsHeader.style.display = '';
+                elFooter.style.display = '';
+                elSelectAllChk.checked = false;
+                updateFooter();
+
+                if (dlFiltered.length === 0) {
+                    elResultsList.innerHTML = `
+                    <div class="dl-empty-state">
+                        <div class="dl-empty-icon">🔍</div>
+                        <div>No files match the criteria</div>
+                    </div>`;
+                    return;
+                }
+
+                elResultsList.innerHTML = '';
+
+                // Append quick controller linkage to top context
+                const controllerRow = document.createElement('div');
+                controllerRow.style.cssText = "display: flex; gap: 0.5rem; justify-content: flex-end; margin: 0.2rem 0.4rem; font-size: 11px;";
+
+                // const expBtn = document.createElement('span');
+                // expBtn.style.cssText = "color: var(--accent); cursor: pointer; text-decoration: underline; user-select: none;";
+                // expBtn.textContent = "Expand All";
+                // expBtn.addEventListener('click', () => setAllFoldersOpen(true));
+
+                // const colBtn = document.createElement('span');
+                // colBtn.style.cssText = "color: var(--accent); cursor: pointer; text-decoration: underline; user-select: none;";
+                // colBtn.textContent = "Collapse All";
+                // colBtn.addEventListener('click', () => setAllFoldersOpen(false));
+
+                // controllerRow.appendChild(expBtn);
+                // controllerRow.appendChild(document.createTextNode(' | '));
+                // controllerRow.appendChild(colBtn);
+                // elResultsList.appendChild(controllerRow);
+
+                // --- 🌟2段階ツリーソートのコアロジック開始 ───
+                dlCurrentSort = elSortSelect ? elSortSelect.value : 'date-desc';
+
+                // 各ファイル単体のソート用評価関数
+                const compareEntries = (a, b) => {
+                    if (dlCurrentSort === 'date-desc') {
+                        return (b.date ? new Date(b.date).getTime() : 0) - (a.date ? new Date(a.date).getTime() : 0);
+                    } else if (dlCurrentSort === 'date-asc') {
+                        return (a.date ? new Date(a.date).getTime() : 0) - (b.date ? new Date(b.date).getTime() : 0);
+                    } else if (dlCurrentSort === 'name-asc') {
+                        return a.displayName.localeCompare(b.displayName);
+                    } else if (dlCurrentSort === 'size-desc') {
+                        return b.size - a.size;
+                    }
+                    return 0;
+                };
+
+                // ステップ1: まず各フォルダの箱（グループ）を作り、中身のファイルを配置する
+                const groups = new Map();
+                dlFiltered.forEach((entry, filteredIdx) => {
+                    const path = entry.relativePath || '/';
+                    if (!groups.has(path)) groups.set(path, []);
+                    groups.get(path).push({ entry, filteredIdx });
+                });
+
+                // ステップ2: 各フォルダ内のファイル群を、選択したソート順で並び替える
+                // 同時に、そのフォルダ内で「最も代表的な値（トップにくるファイルのデータ）」を記録する
+                const folderMetadataList = [];
+                for (const [path, items] of groups.entries()) {
+                    items.sort((a, b) => compareEntries(a.entry, b.entry));
+
+                    // フォルダ全体の並び替えに使用する、このグループの代表ファイル（先頭のファイル）
+                    const representative = items[0].entry;
+                    folderMetadataList.push({
+                        path,
+                        items,
+                        representative
+                    });
+                }
+
+                // ステップ3: フォルダ自体（アコーディオン）の並び順を、代表ファイルの基準に合わせてソートする
+                folderMetadataList.sort((a, b) => {
+                    if (dlCurrentSort === 'name-asc') {
+                        // 名前順の時は、フォルダパス名そのものの文字列でアルファベット順ソート
+                        return a.path.localeCompare(b.path);
+                    } else {
+                        // 日付順やサイズ順の時は、各フォルダの「先頭ファイル」の実績値同士を比較してソート
+                        return compareEntries(a.representative, b.representative);
+                    }
+                });
+
+                // ステップ4: ソートが完了した順にHTML（ツリー）を生成して画面に描画
+                folderMetadataList.forEach(({ path, items }) => {
+                    const folderDetails = document.createElement('details');
+                    folderDetails.className = 'dl-folder-details';
+                    folderDetails.style.cssText = "margin: 0.4rem 0.2rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);";
+                    folderDetails.open = true;
+
+                    const folderSummary = document.createElement('summary');
+                    folderSummary.style.cssText = "padding: 0.45rem 0.6rem; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--table-head); border-radius: 6px; cursor: pointer; user-select: none;";
+                    folderSummary.innerHTML = `📂 ${esc(path)} <span style="font-weight: normal; color: var(--muted); font-size: 11px; margin-left: 4px;">(${items.length} items)</span>`;
+                    folderDetails.appendChild(folderSummary);
+
+                    const cardContainer = document.createElement('div');
+                    cardContainer.style.padding = "0.2rem;";
+
+                    items.forEach(({ entry, filteredIdx }) => {
+                        const card = document.createElement('div');
+                        card.className = 'dl-file-card';
+                        card.dataset.idx = filteredIdx;
+
+                        const dateLabel = entry.date
+                            ? new Date(entry.date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                            : 'Unknown Date';
+                        const sizeLabel = formatSize(entry.size);
+
+                        const badges = [];
+                        if (entry.chainId) badges.push(`<span class="dl-badge chain">⛓ chain</span>`);
+                        if (entry.instrument) badges.push(`<span class="dl-badge instrument">${esc(entry.instrument)}</span>`);
+
+                        const cacheNotice = dlIsCachedMode
+                            ? `<span style="font-size:10px; color:var(--warn); margin-left:6px; font-style:italic;">[Offline Cache - Click 🔄 to Update]</span>`
+                            : '';
+
+                        card.innerHTML = `
+                        <input type="checkbox" class="dl-card-chk" data-idx="${filteredIdx}" style="margin-top:4px;accent-color:var(--accent);">
+                        <div class="dl-card-info">
+                            <div class="dl-card-name" data-idx="${filteredIdx}" title="${esc(entry.displayName)}">${esc(entry.displayName)}${cacheNotice}</div>
+                            <div class="dl-card-meta">${dateLabel} · ${sizeLabel}${entry.sampleName ? ' · ' + esc(entry.sampleName) : ''}${entry.operator ? ' · ' + esc(entry.operator) : ''}</div>
+                            ${badges.length ? `<div class="dl-card-badges">${badges.join('')}</div>` : ''}
+                        </div>`;
+
+                        const chk = card.querySelector('.dl-card-chk');
+                        if (dlChecked.has(filteredIdx)) {
+                            chk.checked = true;
+                            card.classList.add('selected');
+                        }
+
+                        card.querySelector('.dl-card-name').addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            await openSingle(entry);
+                        });
+
+                        card.addEventListener('click', (e) => {
+                            if (e.target.classList.contains('dl-card-name')) return;
+                            if (e.target.classList.contains('dl-card-chk')) return;
+                            chk.checked = !chk.checked;
+                            handleCheckChange(filteredIdx, chk.checked, card);
+                        });
+
+                        chk.addEventListener('change', (e) => {
+                            e.stopPropagation();
+                            handleCheckChange(filteredIdx, e.target.checked, card);
+                        });
+
+                        cardContainer.appendChild(card);
+                    });
+
+                    folderDetails.appendChild(cardContainer);
+                    elResultsList.appendChild(folderDetails);
+                });
+            }
+
+            function handleCheckChange(idx, checked, card) {
+                if (checked) {
+                    dlChecked.add(idx);
+                    card.classList.add('selected');
+                } else {
+                    dlChecked.delete(idx);
+                    card.classList.remove('selected');
+                }
+                updateFooter();
+                updateSelectAll();
+            }
+
+            function updateFooter() {
+                const n = dlChecked.size;
+                elSelectedCount.textContent = n + ' selected';
+                elLoadSelectedBtn.disabled = n === 0;
+            }
+
+            function updateSelectAll() {
+                elSelectAllChk.checked = dlFiltered.length > 0 && dlChecked.size === dlFiltered.length;
+            }
+
+            // ============================================================
+            // DATA RECONNECTION & LOADER INTERFACE
+            // ============================================================
+            // ============================================================
+            // DATA RECONNECTION & LOADER INTERFACE
+            // ============================================================
+            async function assureFileInstance(entry) {
+                if (!dlIsCachedMode && entry.file instanceof File) {
+                    return entry.file;
+                }
+
+                if (!dlDirHandle) {
+                    dlDirHandle = await loadHandleFromDB();
+                }
+
+                if (!dlDirHandle) {
+                    alert('Session expired. Please click "🔄 Sync / Re-Verify" to reconnect your Data Lake workspace.');
+                    throw new Error('Workspace detached');
+                }
+
+                const opts = { mode: 'read' };
+                if (await dlDirHandle.queryPermission(opts) !== 'granted') {
+                    if (await dlDirHandle.requestPermission(opts) !== 'granted') {
+                        alert('Permission required to stream the file from local storage.');
+                        throw new Error('Permission denied');
+                    }
+                }
+
+                if (dlAllFiles.length === 0) {
+                    // ★修正: バックグラウンドでの全件再スキャン開始時に進捗バーを表示する
+                    showProgress(true, 'Re-connecting & Syncing Data Lake files...', 30);
+                    await yieldFrame();
+
+                    const files = [];
+                    await recurseDir(dlDirHandle, '', files);
+                    dlAllFiles = files;
+
+                    showProgress(true, 'Re-indexing workspace metadata...', 70);
+                    await yieldFrame();
+
+                    dlIsCachedMode = false;
+                    renderTreeResults();
+
+                    // ★修正: 同期完了時にプロgressバーを100%にしてから綺麗に消す
+                    showProgress(true, 'Sync complete!', 100);
+                    await new Promise(res => setTimeout(res, 400)); // 完了を視認させるためのわずかなウェイト
+                    showProgress(false);
+                }
+
+                const liveFile = dlAllFiles.find(f => f.name === entry.displayName || f.name === entry.file?.name);
+                if (liveFile) return liveFile;
+
+                alert(`Failed to stream file: "${entry.displayName}". The file may have been moved or deleted.`);
+                throw new Error('File missing');
+            }
+
+            async function openSingle(entry) {
+                try {
+                    const activeFile = await assureFileInstance(entry);
+                    closePanel();
+                    if (typeof window.handleFiles === 'function') {
+                        await window.handleFiles([activeFile]);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            async function openSelected() {
+                if (dlChecked.size === 0) return;
+
+                try {
+                    const entries = [...dlChecked].map(idx => dlFiltered[idx]);
+                    const files = [];
+
+                    for (const entry of entries) {
+                        const f = await assureFileInstance(entry);
+                        files.push(f);
+                    }
+
+                    closePanel();
+
+                    if (typeof window.handleFiles === 'function') {
+                        // 全ファイルを一括で handleFiles() に渡す。
+                        // これにより、connectParentLinks() / connectChainLinks() が呼ばれる前に
+                        // すべてのファイルが chainFileCache に登録され、chain/parent のハッシュ検証が正しく動作する。
+                        // ※ 以前は first/rest に分けて逐次処理していたため、handleFiles([first]) 内で
+                        //    connectParentLinks() が呼ばれた時点では 2 本目のファイルが未登録となり
+                        //    「⚠️ Parent file not loaded」が誤表示されていた。
+                        await window.handleFiles(files);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            function showProgress(visible, text, pct) {
+                elProgressWrap.classList.toggle('show', visible);
+                if (text !== undefined) elProgressText.textContent = text;
+                if (pct !== undefined) elProgressBarFill.style.width = pct + '%';
+            }
+
+            function esc(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            function formatSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            }
+
+            // ============================================================
+            // INITIALIZATION INTERFACE
+            // ============================================================
+            document.addEventListener('DOMContentLoaded', () => {
+                elOverlay = document.getElementById('datalakeOverlay');
+                elPanel = document.getElementById('datalakePanel');
+                elFolderName = document.getElementById('dlFolderName');
+                elProgressWrap = document.getElementById('dlProgressWrap');
+                elProgressText = document.getElementById('dlProgressText');
+                elProgressBarFill = document.getElementById('dlProgressBarFill');
+                elSearchArea = document.getElementById('dlSearchArea');
+                elKeyword = document.getElementById('dlKeywordInput');
+                elDateFrom = document.getElementById('dlDateFrom');
+                elDateTo = document.getElementById('dlDateTo');
+                elInstrumentFilterWrap = document.getElementById('dlInstrumentFilterWrap');
+                elInstrumentList = document.getElementById('dlInstrumentList');
+                elClearBtn = document.getElementById('dlClearBtn');
+                elSearchBtn = document.getElementById('searchBtn') || document.getElementById('dlSearchBtn');
+                elResultsHeader = document.getElementById('dlResultsHeader');
+                elResultCount = document.getElementById('dlResultCount');
+                elSelectAllChk = document.getElementById('dlSelectAllChk');
+                elResultsList = document.getElementById('dlResultsList');
+                elFooter = document.getElementById('dlFooter');
+                elSelectedCount = document.getElementById('dlSelectedCount');
+                elLoadSelectedBtn = document.getElementById('dlLoadSelectedBtn');
+                elCloseBtn = document.getElementById('dlCloseBtn');
+                elOpenFolderBtn = document.getElementById('openFolderBtn');
+
+                // ★改善: SORT ORDERとEXPAND/COLLAPSEコントロールを「ファイル一覧の直上」に綺麗に横並びで配置
+                const controlHeaderCard = document.createElement('div');
+                controlHeaderCard.style.cssText = "margin: 0.5rem 0.2rem; padding: 0.5rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: flex; flex-direction: column; gap: 0.4rem;";
+                controlHeaderCard.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.3rem; flex: 1;">
+                            <span style="font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap;">Sort:</span>
+                            <select id="dlSortSelect" style="flex: 1; padding: 0.25rem 0.4rem; font-size: 11px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--ink); cursor:pointer;">
+                                <option value="date-desc">🕒 Newest Date</option>
+                                <option value="date-asc">⏳ Oldest Date</option>
+                                <option value="name-asc">🔤 File Name (A-Z)</option>
+                                <option value="size-desc">💾 File Size (Large)</option>
+                            </select>
+                        </div>
+                        <div style="font-size: 11px; white-space: nowrap; padding-right: 0.2rem;">
+                            <span id="dlExpandAllLink" style="color: var(--accent); cursor: pointer; text-decoration: underline; user-select: none;">Expand All</span>
+                            <span style="color: var(--border);"> | </span>
+                            <span id="dlCollapseAllLink" style="color: var(--accent); cursor: pointer; text-decoration: underline; user-select: none;">Collapse All</span>
+                        </div>
+                    </div>
+                `;
+
+                // Results Header（件数表示部分）のすぐ後ろ、リストの直前に挿入
+                elResultsHeader.parentNode.insertBefore(controlHeaderCard, elResultsHeader.nextSibling);
+
+                elSortSelect = document.getElementById('dlSortSelect');
+                elSortSelect.addEventListener('change', () => applyFilter());
+
+                document.getElementById('dlExpandAllLink').addEventListener('click', () => setAllFoldersOpen(true));
+                document.getElementById('dlCollapseAllLink').addEventListener('click', () => setAllFoldersOpen(false));
+
+                // 接続コントロール用ボタン
+                const btnContainer = document.createElement('div');
+                btnContainer.style.cssText = "display:flex; gap:0.4rem; margin-top:0.4rem; width:100%; box-sizing:border-box;";
+
+                const syncBtn = document.createElement('button');
+                syncBtn.className = "btn primary";
+                syncBtn.style.flex = "1";
+                syncBtn.innerHTML = "🔄 Sync / Re-Verify";
+                syncBtn.addEventListener('click', syncFolder);
+
+                const changeFolderBtn = document.createElement('button');
+                changeFolderBtn.className = "btn";
+                changeFolderBtn.style.flex = "1";
+                changeFolderBtn.innerHTML = "📁 Change Folder";
+                changeFolderBtn.addEventListener('click', selectFolder);
+
+                btnContainer.appendChild(syncBtn);
+                btnContainer.appendChild(changeFolderBtn);
+                elFolderName.parentNode.appendChild(btnContainer);
+
+                elFolderInput = document.createElement('input');
+                elFolderInput.type = 'file';
+                elFolderInput.multiple = true;
+                elFolderInput.setAttribute('webkitdirectory', '');
+                elFolderInput.setAttribute('directory', '');
+                elFolderInput.style.display = 'none';
+                document.body.appendChild(elFolderInput);
+                elFolderInput.addEventListener('change', handleFolderInputChange);
+
+                if (elOpenFolderBtn) {
+                    elOpenFolderBtn.style.display = '';
+                    elOpenFolderBtn.addEventListener('click', openPanel);
+                }
+
+                elCloseBtn.addEventListener('click', closePanel);
+                elOverlay.addEventListener('click', closePanel);
+
+                elSelectAllChk.addEventListener('change', (e) => {
+                    const checked = e.target.checked;
+                    dlFiltered.forEach((_, idx) => {
+                        const card = elResultsList.querySelector(`.dl-file-card[data-idx="${idx}"]`);
+                        const chkEl = elResultsList.querySelector(`.dl-card-chk[data-idx="${idx}"]`);
+                        if (chkEl) chkEl.checked = checked;
+                        if (card) card.classList.toggle('selected', checked);
+                        if (checked) dlChecked.add(idx); else dlChecked.delete(idx);
+                    });
+                    updateFooter();
+                });
+
+                if (elSearchBtn) {
+                    elSearchBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        applyFilter();
+                    });
+                }
+                elKeyword.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); applyFilter(); } });
+                elClearBtn.addEventListener('click', clearFilter);
+                elLoadSelectedBtn.addEventListener('click', openSelected);
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && elPanel.classList.contains('open')) {
+                        closePanel();
+                    }
+                });
+
+                setTimeout(() => {
+                    const toolbar = document.getElementById('toolbar');
+                    if (!toolbar || !elOpenFolderBtn) return;
+                    const openFileBtn = document.getElementById('openFileBtn');
+                    if (openFileBtn && openFileBtn.nextSibling) {
+                        toolbar.insertBefore(elOpenFolderBtn, openFileBtn.nextSibling);
+                    }
+                }, 700);
+
+                loadCachedIndex();
+
+                window.dlOpenPanel = openPanel;
+                window.dlClosePanel = closePanel;
+                window.dlSelectFolder = selectFolder;
+                window.dlSyncFolder = syncFolder;
+            });
+        })();
     </script>
 
     <footer
