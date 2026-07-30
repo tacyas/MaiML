@@ -1,3 +1,6 @@
+# Repository moved: This project has moved to the new repository(https://maiml-org.github.io/). 
+# Please update your bookmarks and remotes.
+
 # JIS K 0200 :2024 計測分析装置の分析データ共通フォーマット(MaiMLデータフォーマット）を活用するためのプログラム
 # I have moved the GitHub repository to a new location(https://maiml-org.github.io/).
 ## MaiML ディレクトリ構成
