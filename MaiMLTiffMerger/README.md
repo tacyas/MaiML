@@ -1,4 +1,14 @@
 # MaiMLTiffMerger
+> [!IMPORTANT]
+> 2026/7/30
+> このリポジトリは移行しました。
+>
+> 最新版はこちらをご利用ください。
+>
+> https://github.com/MaiML-Tools/MaiMLTiffMerger
+
+</br></br></br>
+
 ## 概要
 TIFF画像を出力する計測工程の情報をもつMaiMLファイルと、計測結果の情報をマージするwebシステムである。
 
