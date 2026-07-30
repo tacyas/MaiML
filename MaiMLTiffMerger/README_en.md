@@ -1,4 +1,15 @@
 # MaiMLTiffMerger
+> [!IMPORTANT]
+> **2026/7/30**
+>
+> This repository has been migrated to a new location.
+>
+> Please visit the following page for the latest version:
+>
+> https://maiml-org.github.io/
+>
+</br></br></br>
+
 ## Overview
 It is a web system that merges MaiML files containing information about measurement processes that output TIFF images with measurement result information.
 
