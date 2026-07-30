@@ -1,4 +1,14 @@
 # Misc
+> [!IMPORTANT]
+> 2026/7/30
+> このリポジトリは移行しました。
+>
+> 最新版はこちらをご利用ください。
+>
+> https://github.com/MaiML-Sandbox/Misc
+
+</br></br></br>
+
 
 動作の保証は無しです！
 
