@@ -1,4 +1,15 @@
 # Misc
+> [!IMPORTANT]
+> **2026/7/30**
+>
+> This repository has been migrated to a new location.
+>
+> Please visit the following page for the latest version:
+>
+> https://maiml-org.github.io/
+>
+</br></br></br>
+
 
 No guarantees on functionality!
 
