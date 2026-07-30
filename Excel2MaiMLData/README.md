@@ -1,5 +1,13 @@
 # Excel2MaiMLData
-<br/>
+> [!IMPORTANT]
+> 2026/7/30
+> このリポジトリは移行しました。
+>
+> 最新版はこちらをご利用ください。
+>
+> https://github.com/MaiML-Tools/Excel2MaiMLData
+
+</br></br></br>
 
 # A: 概要
 計測分析の手順や条件等の計画情報を記載したMaiMLファイル、その計画を基に実行した結果を記載したエクセルファイルを入力ファイルとし、
