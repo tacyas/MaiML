@@ -1,4 +1,15 @@
 ## A visualization application for reference relationships within templates and instances in MaiML data.<!-- omit in toc -->
+> [!IMPORTANT]
+> **2026/7/30**
+>
+> This repository has been migrated to a new location.
+>
+> Please visit the following page for the latest version:
+>
+> https://maiml-org.github.io/
+>
+</br></br></br>
+
 
 ### 1. Application Overview
 This application registers MaiML data in a GraphDB and allows users to query and edit the data list and Petri net diagrams on a Node.js web application. The results of the Petri net diagram edits can be exported and saved back as MaiML data in a file.
