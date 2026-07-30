@@ -1,5 +1,5 @@
 # JIS K 0200 :2024 計測分析装置の分析データ共通フォーマット(MaiMLデータフォーマット）を活用するためのプログラム
-
+# I have moved the GitHub repository to a new location(https://maiml-org.github.io/).
 ## MaiML ディレクトリ構成
 1. Excel2MaiML　　:　`計測フローを定義したMaiMLファイルと計測結果を記載したExcelファイルをマージするプログラム`
 1. Excel2MaiMLData　　:　`計測フローを定義したMaiMLファイルと計測結果を記載したExcelファイルをマージするプログラム`
