@@ -1,4 +1,15 @@
 # Excel2MaiML
+> [!IMPORTANT]
+> **2026/7/30**
+>
+> This repository has been migrated to a new location.
+>
+> Please visit the following page for the latest version:
+>
+> https://maiml-org.github.io/
+>
+</br></br></br>
+
 ## A：How to run 'Excel2MaiML'
 ### [Input and output data]
 - INPUT DATA　　※Please refer to the [B: Details] below for conditions and other specifics
