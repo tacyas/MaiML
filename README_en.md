@@ -1,5 +1,8 @@
 # JIS K 0200 :2024 A program for utilizing the MaiML data format 
+# Repository moved: This project has moved to the new repository(https://maiml-org.github.io/). 
+# Please update your bookmarks and remotes.
 
+</br></br></br>
 ## Directory structure of MaiML
 1. Excel2MaiML　　: `The program that merges a MaiML file describing the measurement flow with an Excel file containing the measurement results.`
 1. Excel2MaiMLData　　: `The program that merges a MaiML file describing the measurement flow with an Excel file containing the measurement results.`
