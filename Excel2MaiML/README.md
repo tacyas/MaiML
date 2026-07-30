@@ -1,4 +1,14 @@
 # Excel2MaiML
+> [!IMPORTANT]
+> 2026/7/30
+> このリポジトリは移行しました。
+>
+> 最新版はこちらをご利用ください。
+> 
+> https://github.com/MaiML-Tools/Excel2MaiML
+
+</br></br></br>
+
 ## A：実行方法
 ### [入出力データ]
 - 入力データ　　※条件等は下記[B:詳細]を参照
