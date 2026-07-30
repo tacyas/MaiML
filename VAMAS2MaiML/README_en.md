@@ -1,4 +1,16 @@
 # VAMAS2MaiML
+> [!IMPORTANT]
+> **2026/7/30**
+>
+> This repository has been migrated to a new location.
+>
+> Please visit the following page for the latest version:
+>
+> https://maiml-org.github.io/
+>
+</br></br></br>
+
+
 ## A : Execution Method
 ### [Input and Output Data]
 - Input Data (Refer to [B: Details] below for conditions, etc.)
